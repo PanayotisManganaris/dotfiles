@@ -1,0 +1,725 @@
+#+TITLE: Emacs Configuration and Documentation
+#+startup: overview
+#+PROPERTY: header-args:emacs-lisp :tangle ~/.config/emacs/init.el
+* TODO Aesthetics
+** TODO Theme Selection and UI toggles
+  :PROPERTIES:
+  :ID:       ef50006f-dbbb-4800-bebf-2f834b122c7f
+  :END:
+  #+begin_src emacs-lisp
+    (load-theme 'doom-dark+ t)
+    (menu-bar-mode -1)
+    (toggle-scroll-bar -1)
+    (tool-bar-mode -1)
+    (setq inhibit-startup-screen t)
+  #+end_src
+  No startup screen. Remove GUI menus, scrollbar, etc. Use doom-dark+ theme
+*** TODO adjust "dull" color face for comments/done items
+*** TODO enable better tracking of line and column number
+** TODO customize startup screen
+*** TODO show agenda on startup
+*** TODO show perspective switcher on startup
+* TODO Emacs Foundations
+** DONE Package Management
+   :PROPERTIES:
+   :ID:       84ecd110-a05a-48f9-815c-bb2d78dacc45
+   :END:
+   :STATUSLOG:
+   - State "DONE"       from "TODO"       [2021-09-12 Sun 16:59]
+   :END:
+   #+begin_src emacs-lisp
+     (require 'package)
+	  (add-to-list 'package-archives
+		       '("melpa" . "https://melpa.org/packages/") t)
+	  (package-initialize)
+     (when (not (package-installed-p 'use-package))
+       (package-refresh-contents)
+       (package-install 'use-package))     
+   #+end_src
+   use melpa package repository with package.el
+   Ensure Use-Package macro is installed.
+   It enables init portability and directive-based protocol for concise configuration
+** TODO Backups and Recovery
+  :PROPERTIES:
+  :ID:       e80c641b-fc4a-4762-bbaf-0be12fbd84f3
+  :END:
+  #+begin_src emacs-lisp
+    ;; (desktop-save-mode 1) ;; recover frame between sessions -- OBSOLETE, save/load perspectives instead
+    (winner-mode 1) 
+    (setq backup-directory-alist '(("." . "~/.local/share/emacs/saves/")))
+    (setq backup-by-copying t ;; backup by copying to preserve symlinked files and creation times
+	  version-control t ;; number versions unconditionally
+	  delete-old-versions t
+	  kept-new-versions 6 ;; keep 6 versions from the current session
+	  kept-old-versions 2) ;; keep 2 versions from past sessions
+    (setq auto-save-default t ;; auto save every buffer that visits a file
+	  auto-save-timeout 60 ;; default autosave on 30 second idle
+	  auto-save-interval 200) ;; default autosave every 300 keystrokes
+  #+end_src
+  1. activate minor modes to aid in session recovery
+  2. save backups in centralized directory
+     - backups in a long!file!name format (255 byte limit on ext4)
+       - format replaces path separators with !
+  3. Saving regularly is enough to avoid #autosave# creation.
+     notice: they can cause directory-crawling scripts to fail.
+*** TODO pm/restore-this-buffer/file-from-backup
+    A function that can parse the saves directory and recover from a backup
+    (multiple numbered versions possible) for the current file should be found/created
+*** TODO sensitive-mode/minor-mode
+    Limits autosave and backup for sensitive files like gpg keys so there's no un-encrypted copies
+*** TODO manage session recovery using persp and projectile
+    :PROPERTIES:
+    :ID:       95b10f12-2088-435c-a3aa-1db3880ec0ac
+    :END:
+    Perspectives include files and defined frame configurations
+    set up startup screen to show unexpectedly quit perspectives in a subsection?
+** TODO Enable, Empower, Automate mode activations
+    :PROPERTIES:
+    :ID:       51b5345d-67c9-48ef-b749-4ade381c2a36
+    :END:
+   #+begin_src emacs-lisp
+     (load "~/.config/emacs/my-alias.el") ;; load aliases making some commands into other commands, or shortcuts
+     (setq-default abbrev-mode t) ;; universally expand abbreviations and make new ones dynamically
+     (setq save-abbrevs 'silently)
+     ;; (setq auto-mode-alist
+     ;;       (append
+     ;;        (list '("\\.\\(vcf\\|gpg\\)$" . sensitive-minor-mode))
+     ;;        auto-mode-alist))
+   #+end_src
+   auto-mode-alist is used to activate modes according to file extension.
+   it is very well defined. only append cons cells of regexp extensions and associated mode(s)
+*** TODO automate recognition of sensitive file types
+    waiting on sensitive mode installation (see bookmarks)
+* TODO dired mode
+  :PROPERTIES:
+  :ID:       3d554912-ac86-4ca1-8723-220fe537b110
+  :END:
+     #+begin_src emacs-lisp
+    (use-package dired
+      :init
+      (setq dired-auto-revert-buffer t)  ;; don't prompt to revert; just do it
+      (setq dired-dwim-target t)  ;; suggest a target for moving/copying intelligently
+      (setq dired-hide-details-hide-symlink-targets nil)
+    ;; Always copy/delete recursively
+      (setq dired-recursive-copies 'always)
+      (setq dired-recursive-deletes 'top)
+    ;; Where to store image caches
+    ;;        image-dired-dir (concat doom-cache-dir "image-dired/")
+    ;;        image-dired-db-file (concat image-dired-dir "db.el")
+    ;;        image-dired-gallery-dir (concat image-dired-dir "gallery/")
+    ;;        image-dired-temp-image-file (concat image-dired-dir "temp-image")
+    ;;        image-dired-temp-rotate-image-file (concat image-dired-dir "temp-rotate-image")
+    ;; Screens are larger nowadays, we can afford slightly larger thumbnails
+    ;;        image-dired-thumb-size 150)
+      :config
+      ;; cool thumbnails
+    ;;  (set-popup-rule! "^\\*image-dired"
+    ;;    :slot 20 :size 0.8 :select t :quit nil :ttl 0)
+    ;;  (set-evil-initial-state! 'image-dired-display-image-mode 'emacs)
+      (let ((args (list "-ahl" "-v" "--group-directories-first"))))
+    ;;dealing with extenuating circumstances in remote sessions
+    ;;    (add-hook! 'dired-mode-hook 
+    ;;      (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers-h ()
+    ;;        "Fix #1703: dired over TRAMP displays a blank screen.
+    ;;
+    ;;This is because there's no guarantee the remote system has GNU ls, which is the
+    ;;only variant that supports --group-directories-first."
+    ;;        (when (file-remote-p default-directory)
+    ;;          (setq-local dired-actual-switches (car args))))))
+     
+      ;; Don't complain about this command being disabled
+    ;;  (put 'dired-find-alternate-file 'disabled nil)
+      :bind (:map dired-mode-map
+		  (("C-c C-e" . wdired-change-to-wdired-mode)))) ;; To be consistent with ivy and wgrep integration
+  #+end_src
+** TODO dired as a file manager
+*** TODO display thumbnails
+*** TODO file/directory ordering
+*** INACTIVE install discover/discover-my-major for dired
+* TODO company mode
+  :PROPERTIES:
+  :ID:       8adb25c3-de90-4f62-ae57-f6f3cf3505ba
+  :END:
+  #+begin_src emacs-lisp
+    (use-package company
+      :ensure t
+      :config
+      (global-company-mode))
+  #+end_src
+  all purpose backend for on-the-fly code and text completion  
+* TODO Org-mode
+** DONE Automatically Tangle Configuration
+    :PROPERTIES:
+    :ID:       88bbb14f-2679-47a5-a7b6-e2b45d7a2503
+    :END:
+    :STATUSLOG:
+    - State "DONE"       from              [2021-09-12 Sun 12:25]
+    :END:
+    tangle litinit.org to init.el when saving this file.
+    #+begin_src emacs-lisp
+      (defun pm/org-babel-tangle-config ()
+	(when (equal (buffer-file-name)
+		     (expand-file-name "~/.config/emacs/litinit.org"))
+	  (let ((org-confirm-babel-evaluate nil))
+	    (org-babel-tangle))))
+     
+      (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'pm/org-babel-tangle-config)))
+    #+end_src
+*** psudo defun:
+    if full path to litinit is current buffer, then do not confirm
+    evaluation and tangle file.  Hooked to saving in org-mode
+** TODO Org(
+   :PROPERTIES:
+   :ID:       7e51f71f-4166-40f4-8701-cea7edf58451
+   :END:
+   Org depends on a central filesystem, heading keywords, various triggers, definitions and more.
+   additionally, the appearance of certain faces, drawers, and modes are configured.
+   finally certain organization tools are given default definitions or behaviors to aid with my chosen workflow
+   #+begin_src emacs-lisp
+     (use-package org
+       :ensure t
+       :config
+       (setq org-ellipsis " [+]") ;; Custom fold indicator because I often use ellipses and it's confusing
+       (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil))))) ;; using custom -- consider editing theme?
+       (setq org-directory (concat (getenv "HOME") "/org"))
+       (setq org-use-fast-todo-selection 'auto) ;; present keyword hotkeys to user if available
+       (setq org-treat-S-cursor-todo-selection-as-state-change nil) ;; cycle keywords without state logging using S-left\right
+       (setq org-todo-keywords ;; set to timestamp deliberate state changes
+	     '((sequence "TODO(t)"
+			 "NEXT(n!)"
+			 "WAIT(w@/!)"      
+			 "|"	          
+			 "DONE(d!)"        
+			 "INACTIVE(i@)"    
+			 "CANCELED(q@/@)") 	                                   
+	       (sequence "JOURNAL(j!)"     
+			 "CONTACT(c!)"     
+			 "MEETING(m!)"     
+			 "|")))
+       ;;        (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED"))) ;; development task labels
+       (setq org-todo-keyword-faces
+	     (quote (("TODO" :foreground "blue" :weight bold)
+		     ("NEXT" :foreground "red" :weight bold)
+		     ("WAIT" :foreground "orange" :weight bold)
+		     ("DONE" :foreground "forest green" :weight bold)
+		     ("INACTIVE" :foreground "magenta" :weight bold)
+		     ("CANCELED" :foreground "forest green" :weight bold)
+		     ("JOURNAL" :foreground "white" :weight bold)
+		     ("CONTACT" :foreground "white" :weight bold)
+		     ("MEETING" :foreground "white" :weight bold))))
+       (setq org-enforce-todo-dependencies t)
+       (setq org-agenda-dim-blocked-tasks t) ;; try this on for size -- only effects agenda view
+       (setq org-log-into-drawer "STATUSLOG") ;; hide state change history in drawer under headlines
+       (setq org-priority-default 3) ;; strictly options for sorting the agenda
+       (setq org-priority-highest 1)
+       (setq org-priority-lowest 5)
+   #+end_src
+   consolidate automated .org files (captures, project categories, project logs, archives; contacts, zettles, bibliography) under ~/org.
+*** INACTIVE Create keywords for common specific workflows
+    like the commented dev maintainance workflow?
+*** TODO develop filesystem
+    this depends on how best to take literature notes in large part...
+    desires: take zettles while reading, combine reading pdfs and notes in interleaving fashion?
+*** GTD Philosophy
+    clearly label actionables with some conveniences for tracking state changes over a project's history:
+
+    keywords designed for use with hierarchically nested task-trees:
+    - TODO any task to appear in the agenda. Any TODO heading with subheadings is a project. 
+    - NEXT a priority task in an ongoing project -- a project with no NEXT is stuck (log time on)
+      - also, NEXT is a catch-all for immediate actions: reply to, forward mail, return phone call, establish meeting, etc
+    - WAIT any task requiring action from others before proceeding (log note on, time off)
+    - DONE any completed task that stands only to be archived (log time on)
+    - INACTIVE a project that is not prioritized -- cant be stuck (log note on)
+    - CANCELED an aborted project that stands only to be archived (log note on, note off)			  
+
+    hierarchically nested todos imply parents are dependent on children, sometimes siblings. So ORDERED property is assigned and enforced.
+    overrule using NOBLOCKING property.
+    
+    captures documenting unplanned workaday occurrences as org trees can be balled with keywords too.
+    - JOURNAL specific notes relevant to ongoing project. Journal entries should end up in reports (log time on)  
+    - CONTACT add to professional address book and Contact/Customer Relationship Management (CRM) (log time on)
+    - MEETING for any and all meetings, specific capture templates optional (log time on)                            
+    perhaps category properties or tags are better -- but they lack the convenient time stamping
+*** INACTIVE Configure universal properties?
+**** INACTIVE universal tags?
+     ":STUDY:EMAIL:PERSONAL:PURCHASE:GROUP: -> org-tag-alist" for project assignment
+     alternatively, fast meta-linking with org-tag-persistent-alist + file specific tagging -- OR configure org-complete-tags-always-offer-all-agenda-tags
+**** INACTIVE Universal categories?
+     do project assignment with category property? leaves tags free for meta-linking?
+     tags management by C-c C-q and C-c C-c is fast -- better for on the fly connections... But this is more important for notes which are handled by roam anyway.
+** TODO Org filesystem
+   :PROPERTIES:
+   :ID:       4827b3ea-dff2-413b-a136-6312fe665208
+   :END:
+   #+begin_src emacs-lisp
+     (setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
+     ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
+     (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
+			      (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
+			      (concat org-directory "/addressbook.org"))) ;; CRM file. Network contacts by linking manually (so it sticks), use roam
+   #+end_src
+*** TODO include all zettles?
+    why not? perhaps to keep tags distinct? Or be more meticulous, and use hierarchies to make tags more orderly+specific w/ regexp?
+     to-do items often arise while taking notes, so capturing can deal with that, but having the full context of the emergence is useful...
+     I need a system of zettlekasten that can push in-topic todos to the agenda. Even if those todos are just tangents of study to be perused!
+*** TODO Set up archive file? or archive siblings?
+    what is this? how does it work with the logbook datetree intention?
+*** TODO diary or bbdb/CRM?
+    for tabbing anniversaries, holidays, events? or instead, use bbdb integration?
+*** TODO make this init.el literate
+**** TODO use it as a cabinet
+     massively improves ability to track environment development developments
+** TODO Org-Agenda
+   :PROPERTIES:
+   :ID:       512d28ed-857b-4f26-93e8-a4e22ec4f1e1
+   :END:
+   #+begin_src emacs-lisp
+     ;; org-agenda
+     (setq org-agenda-files (cons org-default-notes-file org-cabinets)) ;; populate agenda from cabinets + refile.org
+     (setq org-agenda-skip-scheduled-if-deadline-is-shown t) ;; show only deadline on or after day deadlining task is scheduled
+     (setq org-agenda-span 'week) ;; show week view by default
+     (setq org-agenda-start-day "-0d") ;; start at today by default (in org-read-date input form)
+     (setq org-agenda-start-on-weekday nil) ;; weekly overview starts today and looks forward, leave the past be.
+     ;; tags/TODO filters (see tag and property searches) for agenda organization:
+     (setq org-stuck-projects 
+	   '("+LEVEL=1+TODO/-DONE-CANCELED-INACTIVE-NEXT" ("NEXT")))
+     ;; Use the current window for indirect buffer display
+     (setq org-indirect-buffer-display 'current-window)
+   #+end_src
+   fresh captures appear in the agenda. The ability to adjust org-agenda-files on the fly with C-c C-] is preserved.
+*** Configuring returns of Agenda search queries
+    (setq org-tags-match-list-sublevels nil) will ensure headings
+    matched by tag/property searches carry don't carry subheadings to
+    the agenda However, this is not recommended. Instead, for getting
+    only top level tasks matched by tag filters, configure tag
+    inheritance or define filters if this is a problem
+** TODO Org task timing, tracking and reporting
+   :PROPERTIES:
+   :ID:       3c1ad362-1b03-4b15-91d9-3f3ed6f67c87
+   :END:
+   #+begin_src emacs-lisp
+     (setq org-columns-default-format
+	   "%TODO %2PRIORITY %25ITEM(Task) %10Effort(Est_Effort){est+} %CLOCKSUM %CLOCKSUM_T")
+     (org-clock-persistence-insinuate) ;; set up hooks for clock persistence through sessions
+     (setq org-clock-persist t) ;; continue any running clock when emacs exits. Also save all set clock history accross sessions.
+     (setq org-clock-idle-time 10) ;; and prompt to resolve running clocks when restarting, or after 10 minutes of emacs idle time.     
+   #+end_src
+   default column view of task properties aids in rapid assessment of time investment and difficulty. individual files/headings may define different views locally.
+*** TODO project planning
+    especially for modern collaborative endeavors, estimating effort and tracking progress against expectations is critical.
+    configure effort estimation for project management. in the meantime, update effort estimates for running clocks with ‘C-c C-x C-e’
+** TODO Org-Capture
+   :PROPERTIES:
+   :ID:       f93153be-7354-4160-bc7e-011ec1af3241
+   :END:
+   #+begin_src emacs-lisp
+     (setq org-capture-templates
+	   (quote (("p" "project outlining and reporting") ;; new project definitions and reports on predefined projects
+		   ("pt" "todo" entry (file "~/org/refile.org") ;; a new task needing to be defined and inserted into ongoing project
+		    "* TODO %?\n%U\n%a\n")
+		   ("ps" "todo" entry (file "~/org/refile.org") ;; schedule a new event.
+		    "* TODO %?\n%^T")
+		   ;; template current time, link in ring (or current file), capture new task name, pause other clocks, clock time, resume other clocks
+		   ;; ex :: good for a job in any given piece of code because it links to the line that inspired it.
+		   ;;		("pr" "reflect" entry (file "~/org/refile.org")
+		   ;;		 "* JOURNAL")
+		   ;; OR
+		   ;;		("n" "note" entry (file "~/org/refile.org")
+		   ;;               "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+		   ;; not sure what this looks like yet. On-the-clock thoughts about current work (look at %k), look at organizing by :tag
+		   ("i" "interruptions")
+		   ("ir" "respond" entry (file "~/org/refile.org")
+		    "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+		   ;; fully automated reaction cache for differed inquiries, requests, solicitations, etc.
+		   ("ii" "idea" entry (file "~/org/refile.org")
+		    "* INACTIVE")
+		   ;; for academic questions, topics of investigation, project proposals, paper subject.
+		   ;;		("w" "org-protocol" entry (file "~/org/refile.org")
+		   ;;		 "* TODO Review %c\n%U\n" :immediate-finish t)
+		   ;; tracking org workflow and planning adaptations TAG = :ENV?
+		   ("m" "Meeting" entry (file "~/org/refile.org")
+		    "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+		   ;; documenting essentials of scheduled and spontaneous meetings/encounters.
+		   ("c" "CONTACT" entry (file "~/org/refile.org") ;; document professional contact
+		    "* CONTACT"))))
+     (defun pm/remove-empty-drawer-on-clock-out ()
+       "Remove empty STATUSLOG drawers on clock out, use as hook to de-clutter ephemeral captures"
+       (interactive)
+       (save-excursion
+	 (beginning-of-line 0)
+	 (org-remove-empty-drawer-at "STATUSLOG" (point))))
+     (add-hook 'org-clock-out-hook 'pm/remove-empty-drawer-on-clock-out 'append)     
+   #+end_src
+   Captures are for documenting immediate items that need to be ordered into existing and time-sensitive workflows.
+   Notes from classes, research, reasoning, etc. are handled in the Zettlekasten method using org-roam, configured later.
+*** DONE Declutter rapid captures
+    delete short clock-ins activated on clocked captures. clocking by
+    attention is convenint for continuous productivity logging, but
+    occasional 30 second clocks are neurotic
+**** psudo defun:
+     if clockline is less than a minute, delete "statuslog"
+** TODO Org-Refile
+   :PROPERTIES:
+   :ID:       79c2e923-7f67-4b0d-bd1a-cadcaf5f7ebb
+   :END:
+   #+begin_src emacs-lisp
+     ;; refile targets include any file contributing to the agenda - up to 9 levels deep
+     (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
+     ;; Use full outline paths for refile targets - file directly into agenda position using Ivy
+     (setq org-refile-use-outline-path t)
+     ;; Targets complete directly with Ivy, org need not assist
+     (setq org-outline-path-complete-in-steps nil)
+     ;; Allow refile to create parent tasks with confirmation
+     (setq org-refile-allow-creating-parent-nodes 'confirm)
+     (defun pm/verify-refile-target ()
+       "Exclude todo keywords with a done state from refile targets"
+     (not (member (nth 4 (org-heading-components)) org-done-keywords)))
+     (setq org-refile-target-verify-function 'pm/verify-refile-target)
+   #+end_src
+*** TODO ivy for refiling headings
+    no idea where to start
+*** DONE Tag all headings in refile.org with refile
+    use local file properties
+*** DONE Do not refile done items
+    if something was captured for record but ends up getting done fast, mark done, move on, purge whenever's good
+    make filter function
+    assign to org-refile-target-verify-function
+**** psudo defun:
+     if todo-keyword in current heading is not a member of the done-keywords, provide nil, else provide t
+** TODO Org for academic reading, writing, and reproducible research
+   lots of possibilities. Learn more. take notes. Prepare to keep
+   bibliography (consider centralized bibliography, where citations
+   are made on basis of inclusion in paper)
+*** INACTIVE Org-Ref
+;; org-ref for manuscripting -- see this in action first -- it seems
+;; to want to centralize the library -- sensible
+;; org-roam-bibtex might be a more suitable workflow
+
+;; In either case, ivy-bibtex must also be installed and fully configured
+
+;; (use-package org-ref
+;;   :ensure t
+;;   :config
+;;   (setq reftex-default-bibliography '("~/org/bibliography/references.bib"))
+;; 
+;;   ;; see org-ref for use of these variables
+;;   (setq org-ref-bibliography-notes "~/org/bibliography/notes.org"
+;; 	org-ref-default-bibliography '("~/org/bibliography/references.bib")
+;; 	org-ref-pdf-directory "~/Dropbox/bibliography/bibtex-pdfs/")
+;;   (setq bibtex-completion-bibliography "~/Dropbox/bibliography/references.bib"
+;; 	bibtex-completion-library-path "~/Dropbox/bibliography/bibtex-pdfs"
+;; 	bibtex-completion-notes-path "~/Dropbox/bibliography/bibtex-notes"))    
+*** TODO Org-Attachment
+    :PROPERTIES:
+    :ID:       431674a9-2ff1-40f7-994f-6cc2a7ee1e88
+    :END:
+    #+begin_src emacs-lisp
+      (setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
+    #+end_src
+**** TODO manage attachment directories
+***** where to keep downloads?
+***** screenshots?
+***** latex previews?
+*** TODO Org-Babel
+    :PROPERTIES:
+    :ID:       b9ef07e9-a022-4c1f-a75d-1336bd88fa07
+    :END:
+    #+begin_src emacs-lisp
+      (add-to-list 'org-babel-load-languages '(python . t))
+      (setq org-confirm-babel-evaluate nil)
+    #+end_src
+    use babel for jupyter notebooks? ein?
+*** TODO Org for manuscripting
+    :PROPERTIES:
+    :ID:       2de99c61-a580-4a3c-aa5c-bf1b322b9c97
+    :END:
+    #+begin_src emacs-lisp
+      (setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -interaction nonstopmode' -pdf -f %f"))
+      (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+    #+end_src
+    LaTeX exporter setting and in-line math formula display preferences
+**** TODO configure exporter to handle bibtex as well
+** TODO Org Key Bindings)
+   :PROPERTIES:
+   :ID:       7dea4263-0b4d-4b69-8e6c-6cc11752281e
+   :END:
+   #+begin_src emacs-lisp
+     :bind (("C-c l" . org-store-link) ;; global organization bindings
+	    ("C-c a" . org-agenda) 
+	    ("C-c c" . org-capture))) 
+   #+end_src
+   C-c is the conventional org mode command prefix. More specific sub modes and more general global modes should adopt philosophically consistent standards
+* TODO Org-tempo
+  :PROPERTIES:
+  :ID:       06bdd462-539c-42fa-bf92-94a2271a2d12
+  :END:
+  #+begin_src emacs-lisp
+    (use-package org-tempo ;; builtin
+      :config
+      (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+      (add-to-list 'org-structure-template-alist '("py" . "src python"))
+      :bind (:map org-mode-map (("C-c C-," . org-insert-structure-template))))
+  #+end_src
+  makes literate programing in org a little easier
+* TODO Org-Roam
+  :PROPERTIES:
+  :ID:       2a399e4a-0f14-4a33-a23f-67028014fb5d
+  :END:
+  #+begin_src emacs-lisp
+    (use-package org-roam
+      :ensure t
+      :init (setq org-roam-v2-ack t) ;; Acknowledge no return to v1
+      :custom
+      ;; roam database for focused zettlekasten
+      (org-roam-directory (file-truename (concat org-directory "/zettles")))
+      :bind (("C-c n f" . org-roam-node-find)
+	     ("C-c n g" . org-roam-graph)
+	     ("C-c n r" . org-roam-node-random)		    
+	     (:map org-mode-map
+		   (("C-c n i" . org-roam-node-insert)
+		    ("C-c n o" . org-id-get-create)
+		    ("C-c n t" . org-roam-tag-add)
+		    ("C-c n a" . org-roam-alias-add)
+		    ("C-c n l" . org-roam-buffer-toggle))))
+      :config
+      (org-roam-db-autosync-mode)
+      (require 'org-roam-protocol))
+   #+end_src
+** TODO org-roam-protocol
+   find out what this is
+* TODO org-download
+  :PROPERTIES:
+  :ID:       5ecc8d01-150a-46f9-a9b8-83f3cd1fd6c5
+  :END:
+  #+begin_src emacs-lisp
+    (use-package org-download
+      :ensure t
+      :config
+      (setq org-download-screenshot-method "flameshot gui --raw > %s"))
+  #+end_src
+  Provides integration between org attachment machinery and system's screen capture utility.
+  awesome tool for note taking.
+** TODO better organize where figures captured in notes are kept.
+   Objective: figures taken and contextualized in notes should be readily available for linking into manuscripts, backing-up, etc.
+   linking is easy as long as the note containing the figure can be found... It is *critical* to be able to rediscover notes on demand.
+* TODO ivy and friends
+  :PROPERTIES:
+  :ID:       2780bde7-52be-4524-af10-bbf9f8bff9dc
+  :END:
+  #+begin_src emacs-lisp
+    (use-package ivy
+      :ensure t
+      :init
+      (ivy-mode 1)
+      :bind (:map ivy-minibuffer-map
+		  ("TAB" . ivy-partial)))
+    (use-package ivy-yasnippet
+      :ensure t
+      :bind ("C-c y" . ivy-yasnippet)) ;; look into refining this and ensure consistency with bind logic
+  #+end_src
+  ivy is a completion framework with speed dial. Offers ability to execute actions on selected items on the fly.
+  has a lot of integration with other modes
+** TODO What is Counsel? Swiper?
+* TODO global minor modes
+  :PROPERTIES:
+  :ID:       1d70d5db-5bc9-4f6e-997b-6d91c4c0ea40
+  :END:
+  #+begin_src emacs-lisp
+	(use-package yasnippet ;; extensible codeblock insertion utility
+	  :ensure t
+	  :config
+	  (yas-minor-mode 1))
+	(use-package wucuo ;; use hunspell spell checker
+	  :ensure t
+	  :config
+	  (add-hook 'prog-mode-hook 'wucuo-start)
+	  (add-hook 'text-mode-hook 'wucuo-start))
+	;;(use-package undo-fu (define-key undo-fu-mode-map (kbd "C-?") #'undo-fu-only-redo))
+  #+end_src
+** TODO keybinds
+   :PROPERTIES:
+   :ID:       c1e4c0c0-bc84-482f-8152-05c47909214a
+   :END:
+   #+begin_src emacs-lisp
+     (setq bindlist '((windmove-swap-states-right "C-M-s-f" "C-M-s-<right>")
+		      (windmove-swap-states-up "C-M-s-p" "C-M-s-<up>")
+		      (windmove-swap-states-left "C-M-s-b" "C-M-s-<left>")
+		      (windmove-swap-states-down "C-M-s-n" "C-M-s-<down>")
+		      (windmove-right "C-s-f" "C-s-<right>")
+		      (windmove-up "C-s-p" "C-s-<up>")
+		      (windmove-left "C-s-b" "C-s-<left>")
+		      (windmove-down "C-s-n" "C-s-<down>")
+		      ;;                 (spell-fu-goto-next-error "C-,")
+		      ;;                 (+spell/correct "C-.")
+		      (backward-delete-char-untabify "C-S-d")))
+      
+     (dolist (bind-to bindlist)
+       (let ((keys (cdr bind-to)))
+	 (dolist (key keys)
+	   (define-key (current-global-map) (kbd key) (car bind-to)))))
+      
+     ;; minimize window just freezes it in dwm -- not nice
+     ;;(unbind-key "C-z")
+     ;;(unbind-key "C-x C-z")
+   #+end_src
+   these keybindings are specifically for windmove, anything else? or deal with these usign a use package declaration?
+   what's the advantage here?
+** TODO ibuffer integration with perspective and projectile
+   persp-ibuffer should be able to limit view of buffers in ibuffer to those of the current perspective
+   Within this, the ibuffer-projectile package should be able to group buffers by project root...
+** TODO ibuffer discover bindings
+   discover my major? get similar effect to discover for dired. See the available commands.
+* TODO Image and PDF viewing
+  :PROPERTIES:
+  :ID:       77c9fdea-b27c-497e-acb2-85d1c942ba86
+  :END:
+  #+begin_src emacs-lisp
+    (use-package pdf-tools
+      :ensure t) ;;seems to take care of turning itself on
+  #+end_src
+  pdf-tools PDFview outperforms docview. occasionally requires recompilation (M-x pdf-tools install)
+* TODO Extending Fundamental Functionality
+** TODO Perspective
+   :PROPERTIES:
+   :ID:       9f82beed-818b-4e68-924b-224b3e3c9a83
+   :END:
+   #+begin_src emacs-lisp
+     (use-package perspective
+       :ensure t
+       :init
+       (persp-mode)  
+       (setq persp-initial-frame-name 'Prime)
+       :config
+       (add-hook 'after-init-hook (lambda () (persp-state-load "~/.config/emacs/perspectives/Agenda"))) ;; load todos, switch to agenda perspective on startup
+       (add-hook 'persp-state-after-load-hook (lambda () (when (equal (persp-current-name) "Agenda")
+							   (org-agenda-list)))) ;; show todos by opening Agenda
+       (require 'ibuffer)
+       :bind (("C-x C-b" . persp-ibuffer) ;; this doesn't seem to be working nicely, shows too much
+	      ("C-x b" . persp-ivy-switch-buffer)
+	      ("C-x k" . persp-kill-buffer*)))
+   #+end_src
+*** TODO set up default list of open perspectives
+    on startup, show comprehensive agenda and offer interface for opening/building perspectives
+** TODO Discoverablity
+   :PROPERTIES:
+   :ID:       2f56a136-3572-4341-a307-5081357ff31b
+   :END:
+   #+begin_src emacs-lisp
+     (use-package which-key
+       :init
+       (setq which-key-sort-order #'which-key-key-order-alpha
+	     which-key-sort-uppercase-first nil
+	     which-key-add-column-padding 1
+	     which-key-max-display-columns nil
+	     which-key-min-display-lines 6
+	     which-key-side-window-slot -10)
+       :config
+       ;; general improvements to which-key readability
+       (which-key-setup-side-window-bottom)
+       (which-key-mode 1))
+   #+end_src
+   Provides on-the-fly navigation of key hierarchies.
+*** TODO use which-key as navigator for hydras? or replace which-key with hydra navigator?
+* TODO Integrated Development Environment
+** TODO LSP protocol integration
+** TODO Company Back-ends and Virtual Environment Integration
+*** TODO Python
+    :PROPERTIES:
+    :ID:       12165476-71a2-4170-ae11-4f9c10337935
+    :END:
+    #+begin_src emacs-lisp
+      (defun python-setup ()
+	"Sets company backends"
+	(interactive)
+	;; (setq company-backends '(company-matlab-shell))
+	(company-mode 1))
+       
+      (use-package python
+	:ensure t
+	:config
+	(add-hook 'python-mode-hook 'python-setup))
+       
+      (use-package conda
+	:ensure t
+	:config
+	(setq conda-env-home-directory "/opt/miniconda3") ;;conda is root...
+	;;get current environment--from environment variable CONDA_DEFAULT_ENV
+	(setq conda-anaconda-home "/opt/miniconda3")
+	;; (conda-env-activate (getenv "CONDA_DEFAULT_ENV")) ;; default to (base) or whetever is set
+	(conda-env-autoactivate-mode t) ;;useful for python projects
+	(conda-env-initialize-interactive-shells)
+	(setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
+	;;  (setq eshell-prompt-function ;; customizes the eshell prompt -- here because it includes the env
+	;;        (lambda ()
+	;;          (concat conda-env-current-name
+	;;                  (getenv "USER") "@"
+	;;                  (car (split-string (getenv "HOSTNAME") "[.]"))
+	;;                  (if (= (user-uid) 0) " # " " $ ")))))
+	)
+    #+end_src
+**** TODO set conda default env properly
+**** TODO use conda environment selectively
+     activate when python mode/shell is activated
+* TODO Google-calendar integration
+  :PROPERTIES:
+  :ID:       14b1e902-d92e-4955-889a-453d1aafd43a
+  :END:
+  #+begin_src emacs-lisp
+    ;; org agenda and calendar customization and automation
+    ;;(defun my-open-calendar ()
+    ;;  (interactive)
+    ;;  (cfw:open-calendar-buffer
+    ;;   :contents-sources
+    ;;   (list
+    ;;    (cfw:org-create-source "Green")  ; org-agenda source
+    ;;    (cfw:org-create-file-source "cal" "/path/to/cal.org" "Cyan")  ; other org source
+    ;;    (cfw:howm-create-source "Blue")  ; howm source
+    ;;    (cfw:cal-create-source "Orange") ; diary source
+    ;;    (cfw:ical-create-source "Moon" "~/moon.ics" "Gray")  ; ICS source1
+    ;;    (cfw:ical-create-source "gcal" "https://..../basic.ics" "IndianRed") ; google calendar ICS
+    ;;   )))
+  #+end_src
+  is this necessary considering the emphasis on org-capture based calendaring?
+* Custom Utility Functions
+  :PROPERTIES:
+  :ID:       a909cafc-561b-471d-a157-dd57c0ed019e
+  :END:
+  #+begin_src emacs-lisp
+    (defun smb-2-dee ()
+      "smb remote connection to Uc's ceas1 domain clusterfsnew server"
+      (interactive)
+      (find-file "/smb:manganpt%ceas1@clusterfsnew.ceas1.uc.edu:/DEE/"))
+     
+    (defun copy-file-to-tmp (file)
+      "delegate for dired-open-remote-tmpfile"
+      (copy-file file "/tmp/" 1)
+      (let* ((extension (file-name-extension file))
+	     (base (file-name-base file)))
+	(format "/tmp/%s.%s" base extension)))
+     
+    (defun dired-open-remote-tmpfile (localprog)
+      "copies file in remote dired to local tmp, opens with local program, and returns modified file to remote dired"
+      (interactive "sLocal Program Name: ")
+      (let* ((remote-file (dired-filename-at-point))
+	     (tmpfile (copy-file-to-tmp remote-file)))
+	(async-start-process localprog
+			     localprog
+			     (lambda (process-obj)
+			       "move tmpfile back to remote directory"
+			       (copy-file tmpfile remote-file 1))
+			     tmpfile)))
+  #+end_src
+** TODO dired-open-remote-tmpfile
+   use dmenu or make it work with ivy and council linux apps?
+* Saved Keymacros
+  :PROPERTIES:
+  :ID:       7fad8dd6-624d-4dc0-8886-ea2ca553c673
+  :END:
+  #+begin_src emacs-lisp
+    (fset 'pm/org-clone-3d-subtree-with-1w-timeshift
+	  (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
+    (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
+	  (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
+  #+end_src
+  Org agenda scheduling keymacros
