@@ -1,7 +1,4 @@
 (load-theme 'doom-dark+ t)
-(menu-bar-mode -1)
-(toggle-scroll-bar -1)
-(tool-bar-mode -1)
 (setq inhibit-startup-screen t)
 (setq visible-bell t)
 
@@ -35,40 +32,45 @@
 
 (use-package dired
   :init
-  (setq dired-auto-revert-buffer t)  ;; don't prompt to revert; just do it
-  (setq dired-dwim-target t)  ;; suggest a target for moving/copying intelligently
-  (setq dired-hide-details-hide-symlink-targets nil)
-;; Always copy/delete recursively
-  (setq dired-recursive-copies 'always)
-  (setq dired-recursive-deletes 'top)
-;; Where to store image caches
-;;        image-dired-dir (concat doom-cache-dir "image-dired/")
-;;        image-dired-db-file (concat image-dired-dir "db.el")
-;;        image-dired-gallery-dir (concat image-dired-dir "gallery/")
-;;        image-dired-temp-image-file (concat image-dired-dir "temp-image")
-;;        image-dired-temp-rotate-image-file (concat image-dired-dir "temp-rotate-image")
-;; Screens are larger nowadays, we can afford slightly larger thumbnails
-;;        image-dired-thumb-size 150)
+  (setq dired-listing-switches "-ahl" "-v" "--group-directories-first")
+  (setq dired-auto-revert-buffer t
+        dired-dwim-target t
+        dired-recursive-copies 'always
+        dired-recursive-deletes 'top)
+  :config
+  (add-hook 'dired-mode-hook 'dired-hide-details-mode)
+  :bind (:map dired-mode-map
+              (("C-c C-e" . wdired-change-to-wdired-mode)))) ;; To be consistent with ivy and wgrep integration
+
+(use-package dired
+  :init
+  ;; Where to store image caches
+  ;;        image-dired-dir (concat doom-cache-dir "image-dired/")
+  ;;        image-dired-db-file (concat image-dired-dir "db.el")
+  ;;        image-dired-gallery-dir (concat image-dired-dir "gallery/")
+  ;;        image-dired-temp-image-file (concat image-dired-dir "temp-image")
+  ;;        image-dired-temp-rotate-image-file (concat image-dired-dir "temp-rotate-image")
+  ;; Screens are larger nowadays, we can afford slightly larger thumbnails
+  ;;        image-dired-thumb-size 150)
   :config
   ;; cool thumbnails
-;;  (set-popup-rule! "^\\*image-dired"
-;;    :slot 20 :size 0.8 :select t :quit nil :ttl 0)
-;;  (set-evil-initial-state! 'image-dired-display-image-mode 'emacs)
-  (let ((args (list "-ahl" "-v" "--group-directories-first"))))
-;;dealing with extenuating circumstances in remote sessions
-;;    (add-hook! 'dired-mode-hook 
-;;      (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers-h ()
-;;        "Fix #1703: dired over TRAMP displays a blank screen.
-;;
-;;This is because there's no guarantee the remote system has GNU ls, which is the
-;;only variant that supports --group-directories-first."
-;;        (when (file-remote-p default-directory)
-;;          (setq-local dired-actual-switches (car args))))))
+  ;;  (set-popup-rule! "^\\*image-dired"
+  ;;    :slot 20 :size 0.8 :select t :quit nil :ttl 0)
+  ;;  (set-evil-initial-state! 'image-dired-display-image-mode 'emacs)
+
+  ;;dealing with extenuating circumstances in remote sessions
+  ;;    (add-hook! 'dired-mode-hook 
+  ;;      (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers-h ()
+  ;;        "Fix #1703: dired over TRAMP displays a blank screen.
+  ;;
+  ;;This is because there's no guarantee the remote system has GNU ls, which is the
+  ;;only variant that supports --group-directories-first."
+  ;;        (when (file-remote-p default-directory)
+  ;;          (setq-local dired-actual-switches (car args))))))
 
   ;; Don't complain about this command being disabled
-;;  (put 'dired-find-alternate-file 'disabled nil)
-  :bind (:map dired-mode-map
-	      (("C-c C-e" . wdired-change-to-wdired-mode)))) ;; To be consistent with ivy and wgrep integration
+  ;;  (put 'dired-find-alternate-file 'disabled nil)
+)
 
 (use-package gnuplot-mode
   :ensure t)
@@ -426,7 +428,6 @@
 
 (use-package pdf-tools
   :ensure t
-  ;;    :load-path "site-lisp/pdf-tools/lisp"
   :magic ("%PDF" .  pdf-view-mode) ;; open pdfs please, thank you
   :config (pdf-tools-install)) ;; don't break when libpoppler.so updates.
 
@@ -624,3 +625,16 @@
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
 (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(avy yasnippet-snippets wucuo which-key use-package sudo-edit rainbow-mode popper poetry perspective org-roam org-ref org-pdftools org-download ob-ipython notmuch magit macrostep lsp-mode ivy-yasnippet ivy-bibtex gnuplot-mode gnuplot elfeed doom-themes conda company)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))
