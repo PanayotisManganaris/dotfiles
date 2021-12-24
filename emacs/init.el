@@ -3,6 +3,7 @@
 (toggle-scroll-bar -1)
 (tool-bar-mode -1)
 (setq inhibit-startup-screen t)
+(setq visible-bell t)
 
 (require 'package)
      (add-to-list 'package-archives
@@ -69,6 +70,11 @@
   :bind (:map dired-mode-map
 	      (("C-c C-e" . wdired-change-to-wdired-mode)))) ;; To be consistent with ivy and wgrep integration
 
+(use-package gnuplot-mode
+  :ensure t)
+(use-package gnuplot
+  :ensure t)
+
 (use-package calc
   :bind ("M-#" . calc-dispatch))
 
@@ -76,6 +82,14 @@
   :ensure t
   :config
   (global-company-mode))
+
+(use-package magit
+  :ensure t
+  :bind
+  ("C-x g" . magit-status))
+
+(use-package lsp-mode
+  :ensure t)
 
 (defun pm/org-babel-tangle-config ()
   (when (equal (buffer-file-name)
@@ -89,6 +103,7 @@
   :init (setq org-export-backends '(ascii html icalendar latex odt)) ;; org exports establish prior to loading org.el
   :ensure t
   :config
+  (setq org-startup-indented t) ;; simplify heirarchies management in org
   (setq org-ellipsis " [+]") ;; Custom fold indicator because I often use ellipses and it's confusing
   (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil))))) ;; using custom -- consider editing theme?
   (setq org-use-property-inheritance t)
@@ -96,39 +111,40 @@
   (setq org-use-fast-todo-selection 'auto) ;; present keyword hotkeys to user if available
   (setq org-treat-S-cursor-todo-selection-as-state-change nil) ;; cycle keywords without state logging using S-left\right
   (setq org-todo-keywords ;; set to timestamp deliberate state changes
-	'((sequence "TODO(t)"
-		    "NEXT(n!)"
-		    "WAIT(w@/!)"      
-		    "|"	          
-		    "DONE(d!)"        
-		    "INACTIVE(i@)"    
-		    "CANCELED(q@/@)") 	                                   
-	  (sequence "JOURNAL(j!)"     
-		    "CONTACT(c!)"     
-		    "MEETING(m!)"     
-		    "|")
-	  (sequence "ATTEND(a!)" "|" "DONE(d!)" "MISSED(f!)"))) ;; pure calendar events?
+        '((sequence "TODO(t)"
+                    "NEXT(n!)"
+                    "WAIT(w@/!)"      
+                    "|"	          
+                    "DONE(d!)"        
+                    "INACTIVE(i@)"    
+                    "CANCELED(q@/@)") 	                                   
+          (sequence "JOURNAL(j!)"     
+                    "CONTACT(c!)"     
+                    "MEETING(m!)"     
+                    "|")
+          (sequence "ATTEND(a!)" "|" "DONE(d!)" "MISSED(f!)") ;; pure calendar events?
+          (sequence "SEQ(s)" "|"))) ;; notebook nagiational labels?
   ;;        (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED"))) ;; development task labels
   (defun pm/modify-org-done-face ()
     (setq org-fontify-done-headline t)
     (set-face-attribute 'org-done nil :strike-through t)
     (set-face-attribute 'org-headline-done nil
-			:strike-through t
-			:foreground "light gray"))
+                        :strike-through t
+                        :foreground "light gray"))
 
   (eval-after-load "org"
     (add-hook 'org-add-hook 'pm/modify-org-done-face))
 
   (setq org-todo-keyword-faces
-	(quote (("TODO" :foreground "blue" :weight bold)
-		("NEXT" :foreground "red" :weight bold)
-		("WAIT" :foreground "orange" :weight bold)
-		("DONE" :foreground "forest green" :weight bold)
-		("INACTIVE" :foreground "magenta" :weight bold)
-		("CANCELED" :foreground "forest green" :weight bold)
-		("JOURNAL" :foreground "white" :weight bold)
-		("CONTACT" :foreground "white" :weight bold)
-		("MEETING" :foreground "white" :weight bold))))
+        (quote (("TODO" :foreground "blue" :weight bold)
+                ("NEXT" :foreground "red" :weight bold)
+                ("WAIT" :foreground "orange" :weight bold)
+                ("DONE" :foreground "forest green" :weight bold)
+                ("INACTIVE" :foreground "magenta" :weight bold)
+                ("CANCELED" :foreground "forest green" :weight bold)
+                ("JOURNAL" :foreground "white" :weight bold)
+                ("CONTACT" :foreground "white" :weight bold)
+                ("MEETING" :foreground "white" :weight bold))))
   (setq org-enforce-todo-dependencies t)
   (setq org-agenda-dim-blocked-tasks t) ;; try this on for size -- only effects agenda view
   (setq org-log-into-drawer "STATUSLOG") ;; hide state change history in drawer under headlines
@@ -139,8 +155,9 @@
 (setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
 ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
 (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
-			 (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
-			 (concat org-directory "/addressbook.org"))) ;; CRM file. Network contacts by linking manually (so it sticks), use roam
+                         (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
+                         (concat org-directory "/addressbook.org")
+                         (concat org-directory "/occurance.org"))) ;; CRM file. Network contacts by linking manually (so it sticks), use roam
 
 ;; org-agenda
 (setq org-agenda-files (cons org-default-notes-file org-cabinets)) ;; populate agenda from cabinets + refile.org
@@ -217,18 +234,22 @@
   :ensure t
   :config
   (add-to-list 'company-backends 'company-ob-ipython)
-  (setq ob-ipython-command "/opt/miniconda3/envs/notes/bin/jupyter")
-  :bind (:map org-mode-map (("M-." . ob-ipython-inspect))))
+  (setq ob-ipython-command "jupyter")
+  (setq org-babel-python-command "python")
+  :bind (:map org-mode-map (("M-." . ob-ipython-inspect)))) ;; idea: bind ide doc tools to C-c lang-abbrev i?
+
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((emacs-lisp . t)
    (python . t)
    (ipython . t)
-   (latex . t)))
+   (latex . t)
+   (ditaa . t)))
+
 (setq org-confirm-babel-evaluate nil)
 (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)
 
-(setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -interaction nonstopmode' -pdf -f %f"))
+(setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
 (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
 ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 
@@ -248,54 +269,66 @@
   ;; roam database for focused zettlekasten
   (org-roam-directory (file-truename (concat org-directory "/zettles/")))
   :bind (("C-c n f" . org-roam-node-find)
-	 ("C-c n g" . org-roam-graph)
-	 ("C-c n r" . org-roam-node-random)		    
-	 (:map org-mode-map
-	       (("C-c n i" . org-roam-node-insert) ;; Insert
-		("C-c n o" . org-id-get-create) ;; Organize
-		("C-c n t" . org-roam-tag-add) ;; Tag
-		("C-c n a" . org-roam-alias-add) ;; Alias
-		("C-c n l" . org-roam-buffer-toggle) ;; backLink
-		("C-c n c" . org-roam-extract-subtree)))) ;; Create (use in conjunction with organize)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n r" . org-roam-node-random)		    
+         (:map org-mode-map
+               (("C-c n i" . org-roam-node-insert) ;; Insert
+                ("C-c n o" . org-id-get-create) ;; Organize
+                ("C-c n t" . org-roam-tag-add) ;; Tag
+                ("C-c n a" . org-roam-alias-add) ;; Alias
+                ("C-c n l" . org-roam-buffer-toggle) ;; backLink
+                ("C-c n c" . org-roam-extract-subtree)))) ;; Create (use in conjunction with organize)
   :config
   (org-roam-db-autosync-mode)
   (setq org-roam-capture-templates
-	(quote (("d" "default" plain "%?"
-		 :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}")
-		 :unnarrowed t)
-		("l" "Literatue Notes") ;; fully contextual notes. Necessarily Integrated with lit docs via org-noter and org-ref
-		("ln" "noter" entry (file "~/org/zettles/") ;; noter academic pdf note. (consider dedicated epub template too.)
-		 "* TODO %?\n%U\n%a\n")
-		("lb" "book" entry (file "~/org/zettles/") ;; physical book note. limited automation + meticulous capture
-		 "* TODO %?\n%^T") ;;book, author, pagenumber, full manual bibtex?
-		("r" "Reference Notes") ;; Reflective notes. lectures, seminars, videos; bookmarks; ongoing projects
-		("rl" "lecture" entry (file "~/org/zettles/") ;; general lecture limited automation
-		 "* TODO %?\n%^T") ;;lecturer, date, 
-		("rm" "meeting" entry (file "~/org/zettles/") ;; general meeting: timestamped with agenda schedule keyword
-		 "%?\n%^T"
-		 :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-		 :unnarrowed t)
-		("p" "Permanent Notes") ;; standalone notes. hub notes, dedicated thoughts, musings, philosophy
-		("ph" "hub" entry (file "~/org/zettles/")
-		 "* TODO %?\n%^T") ;; maybe redundant? possible that proper backlink utilization eliminates need to clarify conncections in hubs
-		("pm" "muse" entry (file "~/org/zettles/")
-		 "* TODO %?\n%^T")))) ;; time. context/reason/event?
+        (quote (("d" "default" plain "%?"
+                 :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}")
+                 :unnarrowed t)
+                ("l" "Literatue Notes") ;; fully contextual notes. Necessarily Integrated with lit docs via org-noter and org-ref
+                ("ln" "noter" entry (file "~/org/zettles/") ;; noter academic pdf note. (consider dedicated epub template too.)
+                 "* TODO %?\n%U\n%a\n")
+                ("lb" "book" entry (file "~/org/zettles/") ;; physical book note. limited automation + meticulous capture
+                 "* TODO %?\n%^T") ;;book, author, pagenumber, full manual bibtex?
+                ("r" "Reference Notes") ;; Reflective notes. lectures, seminars, videos; bookmarks; ongoing projects
+                ("rl" "lecture" entry (file "~/org/zettles/") ;; general lecture limited automation
+                 "* TODO %?\n%^T") ;;lecturer, date, 
+                ("rm" "meeting" entry (file "~/org/zettles/") ;; general meeting: timestamped with agenda schedule keyword
+                 "%?\n%^T"
+                 :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+                 :unnarrowed t)
+                ("p" "Permanent Notes") ;; standalone notes. hub notes, dedicated thoughts, musings, philosophy
+                ("ph" "hub" entry (file "~/org/zettles/")
+                 "* TODO %?\n%^T") ;; maybe redundant? possible that proper backlink utilization eliminates need to clarify conncections in hubs
+                ("pm" "muse" entry (file "~/org/zettles/")
+                 "* TODO %?\n%^T")))) ;; time. context/reason/event?
   (require 'org-roam-protocol))
 
 (use-package org-ref
-  :init (setq org-ref-completion-library 'org-ref-ivy-cite)
+  :ensure t
+  :init
+  (setq org-ref-completion-library 'org-ref-ivy-cite) ;; org-ref manager use ivy-bibtex's retreival machinery
+  ;; (setq org-ref-default-citation-link "autocite") ;; decide which natbib style is predominant
+  (require 'bibtex)
+  (setq bibtex-autokey-year-length 4
+        bibtex-autokey-name-year-separator "-"
+        bibtex-autokey-year-title-separator "-"
+        bibtex-autokey-titleword-separator "-"
+        bibtex-autokey-titlewords 2
+        bibtex-autokey-titlewords-stretch 1
+        bibtex-autokey-titleword-length 5) ;; variables informing entry cleanup function
+  (require 'org-ref-ivy)
+  (require 'org-ref-arxiv)
+  (require 'org-ref-scopus)
+  (require 'org-ref-wos)
   :config
-  (setq reftex-default-bibliography '("~/org/bibliography/library.bib"))
-
-  ;; see org-ref for use of these variables
-  (setq org-ref-bibliography-notes "~/org/zettles/"
-	org-ref-default-bibliography '("~/org/bibliography/library.bib")
-	org-ref-pdf-directory "~/org/bibliography/pdfs/")
-  (setq bibtex-completion-bibliography "~/org/bibliography/library.bib"
-	bibtex-completion-library-path "~/org/bibliography/pdfs"
-	bibtex-completion-notes-path "~/org/zettles")
-  :bind (:map org-mode-map
-	      ("C-c (" . org-ref-insert-link)))
+  (setq reftex-default-bibliography '("~/org/bibliotex/bibliotex.bib")) ;; redundant?
+  (setq org-ref-bibliography-notes "~/org/zettles/" ;; replace this variable with the setting from orb?
+        org-ref-default-bibliography '("~/org/bibliotex/bibliotex.bib")
+        org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks"))
+  ;; put citation source materials, separated for enote access convenience
+  :bind ((:map bibtex-mode-map ("C-c b" . 'org-ref-bibtex-hydra/body))
+         (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
+                             ("C-c [" . 'org-ref-insert-link-hydra/body)))))
 
 
 
@@ -309,15 +342,49 @@
   :init
   (ivy-mode 1)
   :bind (:map ivy-minibuffer-map
-	      ("TAB" . ivy-partial)))
+              ("TAB" . ivy-partial)))
+
 (use-package ivy-yasnippet
   :ensure t
-  :bind ("C-c y" . ivy-yasnippet)) ;; look into refining this and ensure consistency with bind logic
+  :bind ("C-c y" . ivy-yasnippet)) ;; ensure consistency with bind logic
+
+(use-package ivy-bibtex
+  :ensure t
+  :init
+  (setq bibtex-completion-bibliography '("~/org/bibliotex/bibliotex.bib") ;; feel free to expand
+        bibtex-completion-library-path '("~/org/bibliotex/papers_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks/")
+        ;; doi utils uses path to install pdf downloads. org ref uses path to open source material from cite
+        bibtex-completion-notes-path "~/org/zettles/" ;; Keep this concentrated. Might get heavy, but optimize later
+        bibtex-completion-notes-template-multiple-files "* ${author-or-editor}, ${title}, ${journal}, (${year}) :${=type=}: \n\nSee [[cite:&${=key=}]]\n"
+        bibtex-completion-additional-search-fields '(keywords)
+        bibtex-completion-display-formats
+        '((article       . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${journal:40}")
+          (inbook        . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} Chapter ${chapter:32}")
+          (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+          (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+          (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
+        bibtex-completion-pdf-open-function 'find-file)) ;;open pdfs in emacs--best, obviously.
+        ;;          (lambda (fpath)
+        ;;          (call-process "open" nil 0 nil fpath)))) ;;open pdfs
+
+(use-package org-ref-ivy
+  :disabled ;; this is not present on melpa, it's a scimax convenience for the ivy-bound
+  :ensure nil
+  :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
+  :init (setq org-ref-insert-link-function 'org-ref-insert-link-hydra/body
+              org-ref-insert-cite-function 'org-ref-cite-insert-ivy
+              org-ref-insert-label-function 'org-ref-insert-label-link
+              org-ref-insert-ref-function 'org-ref-insert-ref-link
+              org-ref-cite-onclick-function (lambda (_) (org-ref-citation-hydra/body))))
 
 (use-package yasnippet ;; extensible codeblock insertion utility
   :ensure t
   :config
-  (yas-minor-mode 1))
+  (setq-default yas-wrap-around-region t) ;; global option to place selected region at $0
+  (yas-global-mode))
+;; Notice: it is possible to assign unique keybindings to certain snippets.
+;; These bindings are added to the relevant mode's map. This might be reasonable. but...
+;; look into building a hydra? or perhaps just rely on the completion menu on C-c y...
 (use-package wucuo ;; fast emacs spell-checker. uses hunspell
   :ensure t
   :config
@@ -331,10 +398,10 @@
 (use-package flyspell-correct
   :after wucuo
   :bind (:map flyspell-mode-map
-	      (("C-."   . flyspell-auto-correct-word)
-	       ("C-,"   . flyspell-goto-next-error)
-	       ("C-;"   . flyspell-correct-next)
-	       ("C-M-;" . flyspell-buffer))))
+              (("C-."   . flyspell-auto-correct-word)
+               ("C-,"   . flyspell-goto-next-error)
+               ("C-;"   . flyspell-correct-next)
+               ("C-M-;" . flyspell-buffer))))
 
 (setq bindlist '((windmove-swap-states-right "C-M-s-f" "C-M-s-<right>")
 		 (windmove-swap-states-up "C-M-s-p" "C-M-s-<up>")
@@ -358,26 +425,32 @@
 ;;(unbind-key "C-x C-z")
 
 (use-package pdf-tools
-  :load-path "site-lisp/pdf-tools/lisp"
+  :ensure t
+  ;;    :load-path "site-lisp/pdf-tools/lisp"
   :magic ("%PDF" .  pdf-view-mode) ;; open pdfs please, thank you
   :config (pdf-tools-install)) ;; don't break when libpoppler.so updates.
 
-(use-package perspective
+(use-package popper
   :ensure t
-  :init
-  (persp-mode)  
-  (setq persp-initial-frame-name 'Prime)
   :config
-  (add-hook 'after-init-hook (lambda () (persp-state-load "~/.config/emacs/perspectives/Agenda"))) ;; switch to agenda perspective on startup
-  (add-hook 'persp-state-after-load-hook (lambda () (when (equal (persp-current-name) "Agenda")
-						      (org-agenda-list)))) ;; show todos by opening Agenda in Agenda persp
-  (require 'ibuffer)
-  :bind (("C-x C-b" . persp-ibuffer) ;; this doesn't seem to be working nicely, shows too much
-	 ("C-x b" . persp-ivy-switch-buffer)
-	 ("C-x k" . persp-kill-buffer*)
-	 (:map ibuffer-mode-map
-	       (("g" . persp-ibuffer)
-		("/ B" . persp-ibuffer-set-filter-groups)))))
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Org Select\\*"
+          "\\*Backtrace\\*"
+          "\\*ob-ipython-out\\*"
+          "\\*ob-ipython-traceback\\*"
+          "\\*Async Shell Command\\*"
+          "\\*Python\\*"
+          "shell\\*$"
+          help-mode
+          compilation-mode))
+  (popper-mode 1)
+  (popper-echo-mode 1)
+  :bind
+  (("C-`"   . popper-toggle-latest)
+   ("M-`"   . popper-cycle)
+   ("C-~" . popper-toggle-type)))
 
 (use-package which-key
   :init
@@ -392,34 +465,48 @@
   (which-key-setup-side-window-bottom)
   (which-key-mode 1))
 
-(defun python-setup ()
-  "Sets company backends"
-  (interactive)
-  ;; (setq company-backends '(company-matlab-shell))
-  (company-mode 1))
+(autoload 'notmuch "notmuch" "Notmuch mail" t)
+
+(use-package elfeed
+  :ensure t
+  :init
+  (setq elfeed-feeds
+        '("https://github.com/rougier/scientific-visualization-book/tree/master/pdf/book.pdf.atom" ;;data viz w/ matplot
+          "https://github.com/Ramprasad-Group/polyga.atom"
+          "https://github.com/rougier.atom"))
+  :bind ("C-x w" . elfeed))
 
 (use-package python
   :ensure t
   :config
-  (add-hook 'python-mode-hook 'python-setup))
+  (setq python-shell-interpreter "ipython"
+        python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
+
+  (defun set-company-backends-for-python ()
+    (setq-local company-backends '(company-yasnippet
+                                   company-capf
+                                   company-files
+                                   (company-dabbrev-code company-keywords)
+                                   company-dabbrev)))
+  (add-hook 'python-mode-hook 'set-company-backends-for-python))
 
 (use-package conda
   :ensure t
   :config
-  (setq conda-env-home-directory "/opt/miniconda3") ;;conda is root...
-  ;;get current environment--from environment variable CONDA_DEFAULT_ENV
-  (setq conda-anaconda-home "/opt/miniconda3")
-  ;; (conda-env-activate (getenv "CONDA_DEFAULT_ENV")) ;; default to (base) or whetever is set
-  (conda-env-autoactivate-mode t) ;;useful for python projects
-  (conda-env-initialize-interactive-shells)
+  (setq conda-anaconda-home "/opt/miniconda3") ;; specify install location
+  (setq conda-env-home-directory "/opt/miniconda3") ;;conda envs explicit location
+  (conda-env-initialize-interactive-shells) ;; conda awareness will be enabled for inferior shell processes
+  (conda-env-initialize-eshell) ;; and eshell
+  ;; NOTE: eshell and emacs share an evironment. Change one change the other.
+  ;;set current environment from instance of interactive shell
+  (conda-env-activate (getenv-internal "CONDA_DEFAULT_ENV" (split-string (shell-command-to-string "$SHELL --interactive -c printenv") "\n")))
+  ;; display env in modline ~ if modline is customized, :exec keyword can be redirected there.
   (setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
-  ;;  (setq eshell-prompt-function ;; customizes the eshell prompt -- here because it includes the env
-  ;;        (lambda ()
-  ;;          (concat conda-env-current-name
-  ;;                  (getenv "USER") "@"
-  ;;                  (car (split-string (getenv "HOSTNAME") "[.]"))
-  ;;                  (if (= (user-uid) 0) " # " " $ ")))))
-  )
+  (conda-env-autoactivate-mode -1)) ;; t causes annoying error. But useful for jumping projectile python projects
+
+(use-package poetry
+  :ensure t
+  :bind ("C-x p" . poetry))
 
 ;; org agenda and calendar customization and automation
 ;;(defun my-open-calendar ()
@@ -435,6 +522,47 @@
 ;;    (cfw:ical-create-source "gcal" "https://..../basic.ics" "IndianRed") ; google calendar ICS
 ;;   )))
 
+(defun pm/ansi-term (&optional path name)
+  "Opens an ansi terminal at PATH. If no PATH is given, it uses
+    the value of `default-directory'. PATH may be a tramp remote path.
+    (username should be requested, or default to local user name).
+    The ansi-term buffer is named based on `name' 
+    ----
+    modification of code by dfeich"
+  (interactive)
+  (unless path (setq path default-directory))
+  (unless name (setq name "ansi-term"))
+  (ansi-term "/bin/sh" name)
+  (let ((path (replace-regexp-in-string "^file:" "" path))
+        (cd-str 
+         "fn=%s; if test ! -d $fn; then fn=$(dirname $fn); fi; cd $fn;")
+        (bufname (concat "*" name "*" )))
+    (if (tramp-tramp-file-p path)
+        (let ((tstruct (tramp-dissect-file-name path)))
+          (cond 
+           ((equal (tramp-file-name-method tstruct) "ssh")
+            (process-send-string bufname (format
+                                          (concat  "ssh -t %s@%s '"
+                                                   cd-str
+                                                   "exec bash'; exec bash; clear\n")
+                                          (tramp-file-name-user tstruct)
+                                          (tramp-file-name-host tstruct)
+                                          (tramp-file-name-localname tstruct))))
+           (t (error "not implemented for method %s"
+                     (tramp-file-name-method tstruct)))))
+      (process-send-string bufname (format (concat cd-str " exec bash;clear\n")
+                                           path)))))
+
+(defun scp-bell-ipython ()
+  "scp remote jupyter session files from Purdue HPC cluster bell.rcac.purdue.edu to local"
+  (interactive)
+  (find-file "/scp:pmangana@bell.rcac.purdue.edu:/home/pmangana/.local/share/jupyter/runtime/*.json /run/user/1000/jupyter"))
+
+(defun ssh-2-bell ()
+  "ssh remote connection to Purdue HPC cluster bell.rcac.purdue.edu"
+  (interactive)
+  (find-file "/ssh:pmangana@bell.rcac.purdue.edu:/home/pmangana"))
+
 (defun smb-2-dee ()
   "smb remote connection to Uc's ceas1 domain clusterfsnew server"
   (interactive)
@@ -444,51 +572,51 @@
   "delegate for dired-open-remote-tmpfile"
   (copy-file file "/tmp/" 1)
   (let* ((extension (file-name-extension file))
-	 (base (file-name-base file)))
+         (base (file-name-base file)))
     (format "/tmp/%s.%s" base extension)))
 
 (defun dired-open-remote-tmpfile (localprog)
   "copies file in remote dired to local tmp, opens with local program, and returns modified file to remote dired"
   (interactive "sLocal Program Name: ")
   (let* ((remote-file (dired-filename-at-point))
-	 (tmpfile (copy-file-to-tmp remote-file)))
+         (tmpfile (copy-file-to-tmp remote-file)))
     (async-start-process localprog
-			 localprog
-			 (lambda (process-obj)
-			   "move tmpfile back to remote directory"
-			   (copy-file tmpfile remote-file 1))
-			 tmpfile)))
+                         localprog
+                         (lambda (process-obj)
+                           "move tmpfile back to remote directory"
+                           (copy-file tmpfile remote-file 1))
+                         tmpfile)))
 (use-package macrostep
   :ensure t
   :bind ((:map emacs-lisp-mode-map
-	       ("C-c C-e" . macrostep-expand))
-	 (:map lisp-interaction-mode-map
-	       ("C-c C-e" . macrostep-expand))))
+               ("C-c C-e" . macrostep-expand))
+         (:map lisp-interaction-mode-map
+               ("C-c C-e" . macrostep-expand))))
 
 (defun toggle-window-split ()
   (interactive)
   (if (= (count-windows) 2)
       (let* ((this-win-buffer (window-buffer))
-	     (next-win-buffer (window-buffer (next-window)))
-	     (this-win-edges (window-edges (selected-window)))
-	     (next-win-edges (window-edges (next-window)))
-	     (this-win-2nd (not (and (<= (car this-win-edges)
-					 (car next-win-edges))
-				     (<= (cadr this-win-edges)
-					 (cadr next-win-edges)))))
-	     (splitter
-	      (if (= (car this-win-edges)
-		     (car (window-edges (next-window))))
-		  'split-window-horizontally
-		'split-window-vertically)))
-	(delete-other-windows)
-	(let ((first-win (selected-window)))
-	  (funcall splitter)
-	  (if this-win-2nd (other-window 1))
-	  (set-window-buffer (selected-window) this-win-buffer)
-	  (set-window-buffer (next-window) next-win-buffer)
-	  (select-window first-win)
-	  (if this-win-2nd (other-window 1))))))
+             (next-win-buffer (window-buffer (next-window)))
+             (this-win-edges (window-edges (selected-window)))
+             (next-win-edges (window-edges (next-window)))
+             (this-win-2nd (not (and (<= (car this-win-edges)
+                                         (car next-win-edges))
+                                     (<= (cadr this-win-edges)
+                                         (cadr next-win-edges)))))
+             (splitter
+              (if (= (car this-win-edges)
+                     (car (window-edges (next-window))))
+                  'split-window-horizontally
+                'split-window-vertically)))
+        (delete-other-windows)
+        (let ((first-win (selected-window)))
+          (funcall splitter)
+          (if this-win-2nd (other-window 1))
+          (set-window-buffer (selected-window) this-win-buffer)
+          (set-window-buffer (next-window) next-win-buffer)
+          (select-window first-win)
+          (if this-win-2nd (other-window 1))))))
 
 (global-set-key (kbd "C-x |") 'toggle-window-split) ;; ediff-like keybinding
 
@@ -496,16 +624,3 @@
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
 (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(notmuch yasnippet-snippets wucuo which-key use-package sudo-edit rainbow-mode perspective org-roam org-ref org-pdftools org-download ob-ipython macrostep ivy-yasnippet ivy-bibtex doom-themes conda company)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))

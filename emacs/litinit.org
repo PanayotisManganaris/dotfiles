@@ -2,24 +2,25 @@
 #+startup: overview
 #+PROPERTY: header-args:emacs-lisp :tangle ~/.config/emacs/init.el
 * INACTIVE Optimization
-  check out emacs-ludicrous-speed
-  avoid deferred loading. avoid arcane elisp. avoid repurposing a sped-up distro for your own trimmed-down config.
-  Sounds too good to be true?
-  els-emacs script takes commandline options like emacsclient
-  [[https://gitlab.com/blak3mill3r/emacs-ludicrous-speed]]
+check out emacs-ludicrous-speed
+avoid deferred loading. avoid arcane elisp. avoid repurposing a sped-up distro for your own trimmed-down config.
+Sounds too good to be true?
+els-emacs script takes commandline options like emacsclient
+[[https://gitlab.com/blak3mill3r/emacs-ludicrous-speed]]
 * TODO Aesthetics
 ** TODO Theme Selection and UI toggles
-  :PROPERTIES:
-  :ID:       ef50006f-dbbb-4800-bebf-2f834b122c7f
-  :END:
-  #+begin_src emacs-lisp
-    (load-theme 'doom-dark+ t)
-    (menu-bar-mode -1)
-    (toggle-scroll-bar -1)
-    (tool-bar-mode -1)
-    (setq inhibit-startup-screen t)
-  #+end_src
-  No startup screen. Remove GUI menus, scrollbar, etc. Use doom-dark+ theme
+:PROPERTIES:
+:ID:       ef50006f-dbbb-4800-bebf-2f834b122c7f
+:END:
+#+begin_src emacs-lisp
+  (load-theme 'doom-dark+ t)
+  (menu-bar-mode -1)
+  (toggle-scroll-bar -1)
+  (tool-bar-mode -1)
+  (setq inhibit-startup-screen t)
+  (setq visible-bell t)
+#+end_src
+No startup screen. Remove GUI menus, scrollbar, etc. Use doom-dark+ theme
 *** TODO adjust "dull" color face for comments/done items
 *** TODO enable better tracking of line and column number
 ** TODO customize startup screen
@@ -27,416 +28,718 @@
 *** TODO show perspective switcher on startup
 * TODO Emacs Foundations
 ** DONE Package Management
-   :PROPERTIES:
-   :ID:       84ecd110-a05a-48f9-815c-bb2d78dacc45
-   :END:
-   :STATUSLOG:
-   - State "DONE"       from "TODO"       [2021-09-12 Sun 16:59]
-   :END:
-   #+begin_src emacs-lisp
-     (require 'package)
-	  (add-to-list 'package-archives
-		       '("melpa" . "https://melpa.org/packages/") t)
-	  (package-initialize)
-     (when (not (package-installed-p 'use-package))
-       (package-refresh-contents)
-       (package-install 'use-package))     
-   #+end_src
-   use melpa package repository with package.el
-   Ensure Use-Package macro is installed.
-   It enables init portability and directive-based protocol for concise configuration
+:PROPERTIES:
+:ID:       84ecd110-a05a-48f9-815c-bb2d78dacc45
+:END:
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2021-09-12 Sun 16:59]
+:END:
+#+begin_src emacs-lisp
+  (require 'package)
+       (add-to-list 'package-archives
+		    '("melpa" . "https://melpa.org/packages/") t)
+       (package-initialize)
+  (when (not (package-installed-p 'use-package))
+    (package-refresh-contents)
+    (package-install 'use-package))
+#+end_src
+use melpa package repository with package.el
+Ensure Use-Package macro is installed.
+It enables init portability and directive-based protocol for concise configuration
+** TODO file finding
+C-h P ffap
 ** TODO Backups and Recovery
-  :PROPERTIES:
-  :ID:       e80c641b-fc4a-4762-bbaf-0be12fbd84f3
-  :END:
-  #+begin_src emacs-lisp
-    ;; (desktop-save-mode 1) ;; recover frame between sessions -- OBSOLETE, save/load perspectives instead
-    (winner-mode 1) 
-    (setq backup-directory-alist '(("." . "~/.local/share/emacs/saves/")))
-    (setq backup-by-copying t ;; backup by copying to preserve symlinked files and creation times
-	  version-control t ;; number versions unconditionally
-	  delete-old-versions t
-	  kept-new-versions 6 ;; keep 6 versions from the current session
-	  kept-old-versions 2) ;; keep 2 versions from past sessions
-    (setq auto-save-default t ;; auto save every buffer that visits a file
-	  auto-save-timeout 60 ;; default autosave on 30 second idle
-	  auto-save-interval 200) ;; default autosave every 300 keystrokes
-  #+end_src
-  1. activate minor modes to aid in session recovery
-  2. save backups in centralized directory
-     - backups in a long!file!name format (255 byte limit on ext4)
-       - format replaces path separators with !
-  3. Saving regularly is enough to avoid #autosave# creation.
-     notice: they can cause directory-crawling scripts to fail.
+:PROPERTIES:
+:ID:       e80c641b-fc4a-4762-bbaf-0be12fbd84f3
+:END:
+#+begin_src emacs-lisp
+  ;; (desktop-save-mode 1) ;; recover frame between sessions -- OBSOLETE, save/load perspectives instead
+  (winner-mode 1) 
+  (setq backup-directory-alist '(("." . "~/.local/share/emacs/saves/")))
+  (setq backup-by-copying t ;; backup by copying to preserve symlinked files and creation times
+	version-control t ;; number versions unconditionally
+	delete-old-versions t
+	kept-new-versions 6 ;; keep 6 versions from the current session
+	kept-old-versions 2) ;; keep 2 versions from past sessions
+  (setq auto-save-default t ;; auto save every buffer that visits a file
+	auto-save-timeout 60 ;; default autosave on 30 second idle
+	auto-save-interval 200) ;; default autosave every 300 keystrokes
+#+end_src
+1. activate minor modes to aid in session recovery
+2. save backups in centralized directory
+   - backups in a long!file!name format (255 byte limit on ext4)
+     - format replaces path separators with !
+3. Saving regularly is enough to avoid #autosave# creation.
+   notice: they can cause directory-crawling scripts to fail.
 *** TODO pm/restore-this-buffer/file-from-backup
-    A function that can parse the saves directory and recover from a backup
-    (multiple numbered versions possible) for the current file should be found/created
+A function that can parse the saves directory and recover from a backup
+(multiple numbered versions possible) for the current file should be found/created
 *** TODO sensitive-mode/minor-mode
-    Limits autosave and backup for sensitive files like gpg keys so there's no un-encrypted copies
+Limits autosave and backup for sensitive files like gpg keys so there's no un-encrypted copies
 *** TODO manage session recovery using persp and projectile
-    :PROPERTIES:
-    :ID:       95b10f12-2088-435c-a3aa-1db3880ec0ac
-    :END:
-    Perspectives include files and defined frame configurations
-    set up startup screen to show unexpectedly quit perspectives in a subsection?
+:PROPERTIES:
+:ID:       95b10f12-2088-435c-a3aa-1db3880ec0ac
+:END:
+Perspectives include files and defined frame configurations
+set up startup screen to show unexpectedly quit perspectives in a subsection?
 ** TODO Enable, Empower, Automate mode activations
-    :PROPERTIES:
-    :ID:       51b5345d-67c9-48ef-b749-4ade381c2a36
-    :END:
-   #+begin_src emacs-lisp
-     (load "~/.config/emacs/my-alias.el") ;; load aliases making some commands into other commands, or shortcuts
-     (setq-default abbrev-mode t) ;; universally expand abbreviations and make new ones dynamically
-     (setq save-abbrevs 'silently)
-     ;; (setq auto-mode-alist
-     ;;       (append
-     ;;        (list '("\\.\\(vcf\\|gpg\\)$" . sensitive-minor-mode))
-     ;;        auto-mode-alist))
-   #+end_src
-   auto-mode-alist is used to activate modes according to file extension.
-   it is very well defined. only append cons cells of regexp extensions and associated mode(s)
+:PROPERTIES:
+:ID:       51b5345d-67c9-48ef-b749-4ade381c2a36
+:END:
+#+begin_src emacs-lisp
+  (load "~/.config/emacs/my-alias.el") ;; load aliases making some commands into other commands, or shortcuts
+  (setq-default abbrev-mode t) ;; universally expand abbreviations and make new ones dynamically
+  (setq save-abbrevs 'silently)
+  ;; (setq auto-mode-alist
+  ;;       (append
+  ;;        (list '("\\.\\(vcf\\|gpg\\)$" . sensitive-minor-mode))
+  ;;        auto-mode-alist))
+#+end_src
+auto-mode-alist is used to activate modes according to file extension.
+it is very well defined. only append cons cells of regexp extensions and associated mode(s)
 *** TODO automate recognition of sensitive file types
-    waiting on sensitive mode installation (see bookmarks)
+waiting on sensitive mode installation (see bookmarks)
 * TODO dired mode
-  :PROPERTIES:
-  :ID:       3d554912-ac86-4ca1-8723-220fe537b110
-  :END:
-     #+begin_src emacs-lisp
-    (use-package dired
-      :init
-      (setq dired-auto-revert-buffer t)  ;; don't prompt to revert; just do it
-      (setq dired-dwim-target t)  ;; suggest a target for moving/copying intelligently
-      (setq dired-hide-details-hide-symlink-targets nil)
-    ;; Always copy/delete recursively
-      (setq dired-recursive-copies 'always)
-      (setq dired-recursive-deletes 'top)
-    ;; Where to store image caches
-    ;;        image-dired-dir (concat doom-cache-dir "image-dired/")
-    ;;        image-dired-db-file (concat image-dired-dir "db.el")
-    ;;        image-dired-gallery-dir (concat image-dired-dir "gallery/")
-    ;;        image-dired-temp-image-file (concat image-dired-dir "temp-image")
-    ;;        image-dired-temp-rotate-image-file (concat image-dired-dir "temp-rotate-image")
-    ;; Screens are larger nowadays, we can afford slightly larger thumbnails
-    ;;        image-dired-thumb-size 150)
-      :config
-      ;; cool thumbnails
-    ;;  (set-popup-rule! "^\\*image-dired"
-    ;;    :slot 20 :size 0.8 :select t :quit nil :ttl 0)
-    ;;  (set-evil-initial-state! 'image-dired-display-image-mode 'emacs)
-      (let ((args (list "-ahl" "-v" "--group-directories-first"))))
-    ;;dealing with extenuating circumstances in remote sessions
-    ;;    (add-hook! 'dired-mode-hook 
-    ;;      (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers-h ()
-    ;;        "Fix #1703: dired over TRAMP displays a blank screen.
-    ;;
-    ;;This is because there's no guarantee the remote system has GNU ls, which is the
-    ;;only variant that supports --group-directories-first."
-    ;;        (when (file-remote-p default-directory)
-    ;;          (setq-local dired-actual-switches (car args))))))
-     
-      ;; Don't complain about this command being disabled
-    ;;  (put 'dired-find-alternate-file 'disabled nil)
-      :bind (:map dired-mode-map
-		  (("C-c C-e" . wdired-change-to-wdired-mode)))) ;; To be consistent with ivy and wgrep integration
-  #+end_src
+:PROPERTIES:
+:ID:       3d554912-ac86-4ca1-8723-220fe537b110
+:END:
+   #+begin_src emacs-lisp
+  (use-package dired
+    :init
+    (setq dired-auto-revert-buffer t)  ;; don't prompt to revert; just do it
+    (setq dired-dwim-target t)  ;; suggest a target for moving/copying intelligently
+    (setq dired-hide-details-hide-symlink-targets nil)
+  ;; Always copy/delete recursively
+    (setq dired-recursive-copies 'always)
+    (setq dired-recursive-deletes 'top)
+  ;; Where to store image caches
+  ;;        image-dired-dir (concat doom-cache-dir "image-dired/")
+  ;;        image-dired-db-file (concat image-dired-dir "db.el")
+  ;;        image-dired-gallery-dir (concat image-dired-dir "gallery/")
+  ;;        image-dired-temp-image-file (concat image-dired-dir "temp-image")
+  ;;        image-dired-temp-rotate-image-file (concat image-dired-dir "temp-rotate-image")
+  ;; Screens are larger nowadays, we can afford slightly larger thumbnails
+  ;;        image-dired-thumb-size 150)
+    :config
+    ;; cool thumbnails
+  ;;  (set-popup-rule! "^\\*image-dired"
+  ;;    :slot 20 :size 0.8 :select t :quit nil :ttl 0)
+  ;;  (set-evil-initial-state! 'image-dired-display-image-mode 'emacs)
+    (let ((args (list "-ahl" "-v" "--group-directories-first"))))
+  ;;dealing with extenuating circumstances in remote sessions
+  ;;    (add-hook! 'dired-mode-hook 
+  ;;      (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers-h ()
+  ;;        "Fix #1703: dired over TRAMP displays a blank screen.
+  ;;
+  ;;This is because there's no guarantee the remote system has GNU ls, which is the
+  ;;only variant that supports --group-directories-first."
+  ;;        (when (file-remote-p default-directory)
+  ;;          (setq-local dired-actual-switches (car args))))))
+
+    ;; Don't complain about this command being disabled
+  ;;  (put 'dired-find-alternate-file 'disabled nil)
+    :bind (:map dired-mode-map
+		(("C-c C-e" . wdired-change-to-wdired-mode)))) ;; To be consistent with ivy and wgrep integration
+#+end_src
 ** TODO dired as a file manager
 *** TODO display thumbnails
 *** TODO file/directory ordering
 *** INACTIVE install discover/discover-my-major for dired
+* TODO GNUplot Mode
+:PROPERTIES:
+:ID:       aa3be9ee-56c6-478c-ac7d-15262aa82d2a
+:END:
+Major modes for editing gnuplot scripts and for interacting with
+gnuplot interactively.  Both stand alone, but primarily serve org-plot
+package.
+#+begin_src emacs-lisp
+  (use-package gnuplot-mode
+    :ensure t)
+  (use-package gnuplot
+    :ensure t)
+#+end_src
 * TODO GNU calc
-  :PROPERTIES:
-  :ID:       aa71e2f3-1491-44b9-9414-c1062c9d42c8
-  :END:
-  #+begin_src emacs-lisp
-    (use-package calc
-      :bind ("M-#" . calc-dispatch))
-  #+end_src
+:PROPERTIES:
+:ID:       aa71e2f3-1491-44b9-9414-c1062c9d42c8
+:END:
+#+begin_src emacs-lisp
+  (use-package calc
+    :bind ("M-#" . calc-dispatch))
+#+end_src
 ** TODO add discovery window to calc
-   h h will display calc-full-help. still discovery/whichkey
-   functionality would be useful for refreshing one's memory on the
-   fly
+h h will display calc-full-help. still discovery/whichkey
+functionality would be useful for refreshing one's memory on the
+fly
 ** TODO add right-justification and realignment hook
-   run (calc-right-justify) on load in
-   when window is resized, execute calc-refresh
+run (calc-right-justify) on load in
+when window is resized, execute calc-refresh
 ** TODO hydra functionality
-   starting with trail commands, get trail navigation to lock on with t n/p
-   maybe lock in general and unlock when new prefix is pressed?
-   or unlock when universal unlock key is pressed?
+starting with trail commands, get trail navigation to lock on with t n/p
+maybe lock in general and unlock when new prefix is pressed?
+or unlock when universal unlock key is pressed?
 * TODO company mode
-  :PROPERTIES:
-  :ID:       8adb25c3-de90-4f62-ae57-f6f3cf3505ba
-  :END:
-  #+begin_src emacs-lisp
-    (use-package company
-      :ensure t
-      :config
-      (global-company-mode))
-  #+end_src
-  all purpose backend for on-the-fly code and text completion  
+:PROPERTIES:
+:ID:       8adb25c3-de90-4f62-ae57-f6f3cf3505ba
+:END:
+#+begin_src emacs-lisp
+  (use-package company
+    :ensure t
+    :config
+    (global-company-mode))
+#+end_src
+all purpose backend for on-the-fly code and text completion  
+* TODO Version Control
+** TODO utilize emacs vc?
+learn more anyway...
+** TODO git integration
+#+begin_src emacs-lisp
+  (use-package magit
+    :ensure t
+    :bind
+    ("C-x g" . magit-status))
+#+end_src
+* TODO LSP mode
+#+begin_src emacs-lisp
+  (use-package lsp-mode
+    :ensure t)
+#+end_src
 * TODO Org-mode
 ** DONE Automatically Tangle Configuration
-    :PROPERTIES:
-    :ID:       88bbb14f-2679-47a5-a7b6-e2b45d7a2503
-    :END:
-    :STATUSLOG:
-    - State "DONE"       from              [2021-09-12 Sun 12:25]
-    :END:
-    tangle litinit.org to init.el when saving this file.
-    #+begin_src emacs-lisp
-      (defun pm/org-babel-tangle-config ()
-	(when (equal (buffer-file-name)
-		     (expand-file-name "~/.config/emacs/litinit.org"))
-	  (let ((org-confirm-babel-evaluate nil))
-	    (org-babel-tangle))))
-     
-      (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'pm/org-babel-tangle-config)))
-    #+end_src
+:PROPERTIES:
+:ID:       88bbb14f-2679-47a5-a7b6-e2b45d7a2503
+:END:
+:STATUSLOG:
+- State "DONE"       from              [2021-09-12 Sun 12:25]
+:END:
+tangle litinit.org to init.el when saving this file.
+#+begin_src emacs-lisp
+  (defun pm/org-babel-tangle-config ()
+    (when (equal (buffer-file-name)
+		 (expand-file-name "~/.config/emacs/litinit.org"))
+      (let ((org-confirm-babel-evaluate nil))
+	(org-babel-tangle))))
+
+  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'pm/org-babel-tangle-config)))
+#+end_src
 *** psudo defun:
-    if full path to litinit is current buffer, then do not confirm
-    evaluation and tangle file.  Hooked to saving in org-mode
+if full path to litinit is current buffer, then do not confirm
+evaluation and tangle file.  Hooked to saving in org-mode
 ** TODO Org(
-   :PROPERTIES:
-   :ID:       7e51f71f-4166-40f4-8701-cea7edf58451
-   :END:
-   Org depends on a central filesystem, heading keywords, various triggers, definitions and more.
-   additionally, the appearance of certain faces, drawers, and modes are configured.
-   finally certain organization tools are given default definitions or behaviors to aid with my chosen workflow
-   #+begin_src emacs-lisp
-     (use-package org
-       :init (setq org-export-backends '(ascii html icalendar latex odt)) ;; org exports establish prior to loading org.el
-       :ensure t
-       :config
-       (setq org-ellipsis " [+]") ;; Custom fold indicator because I often use ellipses and it's confusing
-       (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil))))) ;; using custom -- consider editing theme?
-       (setq org-use-property-inheritance t)
-       (setq org-directory (concat (getenv "HOME") "/org"))
-       (setq org-use-fast-todo-selection 'auto) ;; present keyword hotkeys to user if available
-       (setq org-treat-S-cursor-todo-selection-as-state-change nil) ;; cycle keywords without state logging using S-left\right
-       (setq org-todo-keywords ;; set to timestamp deliberate state changes
-	     '((sequence "TODO(t)"
-			 "NEXT(n!)"
-			 "WAIT(w@/!)"      
-			 "|"	          
-			 "DONE(d!)"        
-			 "INACTIVE(i@)"    
-			 "CANCELED(q@/@)") 	                                   
-	       (sequence "JOURNAL(j!)"     
-			 "CONTACT(c!)"     
-			 "MEETING(m!)"     
-			 "|")
-	       (sequence "ATTEND(a!)" "|" "DONE(d!)" "MISSED(f!)"))) ;; pure calendar events?
-       ;;        (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED"))) ;; development task labels
-       (defun pm/modify-org-done-face ()
-	 (setq org-fontify-done-headline t)
-	 (set-face-attribute 'org-done nil :strike-through t)
-	 (set-face-attribute 'org-headline-done nil
-			     :strike-through t
-			     :foreground "light gray"))
-     
-       (eval-after-load "org"
-	 (add-hook 'org-add-hook 'pm/modify-org-done-face))
+:PROPERTIES:
+:ID:       7e51f71f-4166-40f4-8701-cea7edf58451
+:END:
+Org depends on a central filesystem, heading keywords, various triggers, definitions and more.
+additionally, the appearance of certain faces, drawers, and modes are configured.
+finally certain organization tools are given default definitions or behaviors to aid with my chosen workflow
+#+begin_src emacs-lisp
+  (use-package org
+    :init (setq org-export-backends '(ascii html icalendar latex odt)) ;; org exports establish prior to loading org.el
+    :ensure t
+    :config
+    (setq org-startup-indented t) ;; simplify heirarchies management in org
+    (setq org-ellipsis " [+]") ;; Custom fold indicator because I often use ellipses and it's confusing
+    (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil))))) ;; using custom -- consider editing theme?
+    (setq org-use-property-inheritance t)
+    (setq org-directory (concat (getenv "HOME") "/org"))
+    (setq org-use-fast-todo-selection 'auto) ;; present keyword hotkeys to user if available
+    (setq org-treat-S-cursor-todo-selection-as-state-change nil) ;; cycle keywords without state logging using S-left\right
+    (setq org-todo-keywords ;; set to timestamp deliberate state changes
+          '((sequence "TODO(t)"
+                      "NEXT(n!)"
+                      "WAIT(w@/!)"      
+                      "|"	          
+                      "DONE(d!)"        
+                      "INACTIVE(i@)"    
+                      "CANCELED(q@/@)") 	                                   
+            (sequence "JOURNAL(j!)"     
+                      "CONTACT(c!)"     
+                      "MEETING(m!)"     
+                      "|")
+            (sequence "ATTEND(a!)" "|" "DONE(d!)" "MISSED(f!)") ;; pure calendar events?
+            (sequence "SEQ(s)" "|"))) ;; notebook nagiational labels?
+    ;;        (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED"))) ;; development task labels
+    (defun pm/modify-org-done-face ()
+      (setq org-fontify-done-headline t)
+      (set-face-attribute 'org-done nil :strike-through t)
+      (set-face-attribute 'org-headline-done nil
+                          :strike-through t
+                          :foreground "light gray"))
+  
+    (eval-after-load "org"
+      (add-hook 'org-add-hook 'pm/modify-org-done-face))
+  
+    (setq org-todo-keyword-faces
+          (quote (("TODO" :foreground "blue" :weight bold)
+                  ("NEXT" :foreground "red" :weight bold)
+                  ("WAIT" :foreground "orange" :weight bold)
+                  ("DONE" :foreground "forest green" :weight bold)
+                  ("INACTIVE" :foreground "magenta" :weight bold)
+                  ("CANCELED" :foreground "forest green" :weight bold)
+                  ("JOURNAL" :foreground "white" :weight bold)
+                  ("CONTACT" :foreground "white" :weight bold)
+                  ("MEETING" :foreground "white" :weight bold))))
+    (setq org-enforce-todo-dependencies t)
+    (setq org-agenda-dim-blocked-tasks t) ;; try this on for size -- only effects agenda view
+    (setq org-log-into-drawer "STATUSLOG") ;; hide state change history in drawer under headlines
+    (setq org-priority-default 3) ;; strictly options for sorting the agenda
+    (setq org-priority-highest 1)
+    (setq org-priority-lowest 5)
+#+end_src
+consolidate automated .org files (captures, project categories, project logs, archives; contacts, zettles, bibliography) under ~/org.
 
-       (setq org-todo-keyword-faces
-	     (quote (("TODO" :foreground "blue" :weight bold)
-		     ("NEXT" :foreground "red" :weight bold)
-		     ("WAIT" :foreground "orange" :weight bold)
-		     ("DONE" :foreground "forest green" :weight bold)
-		     ("INACTIVE" :foreground "magenta" :weight bold)
-		     ("CANCELED" :foreground "forest green" :weight bold)
-		     ("JOURNAL" :foreground "white" :weight bold)
-		     ("CONTACT" :foreground "white" :weight bold)
-		     ("MEETING" :foreground "white" :weight bold))))
-       (setq org-enforce-todo-dependencies t)
-       (setq org-agenda-dim-blocked-tasks t) ;; try this on for size -- only effects agenda view
-       (setq org-log-into-drawer "STATUSLOG") ;; hide state change history in drawer under headlines
-       (setq org-priority-default 3) ;; strictly options for sorting the agenda
-       (setq org-priority-highest 1)
-       (setq org-priority-lowest 5)
-   #+end_src
-   consolidate automated .org files (captures, project categories, project logs, archives; contacts, zettles, bibliography) under ~/org.
-
-   Currently set so properties are inherited by sub trees. is this nice? only for
-   units/constants really. perhaps keep properties entry-level and let
-   tags be inherited
+Currently set so properties are inherited by sub trees. is this nice? only for
+units/constants really. perhaps keep properties entry-level and let
+tags be inherited
 *** INACTIVE Create keywords for common specific workflows
-    like the commented dev maintainance workflow?
+like the commented dev maintainance workflow?
 *** TODO develop filesystem
-    this depends on how best to take literature notes in large part...
-    desires: take zettles while reading, combine reading pdfs and notes in interleaving fashion?
+this depends on how best to take literature notes in large part...
+desires: take zettles while reading, combine reading pdfs and notes in interleaving fashion?
 *** GTD Philosophy
-    clearly label actionables with some conveniences for tracking state changes over a project's history:
+clearly label actionables with some conveniences for tracking state changes over a project's history:
 
-    keywords designed for use with hierarchically nested task-trees:
-    - TODO any task to appear in the agenda. Any TODO heading with subheadings is a project. 
-    - NEXT a priority task in an ongoing project -- a project with no NEXT is stuck (log time on)
-      - also, NEXT is a catch-all for immediate actions: reply to, forward mail, return phone call, establish meeting, etc
-    - WAIT any task requiring action from others before proceeding (log note on, time off)
-    - DONE any completed task that stands only to be archived (log time on)
-    - INACTIVE a project that is not prioritized -- cant be stuck (log note on)
-    - CANCELED an aborted project that stands only to be archived (log note on, note off)			  
+keywords designed for use with hierarchically nested task-trees:
+- TODO any task to appear in the agenda. Any TODO heading with subheadings is a project. 
+- NEXT a priority task in an ongoing project -- a project with no NEXT is stuck (log time on)
+  - also, NEXT is a catch-all for immediate actions: reply to, forward mail, return phone call, establish meeting, etc
+- WAIT any task requiring action from others before proceeding (log note on, time off)
+- DONE any completed task that stands only to be archived (log time on)
+- INACTIVE a project that is not prioritized -- cant be stuck (log note on)
+- CANCELED an aborted project that stands only to be archived (log note on, note off)			  
 
-    hierarchically nested todos imply parents are dependent on children, sometimes siblings. So ORDERED property is assigned and enforced.
-    overrule using NOBLOCKING property.
-    
-    captures documenting unplanned workaday occurrences as org trees can be balled with keywords too.
-    - JOURNAL specific notes relevant to ongoing project. Journal entries should end up in reports (log time on)  
-    - CONTACT add to professional address book and Contact/Customer Relationship Management (CRM) (log time on)
-    - MEETING for any and all meetings, specific capture templates optional (log time on)                            
-    perhaps category properties or tags are better -- but they lack the convenient time stamping
+hierarchically nested todos imply parents are dependent on children, sometimes siblings. So ORDERED property is assigned and enforced.
+overrule using NOBLOCKING property.
+
+captures documenting unplanned workaday occurrences as org trees can be balled with keywords too.
+- JOURNAL specific notes relevant to ongoing project. Journal entries should end up in reports (log time on)  
+- CONTACT add to professional address book and Contact/Customer Relationship Management (CRM) (log time on)
+- MEETING for any and all meetings, specific capture templates optional (log time on)                            
+perhaps category properties or tags are better -- but they lack the convenient time stamping
 *** INACTIVE Configure universal properties?
 **** INACTIVE universal tags?
-     ":STUDY:EMAIL:PERSONAL:PURCHASE:GROUP: -> org-tag-alist" for project assignment
-     alternatively, fast meta-linking with org-tag-persistent-alist + file specific tagging -- OR configure org-complete-tags-always-offer-all-agenda-tags
+":STUDY:EMAIL:PERSONAL:PURCHASE:GROUP: -> org-tag-alist" for project assignment
+alternatively, fast meta-linking with org-tag-persistent-alist + file specific tagging -- OR configure org-complete-tags-always-offer-all-agenda-tags
 **** INACTIVE Universal categories?
-     do project assignment with category property? leaves tags free for meta-linking?
-     tags management by C-c C-q and C-c C-c is fast -- better for on the fly connections... But this is more important for notes which are handled by roam anyway.
+do project assignment with category property? leaves tags free for meta-linking?
+tags management by C-c C-q and C-c C-c is fast -- better for on the fly connections... But this is more important for notes which are handled by roam anyway.
 ** TODO Org filesystem
-   :PROPERTIES:
-   :ID:       4827b3ea-dff2-413b-a136-6312fe665208
-   :END:
-   #+begin_src emacs-lisp
-     (setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
-     ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
-     (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
-			      (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
-			      (concat org-directory "/addressbook.org"))) ;; CRM file. Network contacts by linking manually (so it sticks), use roam
-   #+end_src
+:PROPERTIES:
+:ID:       4827b3ea-dff2-413b-a136-6312fe665208
+:END:
+#+begin_src emacs-lisp
+  (setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
+  ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
+  (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
+                           (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
+                           (concat org-directory "/addressbook.org")
+                           (concat org-directory "/occurance.org"))) ;; CRM file. Network contacts by linking manually (so it sticks), use roam
+#+end_src
 *** TODO include all zettles?
-    why not? perhaps to keep tags distinct? Or be more meticulous, and use hierarchies to make tags more orderly+specific w/ regexp?
-     to-do items often arise while taking notes, so capturing can deal with that, but having the full context of the emergence is useful...
-     I need a system of zettlekasten that can push in-topic todos to the agenda. Even if those todos are just tangents of study to be perused!
+why not? perhaps to keep tags distinct? Or be more meticulous, and use hierarchies to make tags more orderly+specific w/ regexp?
+ to-do items often arise while taking notes, so capturing can deal with that, but having the full context of the emergence is useful...
+ I need a system of zettlekasten that can push in-topic todos to the agenda. Even if those todos are just tangents of study to be perused!
 *** TODO Set up archive file? or archive siblings?
-    what is this? how does it work with the logbook datetree intention?
+what is this? how does it work with the logbook datetree intention?
 *** TODO diary or bbdb/CRM?
-    for tabbing anniversaries, holidays, events? or instead, use bbdb integration?
+for tabbing anniversaries, holidays, events? or instead, use bbdb integration?
 *** TODO make this init.el literate
 **** TODO use it as a cabinet
-     massively improves ability to track environment development developments
+massively improves ability to track environment development developments
 ** TODO Org-Agenda
-   :PROPERTIES:
-   :ID:       512d28ed-857b-4f26-93e8-a4e22ec4f1e1
-   :END:
-   #+begin_src emacs-lisp
-     ;; org-agenda
-     (setq org-agenda-files (cons org-default-notes-file org-cabinets)) ;; populate agenda from cabinets + refile.org
-     (setq org-agenda-skip-scheduled-if-deadline-is-shown t) ;; show only deadline on or after day deadlining task is scheduled
-     (setq org-agenda-span 'week) ;; show week view by default
-     (setq org-agenda-start-day "-0d") ;; start at today by default (in org-read-date input form)
-     (setq org-agenda-start-on-weekday nil) ;; weekly overview starts today and looks forward, leave the past be.
-     ;; tags/TODO filters (see tag and property searches) for agenda organization:
-     (setq org-stuck-projects 
-	   '("+LEVEL=1+TODO/-DONE-CANCELED-INACTIVE-NEXT" ("NEXT")))
-     ;; Use the current window for indirect buffer display
-     (setq org-indirect-buffer-display 'current-window)
-   #+end_src
-   fresh captures appear in the agenda. The ability to adjust org-agenda-files on the fly with C-c C-] is preserved.
+:PROPERTIES:
+:ID:       512d28ed-857b-4f26-93e8-a4e22ec4f1e1
+:END:
+#+begin_src emacs-lisp
+  ;; org-agenda
+  (setq org-agenda-files (cons org-default-notes-file org-cabinets)) ;; populate agenda from cabinets + refile.org
+  (setq org-agenda-skip-scheduled-if-deadline-is-shown t) ;; show only deadline on or after day deadlining task is scheduled
+  (setq org-agenda-span 'week) ;; show week view by default
+  (setq org-agenda-start-day "-0d") ;; start at today by default (in org-read-date input form)
+  (setq org-agenda-start-on-weekday nil) ;; weekly overview starts today and looks forward, leave the past be.
+  ;; tags/TODO filters (see tag and property searches) for agenda organization:
+  (setq org-stuck-projects 
+	'("+LEVEL=1+TODO/-DONE-CANCELED-INACTIVE-NEXT" ("NEXT")))
+  ;; Use the current window for indirect buffer display
+  (setq org-indirect-buffer-display 'current-window)
+#+end_src
+fresh captures appear in the agenda. The ability to adjust org-agenda-files on the fly with C-c C-] is preserved.
 *** Configuring returns of Agenda search queries
-    (setq org-tags-match-list-sublevels nil) will ensure headings
-    matched by tag/property searches carry don't carry subheadings to
-    the agenda However, this is not recommended. Instead, for getting
-    only top level tasks matched by tag filters, configure tag
-    inheritance or define filters if this is a problem
+(setq org-tags-match-list-sublevels nil) will ensure headings
+matched by tag/property searches carry don't carry subheadings to
+the agenda However, this is not recommended. Instead, for getting
+only top level tasks matched by tag filters, configure tag
+inheritance or define filters if this is a problem
 ** TODO Org task timing, tracking and reporting
-   :PROPERTIES:
-   :ID:       3c1ad362-1b03-4b15-91d9-3f3ed6f67c87
-   :END:
-   #+begin_src emacs-lisp
-     (setq org-columns-default-format
-	   "%TODO %2PRIORITY %25ITEM(Task) %10Effort(Est_Effort){est+} %CLOCKSUM %CLOCKSUM_T")
-     (org-clock-persistence-insinuate) ;; set up hooks for clock persistence through sessions
-     (setq org-clock-persist t) ;; continue any running clock when emacs exits. Also save all set clock history accross sessions.
-     (setq org-clock-idle-time 10) ;; and prompt to resolve running clocks when restarting, or after 10 minutes of emacs idle time.     
-   #+end_src
-   default column view of task properties aids in rapid assessment of time investment and difficulty. individual files/headings may define different views locally.
+:PROPERTIES:
+:ID:       3c1ad362-1b03-4b15-91d9-3f3ed6f67c87
+:END:
+#+begin_src emacs-lisp
+  (setq org-columns-default-format
+	"%TODO %2PRIORITY %25ITEM(Task) %10Effort(Est_Effort){est+} %CLOCKSUM %CLOCKSUM_T")
+  (org-clock-persistence-insinuate) ;; set up hooks for clock persistence through sessions
+  (setq org-clock-persist t) ;; continue any running clock when emacs exits. Also save all set clock history accross sessions.
+  (setq org-clock-idle-time 10) ;; and prompt to resolve running clocks when restarting, or after 10 minutes of emacs idle time.     
+#+end_src
+default column view of task properties aids in rapid assessment of time investment and difficulty. individual files/headings may define different views locally.
 *** TODO project planning
-    especially for modern collaborative endeavors, estimating effort and tracking progress against expectations is critical.
-    configure effort estimation for project management. in the meantime, update effort estimates for running clocks with ‘C-c C-x C-e’
+especially for modern collaborative endeavors, estimating effort and tracking progress against expectations is critical.
+configure effort estimation for project management. in the meantime, update effort estimates for running clocks with ‘C-c C-x C-e’
 ** TODO Org-Capture
-   :PROPERTIES:
-   :ID:       f93153be-7354-4160-bc7e-011ec1af3241
-   :END:
-   #+begin_src emacs-lisp
-     (setq org-capture-templates
-	   (quote (("p" "project outlining") ;; new project definitions and reports on predefined projects
-		   ("pt" "todo" entry (file "~/org/refile.org") ;; a new task needing to be defined and inserted into ongoing project
-		    "* TODO %?\n%U\n%a\n")
-		   ("ps" "todo" entry (file "~/org/refile.org") ;; schedule a new event.
-		    "* TODO %?\n%^T")
-		   ;; template current time, link in ring (or current file), capture new task name, pause other clocks, clock time, resume other clocks
-		   ;; ex :: good for a job in any given piece of code because it links to the line that inspired it.
-		   ;;		("pr" "reflect" entry (file "~/org/refile.org")
-		   ;;		 "* JOURNAL")
-		   ;; OR
-		   ;;		("n" "note" entry (file "~/org/refile.org")
-		   ;;               "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-		   ;; not sure what this looks like yet. On-the-clock thoughts about current work (look at %k), look at organizing by :tag
-		   ("i" "interruptions")
-		   ("ir" "respond" entry (file "~/org/refile.org")
-		    "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-		   ;; fully automated reaction cache for differed inquiries, requests, solicitations, etc.
-		   ("ii" "idea" entry (file "~/org/refile.org")
-		    "* INACTIVE")
-		   ;; for academic questions, topics of investigation, project proposals, paper subject.
-		   ;;		("w" "org-protocol" entry (file "~/org/refile.org")
-		   ;;		 "* TODO Review %c\n%U\n" :immediate-finish t)
-		   ;; tracking org workflow and planning adaptations TAG = :ENV?
-		   ("m" "Meeting" entry (file "~/org/refile.org")
-		    "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-		   ;; documenting essentials of scheduled and spontaneous meetings/encounters.
-		   ("c" "Contact" entry (file "~/org/refile.org") ;; document professional contact
-		    "* CONTACT"))))
-     (defun pm/remove-empty-drawer-on-clock-out ()
-       "Remove empty STATUSLOG drawers on clock out, use as hook to de-clutter ephemeral captures"
-       (interactive)
-       (save-excursion
-	 (beginning-of-line 0)
-	 (org-remove-empty-drawer-at "STATUSLOG" (point))))
-     (add-hook 'org-clock-out-hook 'pm/remove-empty-drawer-on-clock-out 'append)     
-   #+end_src
-   Captures are for documenting immediate items that need to be ordered into existing and time-sensitive workflows.
-   Notes from classes, research, reasoning, etc. are handled in the Zettlekasten method using org-roam, configured later.
+:PROPERTIES:
+:ID:       f93153be-7354-4160-bc7e-011ec1af3241
+:END:
+#+begin_src emacs-lisp
+  (setq org-capture-templates
+	(quote (("p" "project outlining") ;; new project definitions and reports on predefined projects
+		("pt" "todo" entry (file "~/org/refile.org") ;; a new task needing to be defined and inserted into ongoing project
+		 "* TODO %?\n%U\n%a\n")
+		("ps" "todo" entry (file "~/org/refile.org") ;; schedule a new event.
+		 "* TODO %?\n%^T")
+		;; template current time, link in ring (or current file), capture new task name, pause other clocks, clock time, resume other clocks
+		;; ex :: good for a job in any given piece of code because it links to the line that inspired it.
+		;;		("pr" "reflect" entry (file "~/org/refile.org")
+		;;		 "* JOURNAL")
+		;; OR
+		;;		("n" "note" entry (file "~/org/refile.org")
+		;;               "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+		;; not sure what this looks like yet. On-the-clock thoughts about current work (look at %k), look at organizing by :tag
+		("i" "interruptions")
+		("ir" "respond" entry (file "~/org/refile.org")
+		 "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+		;; fully automated reaction cache for differed inquiries, requests, solicitations, etc.
+		("ii" "idea" entry (file "~/org/refile.org")
+		 "* INACTIVE")
+		;; for academic questions, topics of investigation, project proposals, paper subject.
+		;;		("w" "org-protocol" entry (file "~/org/refile.org")
+		;;		 "* TODO Review %c\n%U\n" :immediate-finish t)
+		;; tracking org workflow and planning adaptations TAG = :ENV?
+		("m" "Meeting" entry (file "~/org/refile.org")
+		 "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+		;; documenting essentials of scheduled and spontaneous meetings/encounters.
+		("c" "Contact" entry (file "~/org/refile.org") ;; document professional contact
+		 "* CONTACT"))))
+  (defun pm/remove-empty-drawer-on-clock-out ()
+    "Remove empty STATUSLOG drawers on clock out, use as hook to de-clutter ephemeral captures"
+    (interactive)
+    (save-excursion
+      (beginning-of-line 0)
+      (org-remove-empty-drawer-at "STATUSLOG" (point))))
+  (add-hook 'org-clock-out-hook 'pm/remove-empty-drawer-on-clock-out 'append)     
+#+end_src
+Captures are for documenting immediate items that need to be ordered into existing and time-sensitive workflows.
+Notes from classes, research, reasoning, etc. are handled in the Zettlekasten method using org-roam, configured later.
 *** DONE Declutter rapid captures
-    delete short clock-ins activated on clocked captures. clocking by
-    attention is convenint for continuous productivity logging, but
-    occasional 30 second clocks is neurotic
+delete short clock-ins activated on clocked captures. clocking by
+attention is convenint for continuous productivity logging, but
+occasional 30 second clocks is neurotic
 **** psudo defun:
-     if clockline is less than a minute, delete "statuslog"
+if clockline is less than a minute, delete "statuslog"
 *** Bug: with ob-ipython installed and in babel-load-languages
-    capturing fails with json-readtable-error 122.
-    It is necessary to have jupyter and ipython-notebook installed in the python env.
-    Additionally, it is necessary to globally declare the ob-ipython-command.
+capturing fails with json-readtable-error 122.
+It is necessary to have jupyter and ipython-notebook installed in the python env.
+Additionally, it is necessary to globally declare the ob-ipython-command.
 ** TODO Org-Refile
-   :PROPERTIES:
-   :ID:       79c2e923-7f67-4b0d-bd1a-cadcaf5f7ebb
-   :END:
-   #+begin_src emacs-lisp
-     ;; refile targets include any file contributing to the agenda - up to 9 levels deep
-     (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
-     ;; Use full outline paths for refile targets - file directly into agenda position using Ivy
-     (setq org-refile-use-outline-path t)
-     ;; Targets complete directly with Ivy, org need not assist
-     (setq org-outline-path-complete-in-steps nil)
-     ;; Allow refile to create parent tasks with confirmation
-     (setq org-refile-allow-creating-parent-nodes 'confirm)
-     (defun pm/verify-refile-target ()
-       "Exclude todo keywords with a done state from refile targets"
-     (not (member (nth 4 (org-heading-components)) org-done-keywords)))
-     (setq org-refile-target-verify-function 'pm/verify-refile-target)
-   #+end_src
+:PROPERTIES:
+:ID:       79c2e923-7f67-4b0d-bd1a-cadcaf5f7ebb
+:END:
+#+begin_src emacs-lisp
+  ;; refile targets include any file contributing to the agenda - up to 9 levels deep
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
+  ;; Use full outline paths for refile targets - file directly into agenda position using Ivy
+  (setq org-refile-use-outline-path t)
+  ;; Targets complete directly with Ivy, org need not assist
+  (setq org-outline-path-complete-in-steps nil)
+  ;; Allow refile to create parent tasks with confirmation
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (defun pm/verify-refile-target ()
+    "Exclude todo keywords with a done state from refile targets"
+  (not (member (nth 4 (org-heading-components)) org-done-keywords)))
+  (setq org-refile-target-verify-function 'pm/verify-refile-target)
+#+end_src
 *** TODO ivy for refiling headings
-    no idea where to start
+no idea where to start
 *** DONE Tag all headings in refile.org with refile
-    use local file properties
+use local file properties
 *** DONE Do not refile done items
-    if something was captured for record but ends up getting done fast, mark done, move on, purge whenever's good
-    make filter function
-    assign to org-refile-target-verify-function
+if something was captured for record but ends up getting done fast, mark done, move on, purge whenever's good
+make filter function
+assign to org-refile-target-verify-function
 **** psudo defun:
-     if todo-keyword in current heading is not a member of the done-keywords, provide nil, else provide t
+if todo-keyword in current heading is not a member of the done-keywords, provide nil, else provide t
 ** TODO Org for academic reading, writing, and reproducible research
-   lots of possibilities. Learn more. take notes. Prepare to keep
-   bibliography (consider centralized bibliography, where citations
-   are made on basis of inclusion in paper)
-*** INACTIVE Org-Ref
+lots of possibilities. Learn more. take notes. Prepare to keep
+bibliography (consider centralized bibliography, where citations
+are made on basis of inclusion in paper)
+
+*** TODO Org-Attachment
+:PROPERTIES:
+:ID:       431674a9-2ff1-40f7-994f-6cc2a7ee1e88
+:END:
+#+begin_src emacs-lisp
+  (setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
+  (setq org-image-actual-width '(200))
+#+end_src
+**** TODO manage attachment directories
+***** where to keep downloads?
+***** screenshots?
+***** latex previews?
+*** TODO Org-Babel
+:PROPERTIES:
+:ID:       b9ef07e9-a022-4c1f-a75d-1336bd88fa07
+:END:
+#+begin_src emacs-lisp
+    (use-package ob-ipython
+      :ensure t
+      :config
+      (add-to-list 'company-backends 'company-ob-ipython)
+      (setq ob-ipython-command "jupyter")
+      (setq org-babel-python-command "python")
+      :bind (:map org-mode-map (("M-." . ob-ipython-inspect)))) ;; idea: bind ide doc tools to C-c lang-abbrev i?
+
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((emacs-lisp . t)
+       (python . t)
+       (ipython . t)
+       (latex . t)
+       (ditaa . t)))
+
+    (setq org-confirm-babel-evaluate nil)
+    (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)
+#+end_src
+use babel for jupyter notebooks? ein?
+*** org capture throws JSON read table error
+:PROPERTIES:
+:ID:       8247e288-af77-4961-93fc-55c9cc65016d
+:END:
+ob-ipython command set to full path to jupyter to prevent issue
+where capture is interrupted by some underlying dependency on
+python. Basically, just always use jupyter because the ipython
+backend steals orders intended for the basic python
+interpreter. Why emacs is talking to python is beyond me.
+
+Also, ob-ipython--get-kernels is playing silly buggers. it looks
+into the dotfiles for ipython's dotfiles. If they're in .config,
+it brings them to home. if there's already a .ipython (or maybe a
+.jupyter) file it just uses them. might fuck itself
+*** ob-ipython features and org integration
+**** features
+***** sessions
+required keyword :session
+optional argument name to separate states
+in combination with :kernel arg allows for block to run specific jupyter kernel arg
+****** remote session
+arg may be connection JSON of running ipython session to connect to it locally or remotely
+instructions:
+1. scp the remote json from /run/user/*/jupyter
+2. use jupyter console --existing ./kernel-remote.json --ssh remote-host to connect locally
+3. use newly created local config file printed by step 2 as argument to :session. Include .json suffix.
+***** results
+recommend to always use :results raw drawer
+graphics files are generated in location set by ob-ipython-resources-dir.
+***** inline rendering
+use %matplotlib inline magic
+***** ipyfile
+:ipyfile ./argument.png overrides default generation
+***** var
+provide imports to src via org keyword :var arg=data with arg set to variable name. data may be #+tblname org table
+***** python config
+config magic allows specification of file formats per block:
+%config InlineBackend.figure_format = 'svg'
+****** DONE configure ipython to show dataframes as org tables
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2021-10-18 Mon 13:32]
+:END:
+ipython config scripts found under .python.
+Helps to controll what python outputs to org.
+***** supports ipython exclusives
+the %timeit magic works!
+***** kernel interrupt
+ob-ipython-interrupt-kernel and ob-ipython-kill-kernel
+***** async
+asynchronous execution is supported
+***** jupyter-X
+experimental full jupyter kernel support with X being supported kernel
+**** integrations
+***** kernel documentation
+ob-ipython-inspect describes target at point
+***** kernel completions
+ob-iython completions. uses company backend by default
+***** in-block REPL!
+in ipython src, run repl for current kernel using org-babelswtich-to-session infrastructure
+***** traceback
+displayed in dedicated buffer
+***** stdout/err popup buffer
+if no :results output keyword arg header is provided to org, output is still available to reference out of document
+*** TODO Org for manuscripting
+:PROPERTIES:
+:ID:       2de99c61-a580-4a3c-aa5c-bf1b322b9c97
+:END:
+#+begin_src emacs-lisp
+  (setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+  ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
+#+end_src
+LaTeX exporter setting and in-line math formula display preferences
+**** TODO configure exporter to use minted package or alternative for code block faces setting
+there was that one package that the one guy wrote for emacs? for latex? makes emacs quality font "engraving?"
+**** TODO configure exporter to handle bibtex as well
+**** DONE configure emacs to open pdfs using pdftools and keep pdf tools up to date
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2021-09-17 Fri 21:33]
+:END:
+I think that's done? Some applications that handle sending files
+to receiving applications may not recognize emacs as a pdf viewer
+without configuration on their side (and this side, maybe?)
+**** TODO pdf display update automatically when PDF is rebuilt
+**** TODO A cool little lisp project:
+create a convenient parser to interpret and flowchart/display the
+formulae defined in a TBLFM keyword for use by a table. In other
+words, make it possible to export tables with their formula
+displayed per column
+*** TODO Org notes utilities
+**** TODO enable org latex preview using custom latex commands 
+While notes may be organized using roam, they depend on the org display infrastructure
+(execute block in buffer? tangle to something?)
+*** TODO Modify ox.el and ox-beamer.el to make a #+SHORT_TITLE: header
+makes my chosen presentation format a little prettier -- might as well fork org while you're at it.
+OI -- YOU HAVE TO EVAL before byte-compiling (I think)
+*** INACTIVE nov.el or similar for ebooks compatibility?
+this is not critical, but nov.el has noter integration and may help with reading more
+** TODO Org Key Bindings)
+:PROPERTIES:
+:ID:       7dea4263-0b4d-4b69-8e6c-6cc11752281e
+:END:
+#+begin_src emacs-lisp
+  :bind (("C-c l" . org-store-link) ;; global organization bindings
+	 ("C-c a" . org-agenda) 
+	 ("C-c c" . org-capture)))
+#+end_src
+C-c is the conventional org mode command prefix. More specific sub modes and more general global modes should adopt philosophically consistent standards
+*** TODO look into ob-ipython
+make babel blocks behave like juyter a bit
+* TODO Org-tempo
+:PROPERTIES:
+:ID:       06bdd462-539c-42fa-bf92-94a2271a2d12
+:END:
+#+begin_src emacs-lisp
+  (use-package org-tempo ;; builtin
+    ;;:config
+    ;;(eval-after-load 'org-tempo (add-to-list 'org-structure-template-alist '("sh" . "src shell")))
+    :bind (:map org-mode-map (("C-c C-," . org-insert-structure-template))))
+#+end_src
+OK. Org-babel provides demarcations functions for writing src blocks
+Demarcation utilizes completion framework by default
+Demarcation utilizes dynamics list of ?supported? src languages
+makes literate programing in org a little easier
+
+org-tempo may help with inserting other kinds of blocks. not src blocks.
+* TODO Org-Roam
+:PROPERTIES:
+:ID:       2a399e4a-0f14-4a33-a23f-67028014fb5d
+:END:
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :ensure t
+    :init (setq org-roam-v2-ack t) ;; Acknowledge no return to v1
+    :custom
+    ;; roam database for focused zettlekasten
+    (org-roam-directory (file-truename (concat org-directory "/zettles/")))
+    :bind (("C-c n f" . org-roam-node-find)
+           ("C-c n g" . org-roam-graph)
+           ("C-c n r" . org-roam-node-random)		    
+           (:map org-mode-map
+                 (("C-c n i" . org-roam-node-insert) ;; Insert
+                  ("C-c n o" . org-id-get-create) ;; Organize
+                  ("C-c n t" . org-roam-tag-add) ;; Tag
+                  ("C-c n a" . org-roam-alias-add) ;; Alias
+                  ("C-c n l" . org-roam-buffer-toggle) ;; backLink
+                  ("C-c n c" . org-roam-extract-subtree)))) ;; Create (use in conjunction with organize)
+    :config
+    (org-roam-db-autosync-mode)
+    (setq org-roam-capture-templates
+          (quote (("d" "default" plain "%?"
+                   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}")
+                   :unnarrowed t)
+                  ("l" "Literatue Notes") ;; fully contextual notes. Necessarily Integrated with lit docs via org-noter and org-ref
+                  ("ln" "noter" entry (file "~/org/zettles/") ;; noter academic pdf note. (consider dedicated epub template too.)
+                   "* TODO %?\n%U\n%a\n")
+                  ("lb" "book" entry (file "~/org/zettles/") ;; physical book note. limited automation + meticulous capture
+                   "* TODO %?\n%^T") ;;book, author, pagenumber, full manual bibtex?
+                  ("r" "Reference Notes") ;; Reflective notes. lectures, seminars, videos; bookmarks; ongoing projects
+                  ("rl" "lecture" entry (file "~/org/zettles/") ;; general lecture limited automation
+                   "* TODO %?\n%^T") ;;lecturer, date, 
+                  ("rm" "meeting" entry (file "~/org/zettles/") ;; general meeting: timestamped with agenda schedule keyword
+                   "%?\n%^T"
+                   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+                   :unnarrowed t)
+                  ("p" "Permanent Notes") ;; standalone notes. hub notes, dedicated thoughts, musings, philosophy
+                  ("ph" "hub" entry (file "~/org/zettles/")
+                   "* TODO %?\n%^T") ;; maybe redundant? possible that proper backlink utilization eliminates need to clarify conncections in hubs
+                  ("pm" "muse" entry (file "~/org/zettles/")
+                   "* TODO %?\n%^T")))) ;; time. context/reason/event?
+    (require 'org-roam-protocol))
+ #+end_src
+Org roam is best for zettlekasten. A system that prioritizes /connecting/ knowledge over /collecting/ knowledge.
+** TODO org-roam-protocol
+find out what this is
+** TODO Implement system for flashcard and spaced-repetition learning
+*** Anki anki-editor and anki-connect
+these tools allow org-mode notes to be turned into flash cards
+There is a way to just export an org tree to flash cards
+*** org-mode-incremental-reading
+[[https://github.com/vascoferreira25/org-mode-incremental-reading][by vascoferreira25]]
+created custom special-block #+begin_anki that allows note section to be explicitly made into a card
+#+begin_example
+#+ATTR_DECK: Test
+#+ATTR_TYPE: Cloze
+#+ATTR_TAGS: incremental-reading emacs
+#+BEGIN_ANKI org
+#+ATTR_FIELD: Text
+#+BEGIN_FIELD
+{{c1::Observer pattern}} is a Software Design Pattern in which an object, named
+the ~subject~, maintains a list of its dependents, called {{c2::~observers~}},
+and notifies them automatically of any state changes, usually by calling one of
+their methods.
+#+END_FIELD
+#+END_ANKI
+#+end_example
+* TODO org-ref
+:PROPERTIES:
+:ID:       bdd2ec7c-473c-49dd-9cde-2659de304a93
+:END:
+#+begin_src emacs-lisp
+  (use-package org-ref
+    :ensure t
+    :init
+    (setq org-ref-completion-library 'org-ref-ivy-cite) ;; org-ref manager use ivy-bibtex's retreival machinery
+    ;; (setq org-ref-default-citation-link "autocite") ;; decide which natbib style is predominant
+    (require 'bibtex)
+    (setq bibtex-autokey-year-length 4
+          bibtex-autokey-name-year-separator "-"
+          bibtex-autokey-year-title-separator "-"
+          bibtex-autokey-titleword-separator "-"
+          bibtex-autokey-titlewords 2
+          bibtex-autokey-titlewords-stretch 1
+          bibtex-autokey-titleword-length 5) ;; variables informing entry cleanup function
+    (require 'org-ref-ivy)
+    (require 'org-ref-arxiv)
+    (require 'org-ref-scopus)
+    (require 'org-ref-wos)
+    :config
+    (setq reftex-default-bibliography '("~/org/bibliotex/bibliotex.bib")) ;; redundant?
+    (setq org-ref-bibliography-notes "~/org/zettles/" ;; replace this variable with the setting from orb?
+          org-ref-default-bibliography '("~/org/bibliotex/bibliotex.bib")
+          org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks"))
+    ;; put citation source materials, separated for enote access convenience
+    :bind ((:map bibtex-mode-map ("C-c b" . 'org-ref-bibtex-hydra/body))
+           (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
+                               ("C-c [" . 'org-ref-insert-link-hydra/body)))))
+#+end_src
+note: this is not portable.... melpa vs elpa?
+** INACTIVE Org-Ref
+I think that was a sample config I saved. too much planning
+
 ;; org-ref for manuscripting -- see this in action first -- it seems
 ;; to want to centralize the library -- sensible
 ;; org-roam-bibtex might be a more suitable workflow
@@ -454,582 +757,542 @@
 ;; 	org-ref-pdf-directory "~/Dropbox/bibliography/bibtex-pdfs/")
 ;;   (setq bibtex-completion-bibliography "~/Dropbox/bibliography/references.bib"
 ;; 	bibtex-completion-library-path "~/Dropbox/bibliography/bibtex-pdfs"
-;; 	bibtex-completion-notes-path "~/Dropbox/bibliography/bibtex-notes"))    
-*** TODO Org-Attachment
-    :PROPERTIES:
-    :ID:       431674a9-2ff1-40f7-994f-6cc2a7ee1e88
-    :END:
-    #+begin_src emacs-lisp
-      (setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
-      (setq org-image-actual-width '(200))
-    #+end_src
-**** TODO manage attachment directories
-***** where to keep downloads?
-***** screenshots?
-***** latex previews?
-*** TODO Org-Babel
-    :PROPERTIES:
-    :ID:       b9ef07e9-a022-4c1f-a75d-1336bd88fa07
-    :END:
-    #+begin_src emacs-lisp
-      (use-package ob-ipython
-	:ensure t
-	:config
-	(add-to-list 'company-backends 'company-ob-ipython)
-	(setq ob-ipython-command "/opt/miniconda3/envs/notes/bin/jupyter")
-	:bind (:map org-mode-map (("M-." . ob-ipython-inspect))))
-      (org-babel-do-load-languages
-       'org-babel-load-languages
-       '((emacs-lisp . t)
-	 (python . t)
-	 (ipython . t)
-	 (latex . t)))
-      (setq org-confirm-babel-evaluate nil)
-      (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)
-    #+end_src
-    use babel for jupyter notebooks? ein?
-*** org capture throws JSON read table error
-    :PROPERTIES:
-    :ID:       8247e288-af77-4961-93fc-55c9cc65016d
-    :END:
-    ob-ipython command set to full path to jupyter to prevent issue
-    where capture is interrupted by some underlying dependency on
-    python. Basically, just always use jupyter because the ipython
-    backend steals orders intended for the basic python
-    interpreter. Why emacs is talking to python is beyond me.
-*** ob-ipython features and org integration
-**** features
-***** sessions
-      required keyword :session
-      optional argument name to separate states
-      in combination with :kernel arg allows for block to run specific jupyter kernel arg
-****** remote session
-       arg may be connection JSON of running ipython session to connect to it locally or remotely
-       instructions:
-       1. scp the remote json from /run/user/*/jupyter
-       2. use jupyter console --existing ./kernel-remote.json --ssh remote-host to connect locally
-       3. use newly created local config file printed by step 2 as argument to :session. Include .json suffix.
-***** results
-      recommend to always use :results raw drawer
-      graphics files are generated in location set by ob-ipython-resources-dir.
-***** inline rendering
-      use %matplotlib inline magic
-***** ipyfile
-      :ipyfile ./argument.png overrides default generation
-***** var
-      provide imports to src via org keyword :var arg=data with arg set to variable name. data may be #+tblname org table
-***** python config
-      config magic allows specification of file formats per block:
-      %config InlineBackend.figure_format = 'svg'
-****** TODO drop this and more in ipython startup file
-       #+begin_example
-import IPython
-from tabulate import tabulate
-
-class OrgFormatter(IPython.core.formatters.BaseFormatter):
-    def __call__(self, obj):
-        try:
-            return tabulate(obj, headers='keys',
-                            tablefmt='orgtbl', showindex='always')
-        except:
-            return None
-
-ip = get_ipython()
-ip.display_formatter.formatters['text/org'] = OrgFormatter()
-       #+end_example
-       makes arrays and df display as org tables
-***** supports ipython exclusives
-      the %timeit magic works!
-***** kernel interrupt
-      ob-ipython-interrupt-kernel and ob-ipython-kill-kernel
-***** async
-      asynchronous execution is supported
-***** jupyter-X
-      experimental full jupyter kernel support with X being supported kernel
-**** integrations
-***** kernel documentation
-      ob-ipython-inspect describes target at point
-***** kernel completions
-      ob-iython completions. uses company backend by default
-***** in-block REPL!
-      in ipython src, run repl for current kernel using org-babelswtich-to-session infrastructure
-***** traceback
-      displayed in dedicated buffer
-***** stdout/err popup buffer
-      if no :results output keyword arg header is provided to org, output is still available to reference out of document
-*** TODO Org for manuscripting
-    :PROPERTIES:
-    :ID:       2de99c61-a580-4a3c-aa5c-bf1b322b9c97
-    :END:
-    #+begin_src emacs-lisp
-      (setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -interaction nonstopmode' -pdf -f %f"))
-      (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
-      ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
-    #+end_src
-    LaTeX exporter setting and in-line math formula display preferences
-**** TODO configure exporter to use minted package or alternative for code block faces setting
-     there was that one package that the one guy wrote for emacs? for latex? makes emacs quality font "engraving?"
-**** TODO configure exporter to handle bibtex as well
-**** DONE configure emacs to open pdfs using pdftools and keep pdf tools up to date
-     :STATUSLOG:
-     - State "DONE"       from "TODO"       [2021-09-17 Fri 21:33]
-     :END:
-     I think that's done? Some applications that handle sending files
-     to receiving applications may not recognize emacs as a pdf viewer
-     without configuration on their side (and this side, maybe?)
-**** TODO pdf display update automatically when PDF is rebuilt
-**** TODO A cool little lisp project:
-     create a convenient parser to interpret and flowchart/display the
-     formulae defined in a TBLFM keyword for use by a table. In other
-     words, make it possible to export tables with their formula
-     displayed per column
-*** TODO Org notes utilities
-**** TODO enable org latex preview using custom latex commands 
-    While notes may be organized using roam, they depend on the org display infrastructure
-    (execute block in buffer? tangle to something?)
-*** INACTIVE nov.el or similar for ebooks compatibility?
-    this is not critical, but nov.el has noter integration and may help with reading more
-** TODO Org Key Bindings)
-   :PROPERTIES:
-   :ID:       7dea4263-0b4d-4b69-8e6c-6cc11752281e
-   :END:
-   #+begin_src emacs-lisp
-     :bind (("C-c l" . org-store-link) ;; global organization bindings
-	    ("C-c a" . org-agenda) 
-	    ("C-c c" . org-capture))) 
-   #+end_src
-   C-c is the conventional org mode command prefix. More specific sub modes and more general global modes should adopt philosophically consistent standards
-*** TODO look into ob-ipython
-    make babel blocks behave like juyter a bit
-* TODO Org-tempo
-  :PROPERTIES:
-  :ID:       06bdd462-539c-42fa-bf92-94a2271a2d12
-  :END:
-  #+begin_src emacs-lisp
-    (use-package org-tempo ;; builtin
-      ;;:config
-      ;;(eval-after-load 'org-tempo (add-to-list 'org-structure-template-alist '("sh" . "src shell")))
-      :bind (:map org-mode-map (("C-c C-," . org-insert-structure-template))))
-  #+end_src
-  OK. Org-babel provides demarcations functions for writing src blocks
-  Demarcation utilizes completion framework by default
-  Demarcation utilizes dynamics list of ?supported? src languages
-  makes literate programing in org a little easier
-
-  org-tempo may help with inserting other kinds of blocks. not src blocks.
-* TODO Org-Roam
-  :PROPERTIES:
-  :ID:       2a399e4a-0f14-4a33-a23f-67028014fb5d
-  :END:
-  #+begin_src emacs-lisp
-    (use-package org-roam
-      :ensure t
-      :init (setq org-roam-v2-ack t) ;; Acknowledge no return to v1
-      :custom
-      ;; roam database for focused zettlekasten
-      (org-roam-directory (file-truename (concat org-directory "/zettles/")))
-      :bind (("C-c n f" . org-roam-node-find)
-	     ("C-c n g" . org-roam-graph)
-	     ("C-c n r" . org-roam-node-random)		    
-	     (:map org-mode-map
-		   (("C-c n i" . org-roam-node-insert) ;; Insert
-		    ("C-c n o" . org-id-get-create) ;; Organize
-		    ("C-c n t" . org-roam-tag-add) ;; Tag
-		    ("C-c n a" . org-roam-alias-add) ;; Alias
-		    ("C-c n l" . org-roam-buffer-toggle) ;; backLink
-		    ("C-c n c" . org-roam-extract-subtree)))) ;; Create (use in conjunction with organize)
-      :config
-      (org-roam-db-autosync-mode)
-      (setq org-roam-capture-templates
-	    (quote (("d" "default" plain "%?"
-		     :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}")
-		     :unnarrowed t)
-		    ("l" "Literatue Notes") ;; fully contextual notes. Necessarily Integrated with lit docs via org-noter and org-ref
-		    ("ln" "noter" entry (file "~/org/zettles/") ;; noter academic pdf note. (consider dedicated epub template too.)
-		     "* TODO %?\n%U\n%a\n")
-		    ("lb" "book" entry (file "~/org/zettles/") ;; physical book note. limited automation + meticulous capture
-		     "* TODO %?\n%^T") ;;book, author, pagenumber, full manual bibtex?
-		    ("r" "Reference Notes") ;; Reflective notes. lectures, seminars, videos; bookmarks; ongoing projects
-		    ("rl" "lecture" entry (file "~/org/zettles/") ;; general lecture limited automation
-		     "* TODO %?\n%^T") ;;lecturer, date, 
-		    ("rm" "meeting" entry (file "~/org/zettles/") ;; general meeting: timestamped with agenda schedule keyword
-		     "%?\n%^T"
-		     :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-		     :unnarrowed t)
-		    ("p" "Permanent Notes") ;; standalone notes. hub notes, dedicated thoughts, musings, philosophy
-		    ("ph" "hub" entry (file "~/org/zettles/")
-		     "* TODO %?\n%^T") ;; maybe redundant? possible that proper backlink utilization eliminates need to clarify conncections in hubs
-		    ("pm" "muse" entry (file "~/org/zettles/")
-		     "* TODO %?\n%^T")))) ;; time. context/reason/event?
-      (require 'org-roam-protocol))
-   #+end_src
-   Org roam is best for zettlekasten. A system that prioritizes /connecting/ knowledge over /collecting/ knowledge.
-** TODO org-roam-protocol
-   find out what this is
-** TODO Implement system for flashcard and spaced-repetition learning
-*** Anki anki-editor and anki-connect
-    these tools allow org-mode notes to be turned into flash cards
-    There is a way to just export an org tree to flash cards
-*** org-mode-incremental-reading
-    [[https://github.com/vascoferreira25/org-mode-incremental-reading][by vascoferreira25]]
-    created custom special-block #+begin_anki that allows note section to be explicitly made into a card
-    #+begin_example
-    #+ATTR_DECK: Test
-    #+ATTR_TYPE: Cloze
-    #+ATTR_TAGS: incremental-reading emacs
-    #+BEGIN_ANKI org
-    #+ATTR_FIELD: Text
-    #+BEGIN_FIELD
-    {{c1::Observer pattern}} is a Software Design Pattern in which an object, named
-    the ~subject~, maintains a list of its dependents, called {{c2::~observers~}},
-    and notifies them automatically of any state changes, usually by calling one of
-    their methods.
-    #+END_FIELD
-    #+END_ANKI
-    #+end_example
-* TODO org-ref
-  :PROPERTIES:
-  :ID:       bdd2ec7c-473c-49dd-9cde-2659de304a93
-  :END:
-  #+begin_src emacs-lisp
-    (use-package org-ref
-      :init (setq org-ref-completion-library 'org-ref-ivy-cite)
-      :config
-      (setq reftex-default-bibliography '("~/org/bibliography/library.bib"))
-    
-      ;; see org-ref for use of these variables
-      (setq org-ref-bibliography-notes "~/org/zettles/"
-	    org-ref-default-bibliography '("~/org/bibliography/library.bib")
-	    org-ref-pdf-directory "~/org/bibliography/pdfs/")
-      (setq bibtex-completion-bibliography "~/org/bibliography/library.bib"
-	    bibtex-completion-library-path "~/org/bibliography/pdfs"
-	    bibtex-completion-notes-path "~/org/zettles")
-      :bind (:map org-mode-map
-		  ("C-c (" . org-ref-insert-link)))
-  #+end_src
-note: this is not portable.... melpa vs elpa?
+;; 	bibtex-completion-notes-path "~/Dropbox/bibliography/bibtex-notes"))
+** TODO Make Org-Ref references a choice of type
+by default, latex sections are referenced in org export using label:
+figures referenced by org ref should use fig:
+tables tbl:
+equations eq:
+etc... There's a bunch of specific "counters" used for specif auto-numbering.
+** TODO give option in bibtex hydra to link references to git repos (leverage projectile machinery)
+sometimes, full repo are installed for exploration -- beyond simple
+notebooks but not personal projects.  They may go under ~/src/ just
+like any non-manuscript git repo. or they may go elswhere in the rare
+case that makes more sense, so the linkage should be able to find any
+REPO systemwide
 * TODO org-noter
-  :PROPERTIES:
-  :ID:       cdd817bc-f97e-49e0-9e4b-46ce34c504b1
-  :END:
-  #+begin_src emacs-lisp
-    
-  #+end_src
+:PROPERTIES:
+:ID:       cdd817bc-f97e-49e0-9e4b-46ce34c504b1
+:END:
+#+begin_src emacs-lisp
+
+#+end_src
 * TODO org-pdf-tools
 * TODO org-roam-bibtex
 * TODO org-download
-  :PROPERTIES:
-  :ID:       5ecc8d01-150a-46f9-a9b8-83f3cd1fd6c5
-  :END:
-  #+begin_src emacs-lisp
-    (use-package org-download
-      :ensure t
-      :config
-      (setq org-download-screenshot-method "flameshot gui --raw > %s"))
-  #+end_src
-  Provides integration between org attachment machinery and system's screen capture utility.
-  awesome tool for note taking.
+:PROPERTIES:
+:ID:       5ecc8d01-150a-46f9-a9b8-83f3cd1fd6c5
+:END:
+#+begin_src emacs-lisp
+  (use-package org-download
+    :ensure t
+    :config
+    (setq org-download-screenshot-method "flameshot gui --raw > %s"))
+#+end_src
+Provides integration between org attachment machinery and system's screen capture utility.
+awesome tool for note taking.
 ** TODO better organize where figures captured in notes are kept.
-   Objective: figures taken and contextualized in notes should be readily available for linking into manuscripts, backing-up, etc.
-   linking is easy as long as the note containing the figure can be found... It is *critical* to be able to rediscover notes on demand.
+Objective: figures taken and contextualized in notes should be readily available for linking into manuscripts, backing-up, etc.
+linking is easy as long as the note containing the figure can be found... It is *critical* to be able to rediscover notes on demand.
 ** TODO Enable display of in-line gifs
 * TODO ivy and friends
-  :PROPERTIES:
-  :ID:       2780bde7-52be-4524-af10-bbf9f8bff9dc
-  :END:
-  #+begin_src emacs-lisp
-	(use-package ivy
-	  :ensure t
-	  :init
-	  (ivy-mode 1)
-	  :bind (:map ivy-minibuffer-map
-		      ("TAB" . ivy-partial)))
-	(use-package ivy-yasnippet
-	  :ensure t
-	  :bind ("C-c y" . ivy-yasnippet)) ;; look into refining this and ensure consistency with bind logic
-  #+end_src
-  ivy is a completion framework with speed dial. Offers ability to execute actions on selected items on the fly.
-  has a lot of integration with other modes
+:PROPERTIES:
+:ID:       2780bde7-52be-4524-af10-bbf9f8bff9dc
+:END:
+#+begin_src emacs-lisp
+  (use-package ivy
+    :ensure t
+    :init
+    (ivy-mode 1)
+    :bind (:map ivy-minibuffer-map
+                ("TAB" . ivy-partial)))
+
+  (use-package ivy-yasnippet
+    :ensure t
+    :bind ("C-c y" . ivy-yasnippet)) ;; ensure consistency with bind logic
+
+  (use-package ivy-bibtex
+    :ensure t
+    :init
+    (setq bibtex-completion-bibliography '("~/org/bibliotex/bibliotex.bib") ;; feel free to expand
+          bibtex-completion-library-path '("~/org/bibliotex/papers_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks/")
+          ;; doi utils uses path to install pdf downloads. org ref uses path to open source material from cite
+          bibtex-completion-notes-path "~/org/zettles/" ;; Keep this concentrated. Might get heavy, but optimize later
+          bibtex-completion-notes-template-multiple-files "* ${author-or-editor}, ${title}, ${journal}, (${year}) :${=type=}: \n\nSee [[cite:&${=key=}]]\n"
+          bibtex-completion-additional-search-fields '(keywords)
+          bibtex-completion-display-formats
+          '((article       . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${journal:40}")
+            (inbook        . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} Chapter ${chapter:32}")
+            (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+            (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+            (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
+          bibtex-completion-pdf-open-function 'find-file)) ;;open pdfs in emacs--best, obviously.
+          ;;          (lambda (fpath)
+          ;;          (call-process "open" nil 0 nil fpath)))) ;;open pdfs
+
+  (use-package org-ref-ivy
+    :disabled ;; this is not present on melpa, it's a scimax convenience for the ivy-bound
+    :ensure nil
+    :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
+    :init (setq org-ref-insert-link-function 'org-ref-insert-link-hydra/body
+                org-ref-insert-cite-function 'org-ref-cite-insert-ivy
+                org-ref-insert-label-function 'org-ref-insert-label-link
+                org-ref-insert-ref-function 'org-ref-insert-ref-link
+                org-ref-cite-onclick-function (lambda (_) (org-ref-citation-hydra/body))))
+#+end_src
+ivy is a completion framework with speed dial. Offers ability to execute actions on selected items on the fly.
+has a lot of integration with other modes
+** TODO add an "association" function (bind to l in C-c b hydra)
+a simple function to link from non-pdf source material citations back
+to their source material -- use org-ref machinery and the completion buffer
+** TODO add a github/repository webfunction to C-c C-o hydra
+open action on citations for notebooks is less than functional.
+accomodate basic digging with weblookup recipes for github at least
 ** TODO What is Counsel? Swiper?
 ** TODO Consider replacing ivy with vertico and its utilities
 * TODO global minor modes
-  :PROPERTIES:
-  :ID:       7eb5ca6a-0022-4aba-abdb-049f81af30a7
-  :END:
-  #+begin_src emacs-lisp
-    (use-package yasnippet ;; extensible codeblock insertion utility
-      :ensure t
-      :config
-      (yas-minor-mode 1))
-    (use-package wucuo ;; fast emacs spell-checker. uses hunspell
-      :ensure t
-      :config
-      (add-hook 'prog-mode-hook 'wucuo-start)
-      (add-hook 'text-mode-hook 'wucuo-start))
-    ;;(use-package undo-fu (define-key undo-fu-mode-map (kbd "C-?") #'undo-fu-only-redo))
-    ;; (use-package flyspell
-    ;;   :config
-    ;;   (add-hook 'prog-mode-hook #'flyspell-prog-mode)
-    ;;   (add-hook 'text-mode-hook #'flyspell-mode))
-    (use-package flyspell-correct
-      :after wucuo
-      :bind (:map flyspell-mode-map
-		  (("C-."   . flyspell-auto-correct-word)
-		   ("C-,"   . flyspell-goto-next-error)
-		   ("C-;"   . flyspell-correct-next)
-		   ("C-M-;" . flyspell-buffer))))
-  #+end_src
+:PROPERTIES:
+:ID:       7eb5ca6a-0022-4aba-abdb-049f81af30a7
+:END:
+#+begin_src emacs-lisp
+  (use-package yasnippet ;; extensible codeblock insertion utility
+    :ensure t
+    :config
+    (setq-default yas-wrap-around-region t) ;; global option to place selected region at $0
+    (yas-global-mode))
+  ;; Notice: it is possible to assign unique keybindings to certain snippets.
+  ;; These bindings are added to the relevant mode's map. This might be reasonable. but...
+  ;; look into building a hydra? or perhaps just rely on the completion menu on C-c y...
+  (use-package wucuo ;; fast emacs spell-checker. uses hunspell
+    :ensure t
+    :config
+    (add-hook 'prog-mode-hook 'wucuo-start)
+    (add-hook 'text-mode-hook 'wucuo-start))
+  ;;(use-package undo-fu (define-key undo-fu-mode-map (kbd "C-?") #'undo-fu-only-redo))
+  ;; (use-package flyspell
+  ;;   :config
+  ;;   (add-hook 'prog-mode-hook #'flyspell-prog-mode)
+  ;;   (add-hook 'text-mode-hook #'flyspell-mode))
+  (use-package flyspell-correct
+    :after wucuo
+    :bind (:map flyspell-mode-map
+                (("C-."   . flyspell-auto-correct-word)
+                 ("C-,"   . flyspell-goto-next-error)
+                 ("C-;"   . flyspell-correct-next)
+                 ("C-M-;" . flyspell-buffer))))
+#+end_src
 *** TODO wucuo looks better than flyspell, but make sure
-    Wucuo uses flyspell API, flyspell uses ispell api. ispell can be
-    replaced with aspell and hunspell was conceived from myspell -- a
-    replacement to aspell. Basically any spell check program can be
-    used with wucuo because in progmod camel case words are parsed by
-    wucuo prior to sending for check. Multiple Dictionaries can be
-    defined in ispell-aspell-dictionary-alist claimed to work for
-    hunspell to?. not sure if wucuo-hunspell-dictionary-base-name
-    behaves the same.
+Wucuo uses flyspell API, flyspell uses ispell api. ispell can be
+replaced with aspell and hunspell was conceived from myspell -- a
+replacement to aspell. Basically any spell check program can be
+used with wucuo because in progmod camel case words are parsed by
+wucuo prior to sending for check. Multiple Dictionaries can be
+defined in ispell-aspell-dictionary-alist claimed to work for
+hunspell to?. not sure if wucuo-hunspell-dictionary-base-name
+behaves the same.
 ** TODO keybinds
-   :PROPERTIES:
-   :ID:       c1e4c0c0-bc84-482f-8152-05c47909214a
-   :END:
-   #+begin_src emacs-lisp
-     (setq bindlist '((windmove-swap-states-right "C-M-s-f" "C-M-s-<right>")
-		      (windmove-swap-states-up "C-M-s-p" "C-M-s-<up>")
-		      (windmove-swap-states-left "C-M-s-b" "C-M-s-<left>")
-		      (windmove-swap-states-down "C-M-s-n" "C-M-s-<down>")
-		      (windmove-right "C-s-f" "C-s-<right>")
-		      (windmove-up "C-s-p" "C-s-<up>")
-		      (windmove-left "C-s-b" "C-s-<left>")
-		      (windmove-down "C-s-n" "C-s-<down>")
-		      ;;                 (spell-fu-goto-next-error "C-,")
-		      ;;                 (+spell/correct "C-.")
-		      (backward-delete-char-untabify "C-S-d")))
-      
-     (dolist (bind-to bindlist)
-       (let ((keys (cdr bind-to)))
-	 (dolist (key keys)
-	   (define-key (current-global-map) (kbd key) (car bind-to)))))
-      
-     ;; minimize window just freezes it in dwm -- not nice
-     ;;(unbind-key "C-z")
-     ;;(unbind-key "C-x C-z")
-   #+end_src
-   these keybindings are specifically for windmove, anything else? or deal with these usign a use package declaration?
-   what's the advantage here?
+:PROPERTIES:
+:ID:       c1e4c0c0-bc84-482f-8152-05c47909214a
+:END:
+#+begin_src emacs-lisp
+  (setq bindlist '((windmove-swap-states-right "C-M-s-f" "C-M-s-<right>")
+		   (windmove-swap-states-up "C-M-s-p" "C-M-s-<up>")
+		   (windmove-swap-states-left "C-M-s-b" "C-M-s-<left>")
+		   (windmove-swap-states-down "C-M-s-n" "C-M-s-<down>")
+		   (windmove-right "C-s-f" "C-s-<right>")
+		   (windmove-up "C-s-p" "C-s-<up>")
+		   (windmove-left "C-s-b" "C-s-<left>")
+		   (windmove-down "C-s-n" "C-s-<down>")
+		   ;;                 (spell-fu-goto-next-error "C-,")
+		   ;;                 (+spell/correct "C-.")
+		   (backward-delete-char-untabify "C-S-d")))
+
+  (dolist (bind-to bindlist)
+    (let ((keys (cdr bind-to)))
+      (dolist (key keys)
+	(define-key (current-global-map) (kbd key) (car bind-to)))))
+
+  ;; minimize window just freezes it in dwm -- not nice
+  ;;(unbind-key "C-z")
+  ;;(unbind-key "C-x C-z")
+#+end_src
+these keybindings are specifically for windmove, anything else? or deal with these usign a use package declaration?
+what's the advantage here?
 ** TODO ibuffer integration with perspective and projectile
-   persp-ibuffer should be able to limit view of buffers in ibuffer to those of the current perspective
-   Within this, the ibuffer-projectile package should be able to group buffers by project root...
+persp-ibuffer should be able to limit view of buffers in ibuffer to those of the current perspective
+Within this, the ibuffer-projectile package should be able to group buffers by project root...
 ** TODO ibuffer discover bindings
-   discover my major? get similar effect to discover for dired. See the available commands.
+discover my major? get similar effect to discover for dired. See the available commands.
 * TODO Image and PDF viewing
-  :PROPERTIES:
-  :ID:       77c9fdea-b27c-497e-acb2-85d1c942ba86
-  :END:
-  #+begin_src emacs-lisp
-    (use-package pdf-tools
-      :load-path "site-lisp/pdf-tools/lisp"
-      :magic ("%PDF" .  pdf-view-mode) ;; open pdfs please, thank you
-      :config (pdf-tools-install)) ;; don't break when libpoppler.so updates.
-  #+end_src
+:PROPERTIES:
+:ID:       77c9fdea-b27c-497e-acb2-85d1c942ba86
+:END:
+#+begin_src emacs-lisp
+  (use-package pdf-tools
+    :ensure t
+    ;;    :load-path "site-lisp/pdf-tools/lisp"
+    :magic ("%PDF" .  pdf-view-mode) ;; open pdfs please, thank you
+    :config (pdf-tools-install)) ;; don't break when libpoppler.so updates.
+#+end_src
 * TODO Extending Fundamental Functionality
-** TODO Perspective
-   :PROPERTIES:
-   :ID:       9f82beed-818b-4e68-924b-224b3e3c9a83
-   :END:
-   #+begin_src emacs-lisp
-     (use-package perspective
-       :ensure t
-       :init
-       (persp-mode)  
-       (setq persp-initial-frame-name 'Prime)
-       :config
-       (add-hook 'after-init-hook (lambda () (persp-state-load "~/.config/emacs/perspectives/Agenda"))) ;; switch to agenda perspective on startup
-       (add-hook 'persp-state-after-load-hook (lambda () (when (equal (persp-current-name) "Agenda")
-							   (org-agenda-list)))) ;; show todos by opening Agenda in Agenda persp
-       (require 'ibuffer)
-       :bind (("C-x C-b" . persp-ibuffer) ;; this doesn't seem to be working nicely, shows too much
-	      ("C-x b" . persp-ivy-switch-buffer)
-	      ("C-x k" . persp-kill-buffer*)
-	      (:map ibuffer-mode-map
-		    (("g" . persp-ibuffer)
-		     ("/ B" . persp-ibuffer-set-filter-groups)))))
-   #+end_src
+** TODO Popper
+:PROPERTIES:
+:ID:       eea17ee9-66e0-42de-b66d-b176df045f9b
+:END:
+#+begin_src emacs-lisp
+  (use-package popper
+    :ensure t
+    :config
+    (setq popper-reference-buffers
+          '("\\*Messages\\*"
+            "Output\\*$"
+            "\\*Org Select\\*"
+            "\\*Backtrace\\*"
+            "\\*ob-ipython-out\\*"
+            "\\*ob-ipython-traceback\\*"
+            "\\*Async Shell Command\\*"
+            "\\*Python\\*"
+            "shell\\*$"
+            help-mode
+            compilation-mode))
+    (popper-mode 1)
+    (popper-echo-mode 1)
+    :bind
+    (("C-`"   . popper-toggle-latest)
+     ("M-`"   . popper-cycle)
+     ("C-~" . popper-toggle-type)))
+#+end_src
+** TODO COMMENT Perspective
+:PROPERTIES:
+:ID:       9f82beed-818b-4e68-924b-224b3e3c9a83
+:END:
+#+begin_src emacs-lisp
+  (use-package perspective
+    :ensure t
+    :init
+    (persp-mode)  
+    (setq persp-initial-frame-name 'Prime)
+    :config
+    (add-hook 'after-init-hook (lambda () (persp-state-load "~/.config/emacs/perspectives/Agenda"))) ;; switch to agenda perspective on startup
+    (add-hook 'persp-state-after-load-hook (lambda () (when (equal (persp-current-name) "Agenda")
+                                                        (org-agenda-list)))) ;; show todos by opening Agenda in Agenda persp
+    (require 'ibuffer)
+    :bind (("C-x C-b" . persp-ibuffer) ;; this doesn't seem to be working nicely, shows too much
+           ("C-x b" . persp-ivy-switch-buffer)
+           ("C-x k" . persp-kill-buffer*)
+           (:map ibuffer-mode-map
+                 (("g" . persp-ibuffer)
+                  ("/ B" . persp-ibuffer-set-filter-groups)))))
+#+end_src
 *** TODO set up default list of open perspectives
-    on startup, show comprehensive agenda and offer interface for opening/building perspectives
+on startup, show comprehensive agenda and offer interface for opening/building perspectives
 *** TODO make so persp-save and load functions navigate to perspectives directory
 ** TODO Discoverablity
-   :PROPERTIES:
-   :ID:       2f56a136-3572-4341-a307-5081357ff31b
-   :END:
-   #+begin_src emacs-lisp
-     (use-package which-key
-       :init
-       (setq which-key-sort-order #'which-key-key-order-alpha
-	     which-key-sort-uppercase-first nil
-	     which-key-add-column-padding 1
-	     which-key-max-display-columns nil
-	     which-key-min-display-lines 6
-	     which-key-side-window-slot -10)
-       :config
-       ;; general improvements to which-key readability
-       (which-key-setup-side-window-bottom)
-       (which-key-mode 1))
-   #+end_src
-   Provides on-the-fly navigation of key hierarchies.
+:PROPERTIES:
+:ID:       2f56a136-3572-4341-a307-5081357ff31b
+:END:
+#+begin_src emacs-lisp
+  (use-package which-key
+    :init
+    (setq which-key-sort-order #'which-key-key-order-alpha
+	  which-key-sort-uppercase-first nil
+	  which-key-add-column-padding 1
+	  which-key-max-display-columns nil
+	  which-key-min-display-lines 6
+	  which-key-side-window-slot -10)
+    :config
+    ;; general improvements to which-key readability
+    (which-key-setup-side-window-bottom)
+    (which-key-mode 1))
+#+end_src
+Provides on-the-fly navigation of key hierarchies.
 *** TODO use which-key as navigator for hydras? or replace which-key with hydra navigator?
 * TODO Email
 ** TODO Notmuch
-   #+begin_src emacs-lisp
-     (autoload 'notmuch "notmuch" "Notmuch mail" t)
-   #+end_src
+:PROPERTIES:
+:ID:       def38549-17d3-43f0-8c5b-c16542258e5c
+:END:
+#+begin_src emacs-lisp
+  (autoload 'notmuch "notmuch" "Notmuch mail" t)
+#+end_src
 ** TODO thunderbird mailbox reformat
-   :PROPERTIES:
-   :ID:       967b614e-bac1-4fe6-9f67-93a80a660171
-   :END:
+:PROPERTIES:
+:ID:       967b614e-bac1-4fe6-9f67-93a80a660171
+:END:
    
 ** TODO configure send mail to Thunderbird for sending
+** DONE Feed Reader
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2021-11-19 Fri 16:10]
+:END:
+#+begin_src emacs-lisp
+      (use-package elfeed
+        :ensure t
+        :init
+        (setq elfeed-feeds
+              '("https://github.com/rougier/scientific-visualization-book/tree/master/pdf/book.pdf.atom" ;;data viz w/ matplot
+                "https://github.com/Ramprasad-Group/polyga.atom"
+                "https://github.com/rougier.atom"))
+        :bind ("C-x w" . elfeed))
+#+end_src
+* TODO Web Integration
+** Stack Exchange for Emacs
+browse technical Q&A in emacs
+SX.el on github
 * TODO Integrated Development Environment
 ** TODO LSP protocol integration
 ** TODO Company Back-ends and Virtual Environment Integration
 *** TODO Python
-    :PROPERTIES:
-    :ID:       12165476-71a2-4170-ae11-4f9c10337935
-    :END:
-    #+begin_src emacs-lisp
-      (defun python-setup ()
-	"Sets company backends"
-	(interactive)
-	;; (setq company-backends '(company-matlab-shell))
-	(company-mode 1))
-       
-      (use-package python
-	:ensure t
-	:config
-	(add-hook 'python-mode-hook 'python-setup))
-       
-      (use-package conda
-	:ensure t
-	:config
-	(setq conda-env-home-directory "/opt/miniconda3") ;;conda is root...
-	;;get current environment--from environment variable CONDA_DEFAULT_ENV
-	(setq conda-anaconda-home "/opt/miniconda3")
-	;; (conda-env-activate (getenv "CONDA_DEFAULT_ENV")) ;; default to (base) or whetever is set
-	(conda-env-autoactivate-mode t) ;;useful for python projects
-	(conda-env-initialize-interactive-shells)
-	(setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
-	;;  (setq eshell-prompt-function ;; customizes the eshell prompt -- here because it includes the env
-	;;        (lambda ()
-	;;          (concat conda-env-current-name
-	;;                  (getenv "USER") "@"
-	;;                  (car (split-string (getenv "HOSTNAME") "[.]"))
-	;;                  (if (= (user-uid) 0) " # " " $ ")))))
-	)
-    #+end_src
-**** TODO set conda default env properly
-**** TODO use conda environment selectively
-     activate when python mode/shell is activated
-* TODO Google-calendar integration
-  :PROPERTIES:
-  :ID:       14b1e902-d92e-4955-889a-453d1aafd43a
-  :END:
-  #+begin_src emacs-lisp
-    ;; org agenda and calendar customization and automation
-    ;;(defun my-open-calendar ()
-    ;;  (interactive)
-    ;;  (cfw:open-calendar-buffer
-    ;;   :contents-sources
-    ;;   (list
-    ;;    (cfw:org-create-source "Green")  ; org-agenda source
-    ;;    (cfw:org-create-file-source "cal" "/path/to/cal.org" "Cyan")  ; other org source
-    ;;    (cfw:howm-create-source "Blue")  ; howm source
-    ;;    (cfw:cal-create-source "Orange") ; diary source
-    ;;    (cfw:ical-create-source "Moon" "~/moon.ics" "Gray")  ; ICS source1
-    ;;    (cfw:ical-create-source "gcal" "https://..../basic.ics" "IndianRed") ; google calendar ICS
-    ;;   )))
-  #+end_src
-  is this necessary considering the emphasis on org-capture based calendaring?
-** TODO general caldav protocol handling 
-* Custom Utility Functions
-  :PROPERTIES:
-  :ID:       a909cafc-561b-471d-a157-dd57c0ed019e
-  :END:
-  #+begin_src emacs-lisp
-    (add-to-list 'auto-mode-alist '("\\.xlsx\\'" . no-xls))
-
-    (defun no-xls (&optional filename)
-      "Run xlhtml and w3m -dump on the entire buffer.
-    Optional FILENAME says what filename to use.
-    This is only necessary for buffers without
-    proper `buffer-file-name'.  FILENAME should
-    be a real filename, not a path."
-      (interactive "fExcel File: ")
-      (when (and filename
-		 (not (buffer-file-name)))
-	(write-file (make-temp-file filename)))
-      (erase-buffer)
-      (shell-command
-       (format "xlhtml -nc -te %s | w3m -dump -T text/html" (buffer-file-name))
-       (current-buffer))
-      (setq buffer-file-name nil)
-      (set-buffer-modified-p nil))
-
-    (defun smb-2-dee ()
-      "smb remote connection to Uc's ceas1 domain clusterfsnew server"
-      (interactive)
-      (find-file "/smb:manganpt%ceas1@clusterfsnew.ceas1.uc.edu:/DEE/"))
-    
-    (defun copy-file-to-tmp (file)
-      "delegate for dired-open-remote-tmpfile"
-      (copy-file file "/tmp/" 1)
-      (let* ((extension (file-name-extension file))
-	     (base (file-name-base file)))
-	(format "/tmp/%s.%s" base extension)))
-    
-    (defun dired-open-remote-tmpfile (localprog)
-      "copies file in remote dired to local tmp, opens with local program, and returns modified file to remote dired"
-      (interactive "sLocal Program Name: ")
-      (let* ((remote-file (dired-filename-at-point))
-	     (tmpfile (copy-file-to-tmp remote-file)))
-	(async-start-process localprog
-			     localprog
-			     (lambda (process-obj)
-			       "move tmpfile back to remote directory"
-			       (copy-file tmpfile remote-file 1))
-			     tmpfile)))
-    (use-package macrostep
+:PROPERTIES:
+:ID:       12165476-71a2-4170-ae11-4f9c10337935
+:END:
+#+begin_src emacs-lisp
+    (use-package python
       :ensure t
-      :bind ((:map emacs-lisp-mode-map
-		   ("C-c C-e" . macrostep-expand))
-	     (:map lisp-interaction-mode-map
-		   ("C-c C-e" . macrostep-expand))))
-    
-    (defun toggle-window-split ()
-      (interactive)
-      (if (= (count-windows) 2)
-	  (let* ((this-win-buffer (window-buffer))
-		 (next-win-buffer (window-buffer (next-window)))
-		 (this-win-edges (window-edges (selected-window)))
-		 (next-win-edges (window-edges (next-window)))
-		 (this-win-2nd (not (and (<= (car this-win-edges)
-					     (car next-win-edges))
-					 (<= (cadr this-win-edges)
-					     (cadr next-win-edges)))))
-		 (splitter
-		  (if (= (car this-win-edges)
-			 (car (window-edges (next-window))))
-		      'split-window-horizontally
-		    'split-window-vertically)))
-	    (delete-other-windows)
-	    (let ((first-win (selected-window)))
-	      (funcall splitter)
-	      (if this-win-2nd (other-window 1))
-	      (set-window-buffer (selected-window) this-win-buffer)
-	      (set-window-buffer (next-window) next-win-buffer)
-	      (select-window first-win)
-	      (if this-win-2nd (other-window 1))))))
-    
-    (global-set-key (kbd "C-x |") 'toggle-window-split) ;; ediff-like keybinding
-  #+end_src
+      :config
+      (setq python-shell-interpreter "ipython"
+            python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
+
+      (defun set-company-backends-for-python ()
+        (setq-local company-backends '(company-yasnippet
+                                       company-capf
+                                       company-files
+                                       (company-dabbrev-code company-keywords)
+                                       company-dabbrev)))
+      (add-hook 'python-mode-hook 'set-company-backends-for-python))
+
+    (use-package conda
+      :ensure t
+      :config
+      (setq conda-anaconda-home "/opt/miniconda3") ;; specify install location
+      (setq conda-env-home-directory "/opt/miniconda3") ;;conda envs explicit location
+      (conda-env-initialize-interactive-shells) ;; conda awareness will be enabled for inferior shell processes
+      (conda-env-initialize-eshell) ;; and eshell
+      ;; NOTE: eshell and emacs share an evironment. Change one change the other.
+      ;;set current environment from instance of interactive shell
+      (conda-env-activate (getenv-internal "CONDA_DEFAULT_ENV" (split-string (shell-command-to-string "$SHELL --interactive -c printenv") "\n")))
+      ;; display env in modline ~ if modline is customized, :exec keyword can be redirected there.
+      (setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
+      (conda-env-autoactivate-mode -1)) ;; t causes annoying error. But useful for jumping projectile python projects
+
+    (use-package poetry
+      :ensure t
+      :bind ("C-x p" . poetry))
+#+end_src
+**** DONE set conda default env properly
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2021-10-28 Thu 15:15]
+:END:
+The subshell started by emacs must be informed of the scope of the zsh
+though running an instance of an interactive subsection.
+
+~/.emacs_zsh or ~/.emacs.d/init_zsh.sh are read by interactive
+sessions.  if these files exist, they are read when a new interactive
+shell starts.  if emacs is trying to obtain environment information
+from noninteractive shell on startup, some environments will not be
+communicated. To see the difference between interactive and
+noninteractive process-environments view the process-environment
+variable and run printenv in a shell buffer.
+**** CANCELED use conda environment selectively
+activate when python mode/shell is activated
+* TODO COMMENT ESHELL
+Eshell is a fully independent shell written in elisp. Its only
+dependency is emacs.  It is inherently tramp aware, so it is a
+convenient option for opening a remote shell session on a preexisting
+tramp connection.  However, for full ansi vt100 terminal emulation
+ansi-term or a dedicated terminal emulator should be used.
+
+eshell is documented fairly lightly, considering its complexity.
+sometimes see https://masteringemacs.com/article/complete-guide-mastering-eshell
+
+#+begin_src emacs-lisp
+  ;;  (setq eshell-prompt-function ;; customizes the eshell prompt
+  ;;        (lambda ()
+  ;;          (concat conda-env-current-name
+  ;;                  (getenv "USER") "@"
+  ;;                  (car (split-string (getenv "HOSTNAME") "[.]"))
+  ;;                  (if (= (user-uid) 0) " # " " $ ")))))
+
+#+end_src
+Objectives:
+customize prompt to involve conda env, user, and hostname.
+* TODO Google-calendar integration
+:PROPERTIES:
+:ID:       14b1e902-d92e-4955-889a-453d1aafd43a
+:END:
+#+begin_src emacs-lisp
+  ;; org agenda and calendar customization and automation
+  ;;(defun my-open-calendar ()
+  ;;  (interactive)
+  ;;  (cfw:open-calendar-buffer
+  ;;   :contents-sources
+  ;;   (list
+  ;;    (cfw:org-create-source "Green")  ; org-agenda source
+  ;;    (cfw:org-create-file-source "cal" "/path/to/cal.org" "Cyan")  ; other org source
+  ;;    (cfw:howm-create-source "Blue")  ; howm source
+  ;;    (cfw:cal-create-source "Orange") ; diary source
+  ;;    (cfw:ical-create-source "Moon" "~/moon.ics" "Gray")  ; ICS source1
+  ;;    (cfw:ical-create-source "gcal" "https://..../basic.ics" "IndianRed") ; google calendar ICS
+  ;;   )))
+#+end_src
+is this necessary considering the emphasis on org-capture based calendaring?
+** TODO general caldav protocol handling 
+* TODO TRAMP
+** public key authentication
+ssh protocols exposed by tramp handle direct password requests and
+offer utilities both for integration with gnupg and without (authfile +
+connection syntax (wiped after cleanup).
+
+using an ssh identity file (via ssh -i) in terminal may not work
+automatically via tramp.  so, it is necessary to use ssh-add
+private-key.pem to make ssh (and thus tramp) utilize the key by
+default.
+*** running ssh-agent
+utilizing ssh agent for remote log in requires starting the agent and
+setting the SSH_AGENT_PID and SSH_AGENT_SOCK env vars to the values
+returned by the program. The values are conveniently returned as
+assignments, so invoking
+
+$ eval $(ssh-agent)
+
+will accomplish the minimal set-up
+**** Automating set-up
+to start ssh-agent automatically and ensure only one agent process
+runs at a time systemd/User facilities may be used. This has the
+benefit of running ssh-agent separately from X while also keeping it
+clean and enable ssh-add to work on the fly.
+***** DONE created user service in ~/.config/user/systemd/
+:STATUSLOG:
+- State "DONE"       from              [2021-10-27 Wed 13:02]
+:END:
+***** DONE export envvar in login shell init file
+:STATUSLOG:
+- State "DONE"       from              [2021-10-27 Wed 13:02]
+:END:
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+appended to ~/.zshenv
+and service started with user tag
+
+** TODO COMMENT Configure Remote Shell
+is this necessary?
+:PROPERTIES:
+:ID:       b205c6a6-8664-4cc7-8182-eeb139a3ec75
+:END:
+#+begin_src emacs-lisp
+  (add-to-list 'tramp-connection-properties
+             (list (regexp-quote "/ssh:user@host:")
+                   "remote-shell" "/usr/bin/zsh"))
+#+end_src
+** TODO COMMENT Configure X11 forwarding
+set remote $display envvar to localhost. ssh should be responsible for setting the port for security.
+* Ansi Term
+ansi term should be location aware, and tramp aware for maximum
+convenience.  The below function definition nearly accomplishes this,
+but its call to ssh in remote buffers appear not to respect ssh-agent
+#+begin_src emacs-lisp
+  (defun pm/ansi-term (&optional path name)
+    "Opens an ansi terminal at PATH. If no PATH is given, it uses
+      the value of `default-directory'. PATH may be a tramp remote path.
+      (username should be requested, or default to local user name).
+      The ansi-term buffer is named based on `name' 
+      ----
+      modification of code by dfeich"
+    (interactive)
+    (unless path (setq path default-directory))
+    (unless name (setq name "ansi-term"))
+    (ansi-term "/bin/sh" name)
+    (let ((path (replace-regexp-in-string "^file:" "" path))
+          (cd-str 
+           "fn=%s; if test ! -d $fn; then fn=$(dirname $fn); fi; cd $fn;")
+          (bufname (concat "*" name "*" )))
+      (if (tramp-tramp-file-p path)
+          (let ((tstruct (tramp-dissect-file-name path)))
+            (cond 
+             ((equal (tramp-file-name-method tstruct) "ssh")
+              (process-send-string bufname (format
+                                            (concat  "ssh -t %s@%s '"
+                                                     cd-str
+                                                     "exec bash'; exec bash; clear\n")
+                                            (tramp-file-name-user tstruct)
+                                            (tramp-file-name-host tstruct)
+                                            (tramp-file-name-localname tstruct))))
+             (t (error "not implemented for method %s"
+                       (tramp-file-name-method tstruct)))))
+        (process-send-string bufname (format (concat cd-str " exec bash;clear\n")
+                                             path)))))
+#+end_src
+* Custom Utility Functions
+:PROPERTIES:
+:ID:       a909cafc-561b-471d-a157-dd57c0ed019e
+:END:
+#+begin_src emacs-lisp
+  (defun scp-bell-ipython ()
+    "scp remote jupyter session files from Purdue HPC cluster bell.rcac.purdue.edu to local"
+    (interactive)
+    (find-file "/scp:pmangana@bell.rcac.purdue.edu:/home/pmangana/.local/share/jupyter/runtime/*.json /run/user/1000/jupyter"))
+
+  (defun ssh-2-bell ()
+    "ssh remote connection to Purdue HPC cluster bell.rcac.purdue.edu"
+    (interactive)
+    (find-file "/ssh:pmangana@bell.rcac.purdue.edu:/home/pmangana"))
+
+  (defun smb-2-dee ()
+    "smb remote connection to Uc's ceas1 domain clusterfsnew server"
+    (interactive)
+    (find-file "/smb:manganpt%ceas1@clusterfsnew.ceas1.uc.edu:/DEE/"))
+
+  (defun copy-file-to-tmp (file)
+    "delegate for dired-open-remote-tmpfile"
+    (copy-file file "/tmp/" 1)
+    (let* ((extension (file-name-extension file))
+           (base (file-name-base file)))
+      (format "/tmp/%s.%s" base extension)))
+
+  (defun dired-open-remote-tmpfile (localprog)
+    "copies file in remote dired to local tmp, opens with local program, and returns modified file to remote dired"
+    (interactive "sLocal Program Name: ")
+    (let* ((remote-file (dired-filename-at-point))
+           (tmpfile (copy-file-to-tmp remote-file)))
+      (async-start-process localprog
+                           localprog
+                           (lambda (process-obj)
+                             "move tmpfile back to remote directory"
+                             (copy-file tmpfile remote-file 1))
+                           tmpfile)))
+  (use-package macrostep
+    :ensure t
+    :bind ((:map emacs-lisp-mode-map
+                 ("C-c C-e" . macrostep-expand))
+           (:map lisp-interaction-mode-map
+                 ("C-c C-e" . macrostep-expand))))
+
+  (defun toggle-window-split ()
+    (interactive)
+    (if (= (count-windows) 2)
+        (let* ((this-win-buffer (window-buffer))
+               (next-win-buffer (window-buffer (next-window)))
+               (this-win-edges (window-edges (selected-window)))
+               (next-win-edges (window-edges (next-window)))
+               (this-win-2nd (not (and (<= (car this-win-edges)
+                                           (car next-win-edges))
+                                       (<= (cadr this-win-edges)
+                                           (cadr next-win-edges)))))
+               (splitter
+                (if (= (car this-win-edges)
+                       (car (window-edges (next-window))))
+                    'split-window-horizontally
+                  'split-window-vertically)))
+          (delete-other-windows)
+          (let ((first-win (selected-window)))
+            (funcall splitter)
+            (if this-win-2nd (other-window 1))
+            (set-window-buffer (selected-window) this-win-buffer)
+            (set-window-buffer (next-window) next-win-buffer)
+            (select-window first-win)
+            (if this-win-2nd (other-window 1))))))
+
+  (global-set-key (kbd "C-x |") 'toggle-window-split) ;; ediff-like keybinding
+#+end_src
 Implementation that functions for more than 2 windows... maybe try merging the two. The first is clearly more functional.
   #+begin_example
   (defun window-toggle-split-direction ()
@@ -1060,15 +1323,15 @@ i.e. change right window to bottom, or change bottom window to right."
                 (set-window-buffer (windmove-find-other-window neighbour-dir) other-buf))))))))
   #+end_example
 ** TODO dired-open-remote-tmpfile
-   use dmenu or make it work with ivy and council linux apps?
+use dmenu or make it work with ivy and council linux apps?
 * Saved Keymacros
-  :PROPERTIES:
-  :ID:       7fad8dd6-624d-4dc0-8886-ea2ca553c673
-  :END:
-  #+begin_src emacs-lisp
-    (fset 'pm/org-clone-3d-subtree-with-1w-timeshift
-	  (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
-    (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
-	  (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
-  #+end_src
-  Org agenda scheduling keymacros
+:PROPERTIES:
+:ID:       7fad8dd6-624d-4dc0-8886-ea2ca553c673
+:END:
+#+begin_src emacs-lisp
+  (fset 'pm/org-clone-3d-subtree-with-1w-timeshift
+	(kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
+  (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
+	(kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
+#+end_src
+Org agenda scheduling keymacros
