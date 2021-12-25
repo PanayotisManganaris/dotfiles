@@ -30,9 +30,39 @@
 ;;        (list '("\\.\\(vcf\\|gpg\\)$" . sensitive-minor-mode))
 ;;        auto-mode-alist))
 
+(use-package bufler
+  :ensure t
+  :config
+  ;; (defun agenda-buffer-p (buffer)
+  ;;   "Return non-nil if BUFFER’s file satisfies ‘org-agenda-file-p’"
+  ;;   (org-agenda-file-p (buffer-file-name buffer)))
+  ;; (push 'agenda-buffer-p bufler-workspace-switch-buffer-filter-fns)
+
+  ;; this is slow. investigate memoization of these things?
+  ;; (bufler-buffer-alist-at nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
+  ;; (bufler-buffers :path nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
+
+  :bind (("C-x C-b" . bufler)
+         ("C-x b" . bufler-switch-buffer)))
+
+(use-package avy
+  :ensure t
+  :bind ("C-S-s" . avy-goto-char-2))
+
+(use-package dogears
+  :ensure t
+  :config
+  (dogears-mode 1)
+  :bind (:map global-map
+      ("M-g d" . dogears-go)
+      ("M-g M-b" . dogears-back)
+      ("M-g M-f" . dogears-forward)
+      ("M-g M-d" . dogears-list)
+      ("M-g M-D" . dogears-sidebar)))
+
 (use-package dired
   :init
-  (setq dired-listing-switches "-ahl" "-v" "--group-directories-first")
+  (setq dired-listing-switches "-ahl -v --group-directories-first")
   (setq dired-auto-revert-buffer t
         dired-dwim-target t
         dired-recursive-copies 'always
@@ -158,8 +188,11 @@
 ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
 (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
                          (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
-                         (concat org-directory "/addressbook.org")
-                         (concat org-directory "/occurance.org"))) ;; CRM file. Network contacts by linking manually (so it sticks), use roam
+                         (concat org-directory "/addressbook.org") ;; CRM file. Network contacts by linking manually (so it sticks), use roam
+                         (concat org-directory "/occurance.org")
+                         (concat org-directory "/zettles/")
+                         "~/src/"
+                         "~/.config/emacs/litinit.org"))
 
 ;; org-agenda
 (setq org-agenda-files (cons org-default-notes-file org-cabinets)) ;; populate agenda from cabinets + refile.org
@@ -625,16 +658,3 @@
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
 (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(avy yasnippet-snippets wucuo which-key use-package sudo-edit rainbow-mode popper poetry perspective org-roam org-ref org-pdftools org-download ob-ipython notmuch magit macrostep lsp-mode ivy-yasnippet ivy-bibtex gnuplot-mode gnuplot elfeed doom-themes conda company)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))

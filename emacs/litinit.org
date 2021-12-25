@@ -8,6 +8,9 @@ Sounds too good to be true?
 els-emacs script takes commandline options like emacsclient
 [[https://gitlab.com/blak3mill3r/emacs-ludicrous-speed]]
 * TODO Aesthetics
+:PROPERTIES:
+:ID:       b4267243-3252-4be5-aafd-2bf17e56b9bc
+:END:
 ** TODO Theme Selection and UI toggles
 :PROPERTIES:
 :ID:       ef50006f-dbbb-4800-bebf-2f834b122c7f
@@ -74,12 +77,6 @@ A function that can parse the saves directory and recover from a backup
 (multiple numbered versions possible) for the current file should be found/created
 *** TODO sensitive-mode/minor-mode
 Limits autosave and backup for sensitive files like gpg keys so there's no un-encrypted copies
-*** TODO manage session recovery using persp and projectile
-:PROPERTIES:
-:ID:       95b10f12-2088-435c-a3aa-1db3880ec0ac
-:END:
-Perspectives include files and defined frame configurations
-set up startup screen to show unexpectedly quit perspectives in a subsection?
 ** TODO Enable, Empower, Automate mode activations
 :PROPERTIES:
 :ID:       51b5345d-67c9-48ef-b749-4ade381c2a36
@@ -97,6 +94,48 @@ auto-mode-alist is used to activate modes according to file extension.
 it is very well defined. only append cons cells of regexp extensions and associated mode(s)
 *** TODO automate recognition of sensitive file types
 waiting on sensitive mode installation (see bookmarks)
+** TODO Buffer Management
+#+begin_src emacs-lisp
+  (use-package bufler
+    :ensure t
+    :config
+    ;; (defun agenda-buffer-p (buffer)
+    ;;   "Return non-nil if BUFFER’s file satisfies ‘org-agenda-file-p’"
+    ;;   (org-agenda-file-p (buffer-file-name buffer)))
+    ;; (push 'agenda-buffer-p bufler-workspace-switch-buffer-filter-fns)
+
+    ;; this is slow. investigate memoization of these things?
+    ;; (bufler-buffer-alist-at nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
+    ;; (bufler-buffers :path nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
+
+    :bind (("C-x C-b" . bufler)
+           ("C-x b" . bufler-switch-buffer)))
+#+end_src
+
+** Movement
+*** Avy
+#+begin_src emacs-lisp
+  (use-package avy
+    :ensure t
+    :bind ("C-S-s" . avy-goto-char-2))
+#+end_src
+*** swiper
+** TODO Session and State Recovery
+:PROPERTIES:
+:ID:       95b10f12-2088-435c-a3aa-1db3880ec0ac
+:END:
+#+begin_src emacs-lisp
+  (use-package dogears
+    :ensure t
+    :config
+    (dogears-mode 1)
+    :bind (:map global-map
+        ("M-g d" . dogears-go)
+        ("M-g M-b" . dogears-back)
+        ("M-g M-f" . dogears-forward)
+        ("M-g M-d" . dogears-list)
+        ("M-g M-D" . dogears-sidebar)))
+#+end_src
 * TODO dired mode
 :PROPERTIES:
 :ID:       3d554912-ac86-4ca1-8723-220fe537b110
@@ -104,7 +143,7 @@ waiting on sensitive mode installation (see bookmarks)
 #+begin_src emacs-lisp
   (use-package dired
     :init
-    (setq dired-listing-switches "-ahl" "-v" "--group-directories-first")
+    (setq dired-listing-switches "-ahl -v --group-directories-first")
     (setq dired-auto-revert-buffer t
           dired-dwim-target t
           dired-recursive-copies 'always
@@ -330,12 +369,15 @@ tags management by C-c C-q and C-c C-c is fast -- better for on the fly connecti
 :ID:       4827b3ea-dff2-413b-a136-6312fe665208
 :END:
 #+begin_src emacs-lisp
-  (setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
-  ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
-  (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
-                           (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
-                           (concat org-directory "/addressbook.org")
-                           (concat org-directory "/occurance.org"))) ;; CRM file. Network contacts by linking manually (so it sticks), use roam
+      (setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
+      ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
+      (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
+                               (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
+                               (concat org-directory "/addressbook.org") ;; CRM file. Network contacts by linking manually (so it sticks), use roam
+                               (concat org-directory "/occurance.org")
+                               (concat org-directory "/zettles/")
+                               "~/src/"
+                               "~/.config/emacs/litinit.org"))
 #+end_src
 *** TODO include all zettles?
 why not? perhaps to keep tags distinct? Or be more meticulous, and use hierarchies to make tags more orderly+specific w/ regexp?
@@ -977,14 +1019,13 @@ discover my major? get similar effect to discover for dired. See the available c
     :config
     (add-hook 'after-init-hook (lambda () (persp-state-load "~/.config/emacs/perspectives/Agenda"))) ;; switch to agenda perspective on startup
     (add-hook 'persp-state-after-load-hook (lambda () (when (equal (persp-current-name) "Agenda")
-                                                        (org-agenda-list)))) ;; show todos by opening Agenda in Agenda persp
-    (require 'ibuffer)
-    :bind (("C-x C-b" . persp-ibuffer) ;; this doesn't seem to be working nicely, shows too much
-           ("C-x b" . persp-ivy-switch-buffer)
-           ("C-x k" . persp-kill-buffer*)
-           (:map ibuffer-mode-map
-                 (("g" . persp-ibuffer)
-                  ("/ B" . persp-ibuffer-set-filter-groups)))))
+                                                        (org-agenda-list))))) ;; show todos by opening Agenda in Agenda persp
+    ;; :bind (("C-x C-b" . persp-ibuffer) ;; this doesn't seem to be working nicely, shows too much
+    ;;        ("C-x b" . persp-ivy-switch-buffer)
+    ;;        ("C-x k" . persp-kill-buffer*)
+    ;;        (:map ibuffer-mode-map
+    ;;              (("g" . persp-ibuffer)
+    ;;               ("/ B" . persp-ibuffer-set-filter-groups))))
 #+end_src
 *** TODO set up default list of open perspectives
 on startup, show comprehensive agenda and offer interface for opening/building perspectives
