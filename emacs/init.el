@@ -506,7 +506,14 @@
   (setq message-sendmail-envelope-from 'header)
   :config
   ;;(add-to-list 'company-backends )
-  (setq-default notmuch-search-oldest-first nil))
+  (setq-default notmuch-search-oldest-first nil)
+  (setq my-searches '((:name "mannodi group" :query "from:amannodi@purdue.edu OR from:yang1494@purdue.edu OR from:pmangana@purdue.edu OR from:dfarache@purdue.edu OR from:rahma103@purdue.edu" :key "j")))
+
+  (unless (member (car my-searches) notmuch-saved-searches)
+    (setq notmuch-saved-searches (append notmuch-saved-searches my-searches)))
+
+  :bind (:map global-map
+              ("C-x m" . notmuch)))
 
 (use-package elfeed
   :ensure t

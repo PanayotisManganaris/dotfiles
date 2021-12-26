@@ -1056,14 +1056,21 @@ Provides on-the-fly navigation of key hierarchies.
 :ID:       def38549-17d3-43f0-8c5b-c16542258e5c
 :END:
 #+begin_src emacs-lisp
-  (autoload 'notmuch "notmuch" "Notmuch mail" t)
-  (use-package notmuch
-    :ensure t
-    :init
-    (setq message-sendmail-envelope-from 'header)
-    :config
-    ;;(add-to-list 'company-backends )
-    (setq-default notmuch-search-oldest-first nil))
+        (autoload 'notmuch "notmuch" "Notmuch mail" t)
+        (use-package notmuch
+          :ensure t
+          :init
+          (setq message-sendmail-envelope-from 'header)
+          :config
+          ;;(add-to-list 'company-backends )
+          (setq-default notmuch-search-oldest-first nil)
+          (setq my-searches '((:name "mannodi group" :query "from:amannodi@purdue.edu OR from:yang1494@purdue.edu OR from:pmangana@purdue.edu OR from:dfarache@purdue.edu OR from:rahma103@purdue.edu" :key "j")))
+
+          (unless (member (car my-searches) notmuch-saved-searches)
+            (setq notmuch-saved-searches (append notmuch-saved-searches my-searches)))
+
+          :bind (:map global-map
+                      ("C-x m" . notmuch)))
 #+end_src
 ** TODO thunderbird mailbox reformat
 :PROPERTIES:
