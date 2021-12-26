@@ -108,8 +108,9 @@ waiting on sensitive mode installation (see bookmarks)
     ;; (bufler-buffer-alist-at nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
     ;; (bufler-buffers :path nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
 
-    :bind (("C-x C-b" . bufler)
-           ("C-x b" . bufler-switch-buffer)))
+    :bind (:map global-map
+                (("C-x C-b" . bufler)
+                 ("C-x b" . bufler-switch-buffer))))
 #+end_src
 
 ** Movement
@@ -130,11 +131,11 @@ waiting on sensitive mode installation (see bookmarks)
     :config
     (dogears-mode 1)
     :bind (:map global-map
-        ("M-g d" . dogears-go)
-        ("M-g M-b" . dogears-back)
-        ("M-g M-f" . dogears-forward)
-        ("M-g M-d" . dogears-list)
-        ("M-g M-D" . dogears-sidebar)))
+                (("M-g d" . dogears-go)
+                 ("M-g M-b" . dogears-back)
+                 ("M-g M-f" . dogears-forward)
+                 ("M-g M-d" . dogears-list)
+                 ("M-g M-D" . dogears-sidebar))))
 #+end_src
 * TODO dired mode
 :PROPERTIES:

@@ -42,8 +42,9 @@
   ;; (bufler-buffer-alist-at nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
   ;; (bufler-buffers :path nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
 
-  :bind (("C-x C-b" . bufler)
-         ("C-x b" . bufler-switch-buffer)))
+  :bind (:map global-map
+              (("C-x C-b" . bufler)
+               ("C-x b" . bufler-switch-buffer))))
 
 (use-package avy
   :ensure t
@@ -54,11 +55,11 @@
   :config
   (dogears-mode 1)
   :bind (:map global-map
-      ("M-g d" . dogears-go)
-      ("M-g M-b" . dogears-back)
-      ("M-g M-f" . dogears-forward)
-      ("M-g M-d" . dogears-list)
-      ("M-g M-D" . dogears-sidebar)))
+              (("M-g d" . dogears-go)
+               ("M-g M-b" . dogears-back)
+               ("M-g M-f" . dogears-forward)
+               ("M-g M-d" . dogears-list)
+               ("M-g M-D" . dogears-sidebar))))
 
 (use-package dired
   :init
@@ -499,25 +500,19 @@
   (which-key-setup-side-window-bottom)
   (which-key-mode 1))
 
-(autoload 'notmuch "notmuch" "Notmuch mail" t)
 (use-package notmuch
   :ensure t
   :init
   (setq message-sendmail-envelope-from 'header)
   :config
-  ;;(add-to-list 'company-backends )
+  ;; (add-to-list 'company-backends )
   (setq-default notmuch-search-oldest-first nil)
   (setq my-searches '((:name "mannodi group" :query "from:amannodi@purdue.edu OR from:yang1494@purdue.edu OR from:pmangana@purdue.edu OR from:dfarache@purdue.edu OR from:rahma103@purdue.edu" :key "j")))
-
   (unless (member (car my-searches) notmuch-saved-searches)
     (setq notmuch-saved-searches (append notmuch-saved-searches my-searches)))
-
-  (defun pm/notmuch-poll-hook
-
-  (add-hook 
-
   :bind (:map global-map
-              ("C-x m" . notmuch)))
+              ("C-x m" . notmuch)
+              ("C-x C-m" . notmuch-mua-new-mail)))
 
 (use-package elfeed
   :ensure t
