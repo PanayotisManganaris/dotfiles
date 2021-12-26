@@ -1057,6 +1057,13 @@ Provides on-the-fly navigation of key hierarchies.
 :END:
 #+begin_src emacs-lisp
   (autoload 'notmuch "notmuch" "Notmuch mail" t)
+  (use-package notmuch
+    :ensure t
+    :init
+    (setq message-sendmail-envelope-from 'header)
+    :config
+    ;;(add-to-list 'company-backends )
+    (setq-default notmuch-search-oldest-first nil))
 #+end_src
 ** TODO thunderbird mailbox reformat
 :PROPERTIES:

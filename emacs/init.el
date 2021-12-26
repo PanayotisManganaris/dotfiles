@@ -500,6 +500,13 @@
   (which-key-mode 1))
 
 (autoload 'notmuch "notmuch" "Notmuch mail" t)
+(use-package notmuch
+  :ensure t
+  :init
+  (setq message-sendmail-envelope-from 'header)
+  :config
+  ;;(add-to-list 'company-backends )
+  (setq-default notmuch-search-oldest-first nil))
 
 (use-package elfeed
   :ensure t
