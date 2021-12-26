@@ -512,6 +512,10 @@
   (unless (member (car my-searches) notmuch-saved-searches)
     (setq notmuch-saved-searches (append notmuch-saved-searches my-searches)))
 
+  (defun pm/notmuch-poll-hook
+
+  (add-hook 
+
   :bind (:map global-map
               ("C-x m" . notmuch)))
 
