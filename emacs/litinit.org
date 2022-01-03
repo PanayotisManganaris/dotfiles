@@ -7,11 +7,13 @@ avoid deferred loading. avoid arcane elisp. avoid repurposing a sped-up distro f
 Sounds too good to be true?
 els-emacs script takes commandline options like emacsclient
 [[https://gitlab.com/blak3mill3r/emacs-ludicrous-speed]]
-* TODO Aesthetics
+** consider migrating to emacs-ng?
+rust rewrite with modern features. see if it's worth it. see if it's complete.
+* TODO Aesthetics and Presentation
 :PROPERTIES:
 :ID:       b4267243-3252-4be5-aafd-2bf17e56b9bc
 :END:
-** TODO Theme Selection and UI toggles
+** TODO Theme, text display, feedback, selection and UI toggles
 :PROPERTIES:
 :ID:       ef50006f-dbbb-4800-bebf-2f834b122c7f
 :END:
@@ -22,11 +24,23 @@ els-emacs script takes commandline options like emacsclient
 #+end_src
 Running the Emacs server necessitates disabling GUI menus, scrollbar,
 etc in early-init.el.
-*** TODO adjust "dull" color face for comments/done items
+*** DONE adjust "dull" color face for comments
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 02:14]
+:END:
+*** DONE adjust "dull" color face for done items
+:STATUSLOG:
+- State "DONE"       from              [2022-01-03 Mon 02:13]
+:END:
+strikethrough done items
 *** TODO enable better tracking of line and column number
 ** TODO customize startup screen
-*** TODO show agenda on startup
-*** TODO show perspective switcher on startup
+*** TODO show agenda on startup?
+*** CANCELED show perspective switcher on startup
+:STATUSLOG:
+- State "CANCELED"   from "TODO"       [2022-01-03 Mon 02:12] \\
+  perspectives are trash. replaced with bufler and builtin registry.
+:END:
 * TODO Emacs Foundations
 ** DONE Package Management
 :PROPERTIES:
@@ -99,6 +113,7 @@ waiting on sensitive mode installation (see bookmarks)
   (use-package bufler
     :ensure t
     :config
+    ;; function for grouping roam buffers
     ;; (defun agenda-buffer-p (buffer)
     ;;   "Return non-nil if BUFFER’s file satisfies ‘org-agenda-file-p’"
     ;;   (org-agenda-file-p (buffer-file-name buffer)))
@@ -107,6 +122,10 @@ waiting on sensitive mode installation (see bookmarks)
     ;; this is slow. investigate memoization of these things?
     ;; (bufler-buffer-alist-at nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
     ;; (bufler-buffers :path nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
+
+    ;; if Dir: /home/panos/org and org-mode exist, collapse the section upon bufler open...
+    ;; if fast autogrouping can be done, do it...
+    ;; (magit-section-toggle (magit-get-section (magit-section-ident)))
 
     :bind (:map global-map
                 (("C-x C-b" . bufler)
@@ -173,11 +192,20 @@ waiting on sensitive mode installation (see bookmarks)
           dired-recursive-deletes 'top)
     :config
     (add-hook 'dired-mode-hook 'dired-hide-details-mode)
+    ;;dealing with extenuating circumstances in remote sessions
+    ;;(defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers ()
+    ;;  "For when dired in tramp displays blank screen when remote system
+    ;;   does not use GNU ls, which is the only variant that supports
+    ;;   --group-directories-first."
+    ;;  (when (file-remote-p default-directory)
+    ;;    (setq-local dired-actual-switches (car args))))
+
+    ;; Don't complain about this command being disabled
+    (put 'dired-find-alternate-file 'disabled nil)
     :bind (:map dired-mode-map
                 (("C-c C-e" . wdired-change-to-wdired-mode)))) ;; To be consistent with ivy and wgrep integration
 
-  (use-package dired
-    :init
+    ;; :init
     ;; Where to store image caches
     ;;        image-dired-dir (concat doom-cache-dir "image-dired/")
     ;;        image-dired-db-file (concat image-dired-dir "db.el")
@@ -186,33 +214,28 @@ waiting on sensitive mode installation (see bookmarks)
     ;;        image-dired-temp-rotate-image-file (concat image-dired-dir "temp-rotate-image")
     ;; Screens are larger nowadays, we can afford slightly larger thumbnails
     ;;        image-dired-thumb-size 150)
-    :config
+    ;; :config
     ;; cool thumbnails
     ;;  (set-popup-rule! "^\\*image-dired"
     ;;    :slot 20 :size 0.8 :select t :quit nil :ttl 0)
     ;;  (set-evil-initial-state! 'image-dired-display-image-mode 'emacs)
-
-    ;;dealing with extenuating circumstances in remote sessions
-    ;;    (add-hook! 'dired-mode-hook 
-    ;;      (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers-h ()
-    ;;        "Fix #1703: dired over TRAMP displays a blank screen.
-    ;;
-    ;;This is because there's no guarantee the remote system has GNU ls, which is the
-    ;;only variant that supports --group-directories-first."
-    ;;        (when (file-remote-p default-directory)
-    ;;          (setq-local dired-actual-switches (car args))))))
-
-    ;; Don't complain about this command being disabled
-    ;;  (put 'dired-find-alternate-file 'disabled nil)
-  )
 #+end_src
-** TODO dired as a file manager
-*** TODO display thumbnails
-*** TODO file/directory ordering
-*** INACTIVE install discover/discover-my-major for dired
-* TODO GNUplot Mode
+** TODO display thumbnails
+** DONE file/directory ordering
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 02:20]
+:END:
+push group switch to switches list. Notice: this causes conditional
+dired failure in tramp sessions in remote systems without gnu ls.
+** TODO improve pm/dired-disable-gnu-ls-flags-in-tramp-buffers
+and add as hook
+** INACTIVE install discover/discover-my-major for dired
+* DONE GNUplot Mode
 :PROPERTIES:
 :ID:       aa3be9ee-56c6-478c-ac7d-15262aa82d2a
+:END:
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 02:34]
 :END:
 Major modes for editing gnuplot scripts and for interacting with
 gnuplot interactively.  Both stand alone, but primarily serve org-plot
@@ -262,6 +285,17 @@ learn more anyway...
     :ensure t
     :bind
     ("C-x g" . magit-status))
+#+end_src
+** TODO projectile mode
+#+begin_src emacs-lisp
+  (use-package projectile
+    :ensure t
+    :config
+    (require 'subr-x)
+    (setq projectile-completion-system 'ivy)
+    (projectile-mode +1)
+    :bind (:map global-map
+                (("C-c p" . projectile-command-map))))
 #+end_src
 * TODO Cryptography
 ** EPA

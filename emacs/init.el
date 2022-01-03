@@ -33,6 +33,7 @@
 (use-package bufler
   :ensure t
   :config
+  ;; function for grouping roam buffers
   ;; (defun agenda-buffer-p (buffer)
   ;;   "Return non-nil if BUFFER’s file satisfies ‘org-agenda-file-p’"
   ;;   (org-agenda-file-p (buffer-file-name buffer)))
@@ -41,6 +42,10 @@
   ;; this is slow. investigate memoization of these things?
   ;; (bufler-buffer-alist-at nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
   ;; (bufler-buffers :path nil :filter-fns bufler-workspace-switch-buffer-filter-fns)
+
+  ;; if Dir: /home/panos/org and org-mode exist, collapse the section upon bufler open...
+  ;; if fast autogrouping can be done, do it...
+  ;; (magit-section-toggle (magit-get-section (magit-section-ident)))
 
   :bind (:map global-map
               (("C-x C-b" . bufler)
@@ -82,11 +87,20 @@
         dired-recursive-deletes 'top)
   :config
   (add-hook 'dired-mode-hook 'dired-hide-details-mode)
+  ;;dealing with extenuating circumstances in remote sessions
+  ;;(defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers ()
+  ;;  "For when dired in tramp displays blank screen when remote system
+  ;;   does not use GNU ls, which is the only variant that supports
+  ;;   --group-directories-first."
+  ;;  (when (file-remote-p default-directory)
+  ;;    (setq-local dired-actual-switches (car args))))
+
+  ;; Don't complain about this command being disabled
+  (put 'dired-find-alternate-file 'disabled nil)
   :bind (:map dired-mode-map
               (("C-c C-e" . wdired-change-to-wdired-mode)))) ;; To be consistent with ivy and wgrep integration
 
-(use-package dired
-  :init
+  ;; :init
   ;; Where to store image caches
   ;;        image-dired-dir (concat doom-cache-dir "image-dired/")
   ;;        image-dired-db-file (concat image-dired-dir "db.el")
@@ -95,25 +109,11 @@
   ;;        image-dired-temp-rotate-image-file (concat image-dired-dir "temp-rotate-image")
   ;; Screens are larger nowadays, we can afford slightly larger thumbnails
   ;;        image-dired-thumb-size 150)
-  :config
+  ;; :config
   ;; cool thumbnails
   ;;  (set-popup-rule! "^\\*image-dired"
   ;;    :slot 20 :size 0.8 :select t :quit nil :ttl 0)
   ;;  (set-evil-initial-state! 'image-dired-display-image-mode 'emacs)
-
-  ;;dealing with extenuating circumstances in remote sessions
-  ;;    (add-hook! 'dired-mode-hook 
-  ;;      (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers-h ()
-  ;;        "Fix #1703: dired over TRAMP displays a blank screen.
-  ;;
-  ;;This is because there's no guarantee the remote system has GNU ls, which is the
-  ;;only variant that supports --group-directories-first."
-  ;;        (when (file-remote-p default-directory)
-  ;;          (setq-local dired-actual-switches (car args))))))
-
-  ;; Don't complain about this command being disabled
-  ;;  (put 'dired-find-alternate-file 'disabled nil)
-)
 
 (use-package gnuplot-mode
   :ensure t)
@@ -132,6 +132,15 @@
   :ensure t
   :bind
   ("C-x g" . magit-status))
+
+(use-package projectile
+  :ensure t
+  :config
+  (require 'subr-x)
+  (setq projectile-completion-system 'ivy)
+  (projectile-mode +1)
+  :bind (:map global-map
+              (("C-c p" . projectile-command-map))))
 
 (use-package epa-file
   :config
@@ -691,3 +700,17 @@
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
 (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(projectile swiper yasnippet-snippets wucuo which-key use-package sudo-edit rainbow-mode popper poetry perspective org-roam org-ref org-pdftools org-download ob-ipython notmuch multiple-cursors magit macrostep lsp-mode jupyter ivy-yasnippet ivy-bibtex gnuplot-mode gnuplot elfeed doom-themes dogears conda company bufler))
+ '(send-mail-function 'mailclient-send-it))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))
