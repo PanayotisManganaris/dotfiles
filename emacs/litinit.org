@@ -123,8 +123,10 @@ waiting on sensitive mode installation (see bookmarks)
     ("C-<" . mc/mark-previous-like-this)
     ("C-c C-<" . mc/mark-all-like-this))
 #+end_src
-
 ** Movement
+:STATUSLOG:
+- State "DONE"       from              [2022-01-03 Mon 01:23]
+:END:
 *** Avy
 #+begin_src emacs-lisp
   (use-package avy
@@ -132,9 +134,18 @@ waiting on sensitive mode installation (see bookmarks)
     :bind ("C-S-s" . avy-goto-char-2))
 #+end_src
 *** swiper
-** TODO Session and State Recovery
+#+begin_src emacs-lisp
+  (use-package swiper
+    :ensure t
+    :bind (:map global-map
+                ("C-s" . swiper)))
+#+end_src
+** Session and State Recovery
 :PROPERTIES:
 :ID:       95b10f12-2088-435c-a3aa-1db3880ec0ac
+:END:
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 01:24]
 :END:
 #+begin_src emacs-lisp
   (use-package dogears
