@@ -7,4 +7,5 @@
 (tool-bar-mode -1)
 ;; think about playing around with window fringes
 
-;; (add-to-list 'default-frame-alist '(alpha . (85 . 85))) ;; transparency if you please
+;; transparency config
+;; (add-to-list 'default-frame-alist '(alpha . (85 . 85)))
