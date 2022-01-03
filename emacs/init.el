@@ -1,3 +1,11 @@
+(defun pm/org-babel-tangle-config ()
+  (when (equal (buffer-file-name)
+	       (expand-file-name "~/.config/emacs/litinit.org"))
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
+
+(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'pm/org-babel-tangle-config)))
+
 (load-theme 'doom-dark+ t)
 (setq inhibit-startup-screen t)
 (setq visible-bell t)
@@ -149,39 +157,31 @@
 (use-package lsp-mode
   :ensure t)
 
-(defun pm/org-babel-tangle-config ()
-  (when (equal (buffer-file-name)
-	       (expand-file-name "~/.config/emacs/litinit.org"))
-    (let ((org-confirm-babel-evaluate nil))
-      (org-babel-tangle))))
-
-(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'pm/org-babel-tangle-config)))
-
 (use-package org
-  :init (setq org-export-backends '(ascii html icalendar latex odt)) ;; org exports establish prior to loading org.el
   :ensure t
+  :init (setq org-export-backends '(ascii html icalendar latex odt)) ;; org exports establish prior to loading org.el
   :config
   (setq org-startup-indented t) ;; simplify heirarchies management in org
   (setq org-ellipsis " [+]") ;; Custom fold indicator because I often use ellipses and it's confusing
-  (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil))))) ;; using custom -- consider editing theme?
-  (setq org-use-property-inheritance t)
+  (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))
+  (setq org-use-property-inheritance t) ;; in trees children inherent properties fields from parents
   (setq org-directory (concat (getenv "HOME") "/org"))
   (setq org-use-fast-todo-selection 'auto) ;; present keyword hotkeys to user if available
   (setq org-treat-S-cursor-todo-selection-as-state-change nil) ;; cycle keywords without state logging using S-left\right
-  (setq org-todo-keywords ;; set to timestamp deliberate state changes
+  (setq org-todo-keywords ;; set ! to timestamp deliberate state changes
         '((sequence "TODO(t)"
                     "NEXT(n!)"
-                    "WAIT(w@/!)"      
-                    "|"	          
-                    "DONE(d!)"        
-                    "INACTIVE(i@)"    
-                    "CANCELED(q@/@)") 	                                   
-          (sequence "JOURNAL(j!)"     
-                    "CONTACT(c!)"     
-                    "MEETING(m!)"     
+                    "WAIT(w@/!)"
+                    "|"
+                    "DONE(d!)"
+                    "INACTIVE(i@)"
+                    "CANCELED(q@/@)")
+          (sequence "JOURNAL(j!)"
+                    "CONTACT(c!)"
+                    "MEETING(m!)"
                     "|")
           (sequence "ATTEND(a!)" "|" "DONE(d!)" "MISSED(f!)") ;; pure calendar events?
-          (sequence "SEQ(s)" "|"))) ;; notebook nagiational labels?
+          (sequence "SEQ(s)" "|"))) ;; notebook navigational labels?
   ;;        (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED"))) ;; development task labels
   (defun pm/modify-org-done-face ()
     (setq org-fontify-done-headline t)
@@ -206,90 +206,110 @@
   (setq org-enforce-todo-dependencies t)
   (setq org-agenda-dim-blocked-tasks t) ;; try this on for size -- only effects agenda view
   (setq org-log-into-drawer "STATUSLOG") ;; hide state change history in drawer under headlines
-  (setq org-priority-default 3) ;; strictly options for sorting the agenda
+  (setq org-priority-default 3) ;; options for sorting the agenda
   (setq org-priority-highest 1)
-  (setq org-priority-lowest 5)
+  (setq org-priority-lowest 5))
 
-(setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
-;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
-(setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
-                         (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
-                         (concat org-directory "/addressbook.org") ;; CRM file. Network contacts by linking manually (so it sticks), use roam
-                         (concat org-directory "/occurance.org")
-                         (concat org-directory "/zettles/")
-                         "~/src/"
-                         "~/.config/emacs/litinit.org"))
+(use-package org
+  :ensure t
+  :init
+  (setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
+  ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
+  (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
+                           (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
+                           (concat org-directory "/addressbook.org") ;; CRM file. Network contacts by linking manually (so it sticks), use roam
+                           (concat org-directory "/occurance.org")
+                           (concat org-directory "/zettles/")
+                           "~/src/"
+                           "~/.config/emacs/litinit.org")))
 
-;; org-agenda
-(setq org-agenda-files (cons org-default-notes-file org-cabinets)) ;; populate agenda from cabinets + refile.org
-(setq org-agenda-skip-scheduled-if-deadline-is-shown t) ;; show only deadline on or after day deadlining task is scheduled
-(setq org-agenda-span 'week) ;; show week view by default
-(setq org-agenda-start-day "-0d") ;; start at today by default (in org-read-date input form)
-(setq org-agenda-start-on-weekday nil) ;; weekly overview starts today and looks forward, leave the past be.
-;; tags/TODO filters (see tag and property searches) for agenda organization:
-(setq org-stuck-projects 
-      '("+LEVEL=1+TODO/-DONE-CANCELED-INACTIVE-NEXT" ("NEXT")))
-;; Use the current window for indirect buffer display
-(setq org-indirect-buffer-display 'current-window)
+(use-package org
+  :ensure t
+  :init
+  (setq org-agenda-files (cons org-default-notes-file org-cabinets)) ;; populate agenda from cabinets + refile.org
+  (setq org-agenda-skip-scheduled-if-deadline-is-shown t) ;; show only deadline on or after day deadlining task is scheduled
+  (setq org-agenda-span 'week) ;; show week view by default
+  (setq org-agenda-start-day "-0d") ;; start at today by default (in org-read-date input form)
+  (setq org-agenda-start-on-weekday nil) ;; weekly overview starts today and looks forward, leave the past be.
+  ;; tags/TODO filters (see tag and property searches) for agenda organization:
+  (setq org-stuck-projects 
+        '("+LEVEL=1+TODO/-DONE-CANCELED-INACTIVE-NEXT" ("NEXT")))
+  ;; Use the current window for indirect buffer display
+  (setq org-indirect-buffer-display 'current-window))
 
-(setq org-columns-default-format
-      "%TODO %2PRIORITY %25ITEM(Task) %10Effort(Est_Effort){est+} %CLOCKSUM %CLOCKSUM_T")
-(org-clock-persistence-insinuate) ;; set up hooks for clock persistence through sessions
-(setq org-clock-persist t) ;; continue any running clock when emacs exits. Also save all set clock history accross sessions.
-(setq org-clock-idle-time 10) ;; and prompt to resolve running clocks when restarting, or after 10 minutes of emacs idle time.
+(use-package org
+  :ensure t
+  :init
+  (setq org-columns-default-format
+        "%TODO %2PRIORITY %25ITEM(Task) %10Effort(Est_Effort){est+} %CLOCKSUM %CLOCKSUM_T")
+  (setq org-clock-persist t) ;; continue any running clock when emacs exits. Also save all set clock history accross sessions.
+  (setq org-clock-idle-time 10) ;; and prompt to resolve running clocks when restarting, or after 10 minutes of emacs idle time.
+  :config
+  (org-clock-persistence-insinuate))  ;; set up hooks for clock persistence through sessions
 
-(setq org-capture-templates
-      (quote (("p" "project outlining") ;; new project definitions and reports on predefined projects
-	      ("pt" "todo" entry (file "~/org/refile.org") ;; a new task needing to be defined and inserted into ongoing project
-	       "* TODO %?\n%U\n%a\n")
-	      ("ps" "todo" entry (file "~/org/refile.org") ;; schedule a new event.
-	       "* TODO %?\n%^T")
-	      ;; template current time, link in ring (or current file), capture new task name, pause other clocks, clock time, resume other clocks
-	      ;; ex :: good for a job in any given piece of code because it links to the line that inspired it.
-	      ;;		("pr" "reflect" entry (file "~/org/refile.org")
-	      ;;		 "* JOURNAL")
-	      ;; OR
-	      ;;		("n" "note" entry (file "~/org/refile.org")
-	      ;;               "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-	      ;; not sure what this looks like yet. On-the-clock thoughts about current work (look at %k), look at organizing by :tag
-	      ("i" "interruptions")
-	      ("ir" "respond" entry (file "~/org/refile.org")
-	       "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-	      ;; fully automated reaction cache for differed inquiries, requests, solicitations, etc.
-	      ("ii" "idea" entry (file "~/org/refile.org")
-	       "* INACTIVE")
-	      ;; for academic questions, topics of investigation, project proposals, paper subject.
-	      ;;		("w" "org-protocol" entry (file "~/org/refile.org")
-	      ;;		 "* TODO Review %c\n%U\n" :immediate-finish t)
-	      ;; tracking org workflow and planning adaptations TAG = :ENV?
-	      ("m" "Meeting" entry (file "~/org/refile.org")
-	       "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-	      ;; documenting essentials of scheduled and spontaneous meetings/encounters.
-	      ("c" "Contact" entry (file "~/org/refile.org") ;; document professional contact
-	       "* CONTACT"))))
-(defun pm/remove-empty-drawer-on-clock-out ()
-  "Remove empty STATUSLOG drawers on clock out, use as hook to de-clutter ephemeral captures"
-  (interactive)
-  (save-excursion
-    (beginning-of-line 0)
-    (org-remove-empty-drawer-at "STATUSLOG" (point))))
-(add-hook 'org-clock-out-hook 'pm/remove-empty-drawer-on-clock-out 'append)
+(use-package org
+  :ensure t
+  :init
+  (setq org-capture-templates
+        (quote (("p" "project outlining") ;; new project definitions and reports on predefined projects
+                ("pt" "todo" entry (file "~/org/refile.org") ;; a new task needing to be defined and inserted into ongoing project
+                 "* TODO %?\n%U\n%a\n")
+                ("ps" "todo" entry (file "~/org/refile.org") ;; schedule a new event.
+                 "* TODO %?\n%^T")
+                ;; template current time, link in ring (or current file), capture new task name, pause other clocks, clock time, resume other clocks
+                ;; ex :: good for a job in any given piece of code because it links to the line that inspired it.
+                ;;		("pr" "reflect" entry (file "~/org/refile.org")
+                ;;		 "* JOURNAL")
+                ;; OR
+                ;;		("n" "note" entry (file "~/org/refile.org")
+                ;;               "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+                ;; not sure what this looks like yet. On-the-clock thoughts about current work (look at %k), look at organizing by :tag
+                ("i" "interruptions")
+                ("ir" "respond" entry (file "~/org/refile.org")
+                 "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+                ;; fully automated reaction cache for differed inquiries, requests, solicitations, etc.
+                ("ii" "idea" entry (file "~/org/refile.org")
+                 "* INACTIVE")
+                ;; for academic questions, topics of investigation, project proposals, paper subject.
+                ;;		("w" "org-protocol" entry (file "~/org/refile.org")
+                ;;		 "* TODO Review %c\n%U\n" :immediate-finish t)
+                ;; tracking org workflow and planning adaptations TAG = :ENV?
+                ("m" "Meeting" entry (file "~/org/refile.org")
+                 "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+                ;; documenting essentials of scheduled and spontaneous meetings/encounters.
+                ("c" "Contact" entry (file "~/org/refile.org") ;; document professional contact
+                 "* CONTACT"))))
+  :config
+  (defun pm/remove-empty-drawer-on-clock-out ()
+    "Remove empty STATUSLOG drawers on clock out, use as hook to de-clutter ephemeral captures"
+    (interactive)
+    (save-excursion
+      (beginning-of-line 0)
+      (org-remove-empty-drawer-at "STATUSLOG" (point))))
+  (add-hook 'org-clock-out-hook 'pm/remove-empty-drawer-on-clock-out 'append))
 
-;; refile targets include any file contributing to the agenda - up to 9 levels deep
-(setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
-;; Use full outline paths for refile targets - file directly into agenda position using Ivy
-(setq org-refile-use-outline-path t)
-;; Targets complete directly with Ivy, org need not assist
-(setq org-outline-path-complete-in-steps nil)
-;; Allow refile to create parent tasks with confirmation
-(setq org-refile-allow-creating-parent-nodes 'confirm)
-(defun pm/verify-refile-target ()
-  "Exclude todo keywords with a done state from refile targets"
-(not (member (nth 4 (org-heading-components)) org-done-keywords)))
-(setq org-refile-target-verify-function 'pm/verify-refile-target)
+(use-package org
+  :ensure t
+  :init
+  ;; refile targets include any file contributing to the agenda - up to 9 levels deep
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
+  ;; Use full outline paths for refile targets - file directly into agenda position using Ivy
+  (setq org-refile-use-outline-path t)
+  ;; Targets complete directly with Ivy, org need not assist
+  (setq org-outline-path-complete-in-steps nil)
+  ;; Allow refile to create parent tasks with confirmation
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  :config
+  (defun pm/verify-refile-target ()
+    "Exclude todo keywords with a done state from refile targets"
+    (not (member (nth 4 (org-heading-components)) org-done-keywords)))
+  (setq org-refile-target-verify-function 'pm/verify-refile-target))
 
-(setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
-(setq org-image-actual-width '(200))
+(use-package org
+  :ensure t
+  :init
+  (setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
+  (setq org-image-actual-width '(200)))
 
 (use-package ob-ipython
   :ensure t
@@ -310,17 +330,24 @@
    (latex . t)
    (ditaa . t)
    (ruby . t)))
+(use-package org
+  :ensure t
+  :config
+  (setq org-confirm-babel-evaluate nil)
+  (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append))
 
-(setq org-confirm-babel-evaluate nil)
-(add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)
+(use-package org
+  :ensure t
+  :init
+  (setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0)))
+  ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 
-(setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
-;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
-
-:bind (("C-c l" . org-store-link) ;; global organization bindings
-       ("C-c a" . org-agenda) 
-       ("C-c c" . org-capture)))
+(use-package org
+  :ensure t
+  :bind (("C-c l" . org-store-link) ;; global organization bindings
+         ("C-c a" . org-agenda) 
+         ("C-c c" . org-capture)))
 
 (use-package org-tempo ;; builtin
   ;;:config
@@ -700,17 +727,3 @@
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
 (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(projectile swiper yasnippet-snippets wucuo which-key use-package sudo-edit rainbow-mode popper poetry perspective org-roam org-ref org-pdftools org-download ob-ipython notmuch multiple-cursors magit macrostep lsp-mode jupyter ivy-yasnippet ivy-bibtex gnuplot-mode gnuplot elfeed doom-themes dogears conda company bufler))
- '(send-mail-function 'mailclient-send-it))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))

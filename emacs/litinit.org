@@ -9,6 +9,26 @@ els-emacs script takes commandline options like emacsclient
 [[https://gitlab.com/blak3mill3r/emacs-ludicrous-speed]]
 ** consider migrating to emacs-ng?
 rust rewrite with modern features. see if it's worth it. see if it's complete.
+* DONE Automatically Tangle EMACS Configuration
+:PROPERTIES:
+:ID:       88bbb14f-2679-47a5-a7b6-e2b45d7a2503
+:END:
+:STATUSLOG:
+- State "DONE"       from              [2021-09-12 Sun 12:25]
+:END:
+tangle litinit.org to init.el when saving this file.
+#+begin_src emacs-lisp
+  (defun pm/org-babel-tangle-config ()
+    (when (equal (buffer-file-name)
+		 (expand-file-name "~/.config/emacs/litinit.org"))
+      (let ((org-confirm-babel-evaluate nil))
+	(org-babel-tangle))))
+
+  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'pm/org-babel-tangle-config)))
+#+end_src
+** psudo defun:
+if full path to litinit is current buffer, then do not confirm
+evaluation and tangle file.  Hooked to saving in org-mode
 * TODO Aesthetics and Presentation
 :PROPERTIES:
 :ID:       b4267243-3252-4be5-aafd-2bf17e56b9bc
@@ -276,17 +296,31 @@ or unlock when universal unlock key is pressed?
     (global-company-mode))
 #+end_src
 all purpose backend for on-the-fly code and text completion  
-* TODO Version Control
-** TODO utilize emacs vc?
+* DONE Version Control
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 02:50]
+:END:
+** CANCELED utilize emacs vc?
+:STATUSLOG:
+- State "CANCELED"   from "TODO"       [2022-01-03 Mon 02:50] \\
+  emacs vc is arcane... probably useless? maybe helpful for svn? consider removing it.
+:END:
 learn more anyway...
-** TODO git integration
+** DONE git integration
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 02:49]
+:END:
 #+begin_src emacs-lisp
   (use-package magit
     :ensure t
     :bind
     ("C-x g" . magit-status))
 #+end_src
-** TODO projectile mode
+uses smerge to resolve merge conflicts by default
+** DONE projectile mode
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 02:47]
+:END:
 #+begin_src emacs-lisp
   (use-package projectile
     :ensure t
@@ -297,40 +331,31 @@ learn more anyway...
     :bind (:map global-map
                 (("C-c p" . projectile-command-map))))
 #+end_src
-* TODO Cryptography
+easily pull up projects defined by a version controlling repository and avoid excessive file finding.
+
+pretty deep, learn.
+* DONE Cryptography
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 02:52]
+:END:
 ** EPA
+easy pgp assistant helps to deal with encrypted files quickly
 #+begin_src emacs-lisp
   (use-package epa-file
     :config
     (epa-file-enable))
 #+end_src
-* TODO LSP mode
+* Emacs as an IDE
+** TODO LSP mode
 #+begin_src emacs-lisp
   (use-package lsp-mode
     :ensure t)
 #+end_src
+** literate programing
+*** org babel
+*** emacs jupyter
 * TODO Org-mode
-** DONE Automatically Tangle Configuration
-:PROPERTIES:
-:ID:       88bbb14f-2679-47a5-a7b6-e2b45d7a2503
-:END:
-:STATUSLOG:
-- State "DONE"       from              [2021-09-12 Sun 12:25]
-:END:
-tangle litinit.org to init.el when saving this file.
-#+begin_src emacs-lisp
-  (defun pm/org-babel-tangle-config ()
-    (when (equal (buffer-file-name)
-		 (expand-file-name "~/.config/emacs/litinit.org"))
-      (let ((org-confirm-babel-evaluate nil))
-	(org-babel-tangle))))
-
-  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'pm/org-babel-tangle-config)))
-#+end_src
-*** psudo defun:
-if full path to litinit is current buffer, then do not confirm
-evaluation and tangle file.  Hooked to saving in org-mode
-** TODO Org(
+** TODO Org TODO hierarchies presentation and UI
 :PROPERTIES:
 :ID:       7e51f71f-4166-40f4-8701-cea7edf58451
 :END:
@@ -339,30 +364,30 @@ additionally, the appearance of certain faces, drawers, and modes are configured
 finally certain organization tools are given default definitions or behaviors to aid with my chosen workflow
 #+begin_src emacs-lisp
   (use-package org
-    :init (setq org-export-backends '(ascii html icalendar latex odt)) ;; org exports establish prior to loading org.el
     :ensure t
+    :init (setq org-export-backends '(ascii html icalendar latex odt)) ;; org exports establish prior to loading org.el
     :config
     (setq org-startup-indented t) ;; simplify heirarchies management in org
     (setq org-ellipsis " [+]") ;; Custom fold indicator because I often use ellipses and it's confusing
-    (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil))))) ;; using custom -- consider editing theme?
-    (setq org-use-property-inheritance t)
+    (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))
+    (setq org-use-property-inheritance t) ;; in trees children inherent properties fields from parents
     (setq org-directory (concat (getenv "HOME") "/org"))
     (setq org-use-fast-todo-selection 'auto) ;; present keyword hotkeys to user if available
     (setq org-treat-S-cursor-todo-selection-as-state-change nil) ;; cycle keywords without state logging using S-left\right
-    (setq org-todo-keywords ;; set to timestamp deliberate state changes
+    (setq org-todo-keywords ;; set ! to timestamp deliberate state changes
           '((sequence "TODO(t)"
                       "NEXT(n!)"
-                      "WAIT(w@/!)"      
-                      "|"	          
-                      "DONE(d!)"        
-                      "INACTIVE(i@)"    
-                      "CANCELED(q@/@)") 	                                   
-            (sequence "JOURNAL(j!)"     
-                      "CONTACT(c!)"     
-                      "MEETING(m!)"     
+                      "WAIT(w@/!)"
+                      "|"
+                      "DONE(d!)"
+                      "INACTIVE(i@)"
+                      "CANCELED(q@/@)")
+            (sequence "JOURNAL(j!)"
+                      "CONTACT(c!)"
+                      "MEETING(m!)"
                       "|")
             (sequence "ATTEND(a!)" "|" "DONE(d!)" "MISSED(f!)") ;; pure calendar events?
-            (sequence "SEQ(s)" "|"))) ;; notebook nagiational labels?
+            (sequence "SEQ(s)" "|"))) ;; notebook navigational labels?
     ;;        (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED"))) ;; development task labels
     (defun pm/modify-org-done-face ()
       (setq org-fontify-done-headline t)
@@ -370,10 +395,10 @@ finally certain organization tools are given default definitions or behaviors to
       (set-face-attribute 'org-headline-done nil
                           :strike-through t
                           :foreground "light gray"))
-  
+
     (eval-after-load "org"
       (add-hook 'org-add-hook 'pm/modify-org-done-face))
-  
+
     (setq org-todo-keyword-faces
           (quote (("TODO" :foreground "blue" :weight bold)
                   ("NEXT" :foreground "red" :weight bold)
@@ -387,9 +412,9 @@ finally certain organization tools are given default definitions or behaviors to
     (setq org-enforce-todo-dependencies t)
     (setq org-agenda-dim-blocked-tasks t) ;; try this on for size -- only effects agenda view
     (setq org-log-into-drawer "STATUSLOG") ;; hide state change history in drawer under headlines
-    (setq org-priority-default 3) ;; strictly options for sorting the agenda
+    (setq org-priority-default 3) ;; options for sorting the agenda
     (setq org-priority-highest 1)
-    (setq org-priority-lowest 5)
+    (setq org-priority-lowest 5))
 #+end_src
 consolidate automated .org files (captures, project categories, project logs, archives; contacts, zettles, bibliography) under ~/org.
 
@@ -400,7 +425,13 @@ tags be inherited
 like the commented dev maintainance workflow?
 *** TODO develop filesystem
 this depends on how best to take literature notes in large part...
-desires: take zettles while reading, combine reading pdfs and notes in interleaving fashion?
+
+ideas/desires
+- take zettles while reading
+- combine reading pdfs and notes in interleaving fashion?
+
+Simplicity is important. So limiting org subdirs to zettles/bibliotex is desirable.
+reference notes must be integrated into knowledge graph. this is mostly aided through auto templates.
 *** GTD Philosophy
 clearly label actionables with some conveniences for tracking state changes over a project's history:
 
@@ -423,7 +454,7 @@ captures documenting unplanned workaday occurrences as org trees can be balled w
 perhaps category properties or tags are better -- but they lack the convenient time stamping
 *** INACTIVE Configure universal properties?
 **** INACTIVE universal tags?
-":STUDY:EMAIL:PERSONAL:PURCHASE:GROUP: -> org-tag-alist" for project assignment
+":STUDY:EMAIL:PERSONAL:PURCHASE:MANNODIGROUP: -> org-tag-alist" for project assignment
 alternatively, fast meta-linking with org-tag-persistent-alist + file specific tagging -- OR configure org-complete-tags-always-offer-all-agenda-tags
 **** INACTIVE Universal categories?
 do project assignment with category property? leaves tags free for meta-linking?
@@ -433,43 +464,61 @@ tags management by C-c C-q and C-c C-c is fast -- better for on the fly connecti
 :ID:       4827b3ea-dff2-413b-a136-6312fe665208
 :END:
 #+begin_src emacs-lisp
-      (setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
-      ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
-      (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
-                               (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
-                               (concat org-directory "/addressbook.org") ;; CRM file. Network contacts by linking manually (so it sticks), use roam
-                               (concat org-directory "/occurance.org")
-                               (concat org-directory "/zettles/")
-                               "~/src/"
-                               "~/.config/emacs/litinit.org"))
+  (use-package org
+    :ensure t
+    :init
+    (setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
+    ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
+    (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
+                             (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
+                             (concat org-directory "/addressbook.org") ;; CRM file. Network contacts by linking manually (so it sticks), use roam
+                             (concat org-directory "/occurance.org")
+                             (concat org-directory "/zettles/")
+                             "~/src/"
+                             "~/.config/emacs/litinit.org")))
 #+end_src
-*** TODO include all zettles?
+*** DONE include all zettles?
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 17:32]
+:END:
 why not? perhaps to keep tags distinct? Or be more meticulous, and use hierarchies to make tags more orderly+specific w/ regexp?
- to-do items often arise while taking notes, so capturing can deal with that, but having the full context of the emergence is useful...
- I need a system of zettlekasten that can push in-topic todos to the agenda. Even if those todos are just tangents of study to be perused!
+to-do items often arise while taking notes, so capturing can deal with that, but having the full context of the emergence is useful...
+I need a system of zettlekasten that can push in-topic todos to the agenda. Even if those todos are just tangents of study to be pursued!
 *** TODO Set up archive file? or archive siblings?
 what is this? how does it work with the logbook datetree intention?
 *** TODO diary or bbdb/CRM?
 for tabbing anniversaries, holidays, events? or instead, use bbdb integration?
-*** TODO make this init.el literate
-**** TODO use it as a cabinet
+*** DONE make this init.el literate
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 17:34]
+:END:
+**** DONE use it as a cabinet
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-03 Mon 17:33]
+:END:
 massively improves ability to track environment development developments
+**** DONE stick the whole src dir in as well, lol
+:STATUSLOG:
+- State "DONE"       from              [2022-01-03 Mon 17:34]
+:END:
 ** TODO Org-Agenda
 :PROPERTIES:
 :ID:       512d28ed-857b-4f26-93e8-a4e22ec4f1e1
 :END:
 #+begin_src emacs-lisp
-  ;; org-agenda
-  (setq org-agenda-files (cons org-default-notes-file org-cabinets)) ;; populate agenda from cabinets + refile.org
-  (setq org-agenda-skip-scheduled-if-deadline-is-shown t) ;; show only deadline on or after day deadlining task is scheduled
-  (setq org-agenda-span 'week) ;; show week view by default
-  (setq org-agenda-start-day "-0d") ;; start at today by default (in org-read-date input form)
-  (setq org-agenda-start-on-weekday nil) ;; weekly overview starts today and looks forward, leave the past be.
-  ;; tags/TODO filters (see tag and property searches) for agenda organization:
-  (setq org-stuck-projects 
-	'("+LEVEL=1+TODO/-DONE-CANCELED-INACTIVE-NEXT" ("NEXT")))
-  ;; Use the current window for indirect buffer display
-  (setq org-indirect-buffer-display 'current-window)
+  (use-package org
+    :ensure t
+    :init
+    (setq org-agenda-files (cons org-default-notes-file org-cabinets)) ;; populate agenda from cabinets + refile.org
+    (setq org-agenda-skip-scheduled-if-deadline-is-shown t) ;; show only deadline on or after day deadlining task is scheduled
+    (setq org-agenda-span 'week) ;; show week view by default
+    (setq org-agenda-start-day "-0d") ;; start at today by default (in org-read-date input form)
+    (setq org-agenda-start-on-weekday nil) ;; weekly overview starts today and looks forward, leave the past be.
+    ;; tags/TODO filters (see tag and property searches) for agenda organization:
+    (setq org-stuck-projects 
+          '("+LEVEL=1+TODO/-DONE-CANCELED-INACTIVE-NEXT" ("NEXT")))
+    ;; Use the current window for indirect buffer display
+    (setq org-indirect-buffer-display 'current-window))
 #+end_src
 fresh captures appear in the agenda. The ability to adjust org-agenda-files on the fly with C-c C-] is preserved.
 *** Configuring returns of Agenda search queries
@@ -478,62 +527,74 @@ matched by tag/property searches carry don't carry subheadings to
 the agenda However, this is not recommended. Instead, for getting
 only top level tasks matched by tag filters, configure tag
 inheritance or define filters if this is a problem
+*** TODO make agenda view show projects matching stuck definition
 ** TODO Org task timing, tracking and reporting
 :PROPERTIES:
 :ID:       3c1ad362-1b03-4b15-91d9-3f3ed6f67c87
 :END:
 #+begin_src emacs-lisp
-  (setq org-columns-default-format
-	"%TODO %2PRIORITY %25ITEM(Task) %10Effort(Est_Effort){est+} %CLOCKSUM %CLOCKSUM_T")
-  (org-clock-persistence-insinuate) ;; set up hooks for clock persistence through sessions
-  (setq org-clock-persist t) ;; continue any running clock when emacs exits. Also save all set clock history accross sessions.
-  (setq org-clock-idle-time 10) ;; and prompt to resolve running clocks when restarting, or after 10 minutes of emacs idle time.     
+  (use-package org
+    :ensure t
+    :init
+    (setq org-columns-default-format
+          "%TODO %2PRIORITY %25ITEM(Task) %10Effort(Est_Effort){est+} %CLOCKSUM %CLOCKSUM_T")
+    (setq org-clock-persist t) ;; continue any running clock when emacs exits. Also save all set clock history accross sessions.
+    (setq org-clock-idle-time 10) ;; and prompt to resolve running clocks when restarting, or after 10 minutes of emacs idle time.
+    :config
+    (org-clock-persistence-insinuate))  ;; set up hooks for clock persistence through sessions
 #+end_src
 default column view of task properties aids in rapid assessment of time investment and difficulty. individual files/headings may define different views locally.
 *** TODO project planning
 especially for modern collaborative endeavors, estimating effort and tracking progress against expectations is critical.
 configure effort estimation for project management. in the meantime, update effort estimates for running clocks with ‘C-c C-x C-e’
+*** TODO prep easy generation of gantt charts from column-ized task trees.
+include provisions for displaying timelines with uncertainty
+** TODO Org pomodoro timer
 ** TODO Org-Capture
 :PROPERTIES:
 :ID:       f93153be-7354-4160-bc7e-011ec1af3241
 :END:
 #+begin_src emacs-lisp
-  (setq org-capture-templates
-	(quote (("p" "project outlining") ;; new project definitions and reports on predefined projects
-		("pt" "todo" entry (file "~/org/refile.org") ;; a new task needing to be defined and inserted into ongoing project
-		 "* TODO %?\n%U\n%a\n")
-		("ps" "todo" entry (file "~/org/refile.org") ;; schedule a new event.
-		 "* TODO %?\n%^T")
-		;; template current time, link in ring (or current file), capture new task name, pause other clocks, clock time, resume other clocks
-		;; ex :: good for a job in any given piece of code because it links to the line that inspired it.
-		;;		("pr" "reflect" entry (file "~/org/refile.org")
-		;;		 "* JOURNAL")
-		;; OR
-		;;		("n" "note" entry (file "~/org/refile.org")
-		;;               "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-		;; not sure what this looks like yet. On-the-clock thoughts about current work (look at %k), look at organizing by :tag
-		("i" "interruptions")
-		("ir" "respond" entry (file "~/org/refile.org")
-		 "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-		;; fully automated reaction cache for differed inquiries, requests, solicitations, etc.
-		("ii" "idea" entry (file "~/org/refile.org")
-		 "* INACTIVE")
-		;; for academic questions, topics of investigation, project proposals, paper subject.
-		;;		("w" "org-protocol" entry (file "~/org/refile.org")
-		;;		 "* TODO Review %c\n%U\n" :immediate-finish t)
-		;; tracking org workflow and planning adaptations TAG = :ENV?
-		("m" "Meeting" entry (file "~/org/refile.org")
-		 "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-		;; documenting essentials of scheduled and spontaneous meetings/encounters.
-		("c" "Contact" entry (file "~/org/refile.org") ;; document professional contact
-		 "* CONTACT"))))
-  (defun pm/remove-empty-drawer-on-clock-out ()
-    "Remove empty STATUSLOG drawers on clock out, use as hook to de-clutter ephemeral captures"
-    (interactive)
-    (save-excursion
-      (beginning-of-line 0)
-      (org-remove-empty-drawer-at "STATUSLOG" (point))))
-  (add-hook 'org-clock-out-hook 'pm/remove-empty-drawer-on-clock-out 'append)     
+  (use-package org
+    :ensure t
+    :init
+    (setq org-capture-templates
+          (quote (("p" "project outlining") ;; new project definitions and reports on predefined projects
+                  ("pt" "todo" entry (file "~/org/refile.org") ;; a new task needing to be defined and inserted into ongoing project
+                   "* TODO %?\n%U\n%a\n")
+                  ("ps" "todo" entry (file "~/org/refile.org") ;; schedule a new event.
+                   "* TODO %?\n%^T")
+                  ;; template current time, link in ring (or current file), capture new task name, pause other clocks, clock time, resume other clocks
+                  ;; ex :: good for a job in any given piece of code because it links to the line that inspired it.
+                  ;;		("pr" "reflect" entry (file "~/org/refile.org")
+                  ;;		 "* JOURNAL")
+                  ;; OR
+                  ;;		("n" "note" entry (file "~/org/refile.org")
+                  ;;               "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+                  ;; not sure what this looks like yet. On-the-clock thoughts about current work (look at %k), look at organizing by :tag
+                  ("i" "interruptions")
+                  ("ir" "respond" entry (file "~/org/refile.org")
+                   "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+                  ;; fully automated reaction cache for differed inquiries, requests, solicitations, etc.
+                  ("ii" "idea" entry (file "~/org/refile.org")
+                   "* INACTIVE")
+                  ;; for academic questions, topics of investigation, project proposals, paper subject.
+                  ;;		("w" "org-protocol" entry (file "~/org/refile.org")
+                  ;;		 "* TODO Review %c\n%U\n" :immediate-finish t)
+                  ;; tracking org workflow and planning adaptations TAG = :ENV?
+                  ("m" "Meeting" entry (file "~/org/refile.org")
+                   "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+                  ;; documenting essentials of scheduled and spontaneous meetings/encounters.
+                  ("c" "Contact" entry (file "~/org/refile.org") ;; document professional contact
+                   "* CONTACT"))))
+    :config
+    (defun pm/remove-empty-drawer-on-clock-out ()
+      "Remove empty STATUSLOG drawers on clock out, use as hook to de-clutter ephemeral captures"
+      (interactive)
+      (save-excursion
+        (beginning-of-line 0)
+        (org-remove-empty-drawer-at "STATUSLOG" (point))))
+    (add-hook 'org-clock-out-hook 'pm/remove-empty-drawer-on-clock-out 'append))
 #+end_src
 Captures are for documenting immediate items that need to be ordered into existing and time-sensitive workflows.
 Notes from classes, research, reasoning, etc. are handled in the Zettlekasten method using org-roam, configured later.
@@ -547,23 +608,30 @@ if clockline is less than a minute, delete "statuslog"
 capturing fails with json-readtable-error 122.
 It is necessary to have jupyter and ipython-notebook installed in the python env.
 Additionally, it is necessary to globally declare the ob-ipython-command.
+*** load templates from file?
+any advantage to this? cleanliness, I guess.
 ** TODO Org-Refile
 :PROPERTIES:
 :ID:       79c2e923-7f67-4b0d-bd1a-cadcaf5f7ebb
 :END:
+this isn't very good yet.... hard to easily refile new captures.
 #+begin_src emacs-lisp
-  ;; refile targets include any file contributing to the agenda - up to 9 levels deep
-  (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
-  ;; Use full outline paths for refile targets - file directly into agenda position using Ivy
-  (setq org-refile-use-outline-path t)
-  ;; Targets complete directly with Ivy, org need not assist
-  (setq org-outline-path-complete-in-steps nil)
-  ;; Allow refile to create parent tasks with confirmation
-  (setq org-refile-allow-creating-parent-nodes 'confirm)
-  (defun pm/verify-refile-target ()
-    "Exclude todo keywords with a done state from refile targets"
-  (not (member (nth 4 (org-heading-components)) org-done-keywords)))
-  (setq org-refile-target-verify-function 'pm/verify-refile-target)
+  (use-package org
+    :ensure t
+    :init
+    ;; refile targets include any file contributing to the agenda - up to 9 levels deep
+    (setq org-refile-targets '((org-agenda-files :maxlevel . 9)))
+    ;; Use full outline paths for refile targets - file directly into agenda position using Ivy
+    (setq org-refile-use-outline-path t)
+    ;; Targets complete directly with Ivy, org need not assist
+    (setq org-outline-path-complete-in-steps nil)
+    ;; Allow refile to create parent tasks with confirmation
+    (setq org-refile-allow-creating-parent-nodes 'confirm)
+    :config
+    (defun pm/verify-refile-target ()
+      "Exclude todo keywords with a done state from refile targets"
+      (not (member (nth 4 (org-heading-components)) org-done-keywords)))
+    (setq org-refile-target-verify-function 'pm/verify-refile-target))
 #+end_src
 *** TODO ivy for refiling headings
 no idea where to start
@@ -575,18 +643,21 @@ make filter function
 assign to org-refile-target-verify-function
 **** psudo defun:
 if todo-keyword in current heading is not a member of the done-keywords, provide nil, else provide t
+*** TODO make tasks suitable for refile appear in agenda.
 ** TODO Org for academic reading, writing, and reproducible research
 lots of possibilities. Learn more. take notes. Prepare to keep
 bibliography (consider centralized bibliography, where citations
 are made on basis of inclusion in paper)
-
 *** TODO Org-Attachment
 :PROPERTIES:
 :ID:       431674a9-2ff1-40f7-994f-6cc2a7ee1e88
 :END:
 #+begin_src emacs-lisp
-  (setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
-  (setq org-image-actual-width '(200))
+  (use-package org
+    :ensure t
+    :init
+    (setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
+    (setq org-image-actual-width '(200)))
 #+end_src
 **** TODO manage attachment directories
 ***** where to keep downloads?
@@ -616,9 +687,11 @@ are made on basis of inclusion in paper)
      (latex . t)
      (ditaa . t)
      (ruby . t)))
-
-  (setq org-confirm-babel-evaluate nil)
-  (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)
+  (use-package org
+    :ensure t
+    :config
+    (setq org-confirm-babel-evaluate nil)
+    (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append))
 #+end_src
 use babel for jupyter notebooks? ein?
 *** org capture throws JSON read table error
@@ -689,9 +762,12 @@ if no :results output keyword arg header is provided to org, output is still ava
 :ID:       2de99c61-a580-4a3c-aa5c-bf1b322b9c97
 :END:
 #+begin_src emacs-lisp
-  (setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
-  ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
+  (use-package org
+    :ensure t
+    :init
+    (setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0)))
+    ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 #+end_src
 LaTeX exporter setting and in-line math formula display preferences
 **** TODO configure exporter to use minted package or alternative for code block faces setting
@@ -719,18 +795,20 @@ makes my chosen presentation format a little prettier -- might as well fork org 
 OI -- YOU HAVE TO EVAL before byte-compiling (I think)
 *** INACTIVE nov.el or similar for ebooks compatibility?
 this is not critical, but nov.el has noter integration and may help with reading more
-** TODO Org Key Bindings)
+** TODO Org Key Bindings
 :PROPERTIES:
 :ID:       7dea4263-0b4d-4b69-8e6c-6cc11752281e
 :END:
 #+begin_src emacs-lisp
-  :bind (("C-c l" . org-store-link) ;; global organization bindings
-	 ("C-c a" . org-agenda) 
-	 ("C-c c" . org-capture)))
+  (use-package org
+    :ensure t
+    :bind (("C-c l" . org-store-link) ;; global organization bindings
+           ("C-c a" . org-agenda) 
+           ("C-c c" . org-capture)))
 #+end_src
 C-c is the conventional org mode command prefix. More specific sub modes and more general global modes should adopt philosophically consistent standards
-*** TODO look into ob-ipython
-make babel blocks behave like juyter a bit
+*** TODO conditional keybinds...
+make babel blocks behave like jupyter a bit
 * TODO Org-tempo
 :PROPERTIES:
 :ID:       06bdd462-539c-42fa-bf92-94a2271a2d12
