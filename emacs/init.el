@@ -46,6 +46,13 @@
               (("C-x C-b" . bufler)
                ("C-x b" . bufler-switch-buffer))))
 
+(use-package multiple-cursors
+  :bind
+  ("C-S-c C-S-c" . mc/edit-lines)
+  ("C->" . mc/mark-next-like-this)
+  ("C-<" . mc/mark-previous-like-this)
+  ("C-c C-<" . mc/mark-all-like-this))
+
 (use-package avy
   :ensure t
   :bind ("C-S-s" . avy-goto-char-2))
@@ -120,6 +127,10 @@
   :ensure t
   :bind
   ("C-x g" . magit-status))
+
+(use-package epa-file
+  :config
+  (epa-file-enable))
 
 (use-package lsp-mode
   :ensure t)
@@ -274,13 +285,17 @@
   (setq org-babel-python-command "python")
   :bind (:map org-mode-map (("M-." . ob-ipython-inspect)))) ;; idea: bind ide doc tools to C-c lang-abbrev i?
 
+(use-package jupyter
+  :ensure t)
+
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((emacs-lisp . t)
    (python . t)
    (ipython . t)
    (latex . t)
-   (ditaa . t)))
+   (ditaa . t)
+   (ruby . t)))
 
 (setq org-confirm-babel-evaluate nil)
 (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)
@@ -671,3 +686,15 @@
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
 (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(send-mail-function 'mailclient-send-it))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))

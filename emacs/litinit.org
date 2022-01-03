@@ -113,6 +113,17 @@ waiting on sensitive mode installation (see bookmarks)
                  ("C-x b" . bufler-switch-buffer))))
 #+end_src
 
+** Editing
+*** Multiple Cursors
+#+begin_src emacs-lisp
+  (use-package multiple-cursors
+    :bind
+    ("C-S-c C-S-c" . mc/edit-lines)
+    ("C->" . mc/mark-next-like-this)
+    ("C-<" . mc/mark-previous-like-this)
+    ("C-c C-<" . mc/mark-all-like-this))
+#+end_src
+
 ** Movement
 *** Avy
 #+begin_src emacs-lisp
@@ -240,6 +251,13 @@ learn more anyway...
     :ensure t
     :bind
     ("C-x g" . magit-status))
+#+end_src
+* TODO Cryptography
+** EPA
+#+begin_src emacs-lisp
+  (use-package epa-file
+    :config
+    (epa-file-enable))
 #+end_src
 * TODO LSP mode
 #+begin_src emacs-lisp
@@ -534,24 +552,28 @@ are made on basis of inclusion in paper)
 :ID:       b9ef07e9-a022-4c1f-a75d-1336bd88fa07
 :END:
 #+begin_src emacs-lisp
-    (use-package ob-ipython
-      :ensure t
-      :config
-      (add-to-list 'company-backends 'company-ob-ipython)
-      (setq ob-ipython-command "jupyter")
-      (setq org-babel-python-command "python")
-      :bind (:map org-mode-map (("M-." . ob-ipython-inspect)))) ;; idea: bind ide doc tools to C-c lang-abbrev i?
+  (use-package ob-ipython
+    :ensure t
+    :config
+    (add-to-list 'company-backends 'company-ob-ipython)
+    (setq ob-ipython-command "jupyter")
+    (setq org-babel-python-command "python")
+    :bind (:map org-mode-map (("M-." . ob-ipython-inspect)))) ;; idea: bind ide doc tools to C-c lang-abbrev i?
 
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((emacs-lisp . t)
-       (python . t)
-       (ipython . t)
-       (latex . t)
-       (ditaa . t)))
+  (use-package jupyter
+    :ensure t)
 
-    (setq org-confirm-babel-evaluate nil)
-    (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (python . t)
+     (ipython . t)
+     (latex . t)
+     (ditaa . t)
+     (ruby . t)))
+
+  (setq org-confirm-babel-evaluate nil)
+  (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)
 #+end_src
 use babel for jupyter notebooks? ein?
 *** org capture throws JSON read table error
