@@ -9,6 +9,7 @@
 (load-theme 'doom-dark+ t)
 (setq inhibit-startup-screen t)
 (setq visible-bell t)
+(column-number-mode 1)
 
 (require 'package)
      (add-to-list 'package-archives
@@ -60,6 +61,7 @@
                ("C-x b" . bufler-switch-buffer))))
 
 (use-package multiple-cursors
+  :ensure t
   :bind
   ("C-S-c C-S-c" . mc/edit-lines)
   ("C->" . mc/mark-next-like-this)
@@ -70,10 +72,28 @@
   :ensure t
   :bind ("C-S-s" . avy-goto-char-2))
 
-(use-package swiper
+(use-package consult
   :ensure t
   :bind (:map global-map
-              ("C-s" . swiper)))
+              ("C-s" . consult-line)))
+
+(use-package consult-dir
+:ensure t
+:config
+;; (setq consult-dir-shadow-filenames nil)
+(setq consult-dir-project-list-function #'consult-dir-projectile-dirs)
+:bind (:map global-map
+            (("C-x C-d" . consult-dir))
+       :map minibuffer-local-completion-map
+            (("C-x C-d" . consult-dir))))
+
+(use-package consult
+  :bind (("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)))
+  ;; use the C-c s search bind paradigm for regexps
+(use-package wgrep
+  :ensure t)
 
 (use-package dogears
   :ensure t
@@ -85,6 +105,142 @@
                ("M-g M-f" . dogears-forward)
                ("M-g M-d" . dogears-list)
                ("M-g M-D" . dogears-sidebar))))
+
+(use-package vertico
+  :ensure t
+  :init
+  (vertico-mode)
+  (setq vertico-scroll-margin 0
+        vertico-count 20
+        vertico-resize nil)
+  ;; (setq completion-styles '(basic substring partial-completion flex))
+  ;; orderless replaces this with more curated completion styles
+  :custom
+  (vertico-cycle t)
+  :bind (:map vertico-map ;; minibuffer-local-map derivation
+              (("C-n" . vertico-next)
+               ("C-p" . vertico-previous)
+               ("M-w" . vertico-save)
+               ("M-<" . vertico-first)
+               ("M->" . vertico-last)
+               ("M-{" . vertico-previous-group)
+               ("M-}" . vertico-next-group)
+               ("TAB" . vertico-insert)
+               ("RET" . vertico-exit)
+               ("M-RET" . vertico-repeat))))
+
+(use-package orderless
+  :ensure t
+  :init
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (setq orderless-style-dispatchers '(+orderless-dispatch)
+  ;;       orderless-component-separator #'orderless-escapable-split-on-space)
+  (setq completion-styles '(orderless)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles basic partial-completion)))) ;; include basic
+  (setq read-file-name-completion-ignore-case t ;; case-insensitive search
+        read-buffer-completion-ignore-case t
+        completion-ignore-case t))
+
+(use-package marginalia
+  :ensure t
+  :init
+  (marginalia-mode)
+  :bind (:map minibuffer-local-map
+              (("M-a" . marginalia-cycle))))
+
+(use-package embark
+  :ensure t
+  :bind (:map global-map (("C-;" . embark-act)                ;; pick some comfortable binding
+                          ("M-." . embark-dwim)               ;; Runs the default action (C-; RET) on a target 
+                          ("C-h B" . embark-bindings)         ;; alternative for `describe-bindings'
+                          ;; target selection is flexible -- minibuffer is glob matching, multicursor explicit, region, etc.
+                          ("C-:" . embark-act-all)            ;; run action on all selected targets
+                          ("C-(" . embark-collect-snapshot))) ;; buffer selected targets for leasurely execution
+
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+  :config
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none))))
+
+  ;; below makes embark use which-key style display for verbose actions guide
+  ;; or toggle between whichkey and full menu ? kind of looses the consistency though....
+
+  ;; full display with docstrings appears on paging help command C-h.
+  (defun embark-which-key-indicator ()
+    "An embark indicator that displays keymaps using which-key.
+    The which-key help message will show the type and value of the
+    current target followed by an ellipsis if there are further
+    targets."
+    (lambda (&optional keymap targets prefix)
+      (if (null keymap)
+          (which-key--hide-popup-ignore-command)
+        (which-key--show-keymap
+         (if (eq (plist-get (car targets) :type) 'embark-become)
+             "Become"
+           (format "Act on %s '%s'%s"
+                   (plist-get (car targets) :type)
+                   (embark--truncate-target (plist-get (car targets) :target))
+                   (if (cdr targets) "…" "")))
+         (if prefix
+             (pcase (lookup-key keymap prefix 'accept-default)
+               ((and (pred keymapp) km) km)
+               (_ (key-binding prefix 'accept-default)))
+           keymap)
+         nil nil t (lambda (binding)
+                     (not (string-suffix-p "-argument" (cdr binding))))))))
+
+  (setq embark-indicators
+        '(embark-which-key-indicator
+          embark-highlight-indicator
+          embark-isearch-highlight-indicator))
+
+  (defun embark-hide-which-key-indicator (fn &rest args)
+    "Hide the which-key indicator immediately when using the completing-read prompter."
+    (which-key--hide-popup-ignore-command)
+    (let ((embark-indicators
+           (remq #'embark-which-key-indicator embark-indicators)))
+      (apply fn args)))
+
+  (advice-add #'embark-completing-read-prompter
+              :around #'embark-hide-which-key-indicator)
+
+  ;; instead of Hydras consider using embark as a persistent actions menu...
+  ;; (defun embark-act-noquit ()
+  ;;   "Run action but don't quit the minibuffer afterwards."
+  ;;   (interactive)
+  ;;   (let ((embark-quit-after-action nil))
+  ;;     (embark-act)))
+  )
+
+;; embark-consult adds support for exporting grep results to grep-mode buffer (wgrep selected)
+;; embark-export exposes a more feature rich action environment for any given set of targets of compatible type
+;; but wgrep is the best example
+(use-package embark-consult
+  :ensure t
+  :after (embark consult)
+  :demand t ; only necessary for hook below
+  ;; activates consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode)
+  :bind (:map global-map (("C-c C-;" . embark-export))))
+
+(use-package ivy
+  :ensure t
+  :init
+  (ivy-mode -1) ;;deactivated
+  :bind (:map ivy-minibuffer-map
+              ("TAB" . ivy-partial)))
+
+(use-package ivy-yasnippet
+  :ensure t
+  :bind ("C-c y" . ivy-yasnippet)) ;; ensure consistency with bind logic
 
 (use-package dired
   :init
@@ -345,9 +501,15 @@
 
 (use-package org
   :ensure t
-  :bind (("C-c l" . org-store-link) ;; global organization bindings
-         ("C-c a" . org-agenda) 
-         ("C-c c" . org-capture)))
+  :bind ((:map global-map
+               (("C-c l" . org-store-link) ;; global organization bindings
+                ("C-c a" . org-agenda) 
+                ("C-c c" . org-capture)))
+         (:map org-mode-map
+               (("M-[" . org-backward-paragraph) ;; org-file navigation customizations
+                ("M-]" . org-forward-paragraph)
+                ("M-{" . org-backward-element)
+                ("M-}" . org-forward-element)))))
 
 (use-package org-tempo ;; builtin
   ;;:config
@@ -365,11 +527,11 @@
          ("C-c n r" . org-roam-node-random)		    
          (:map org-mode-map
                (("C-c n i" . org-roam-node-insert) ;; Insert
-                ("C-c n o" . org-id-get-create) ;; Organize
+                ("C-c n o" . org-id-get-create) ;; Organize (index small topics or Create zettles)
                 ("C-c n t" . org-roam-tag-add) ;; Tag
                 ("C-c n a" . org-roam-alias-add) ;; Alias
-                ("C-c n l" . org-roam-buffer-toggle) ;; backLink
-                ("C-c n c" . org-roam-extract-subtree)))) ;; Create (use in conjunction with organize)
+                ("C-c n l" . org-roam-buffer-toggle) ;; view backlinks
+                ("C-c n c" . org-roam-extract-subtree)))) ;; Create (use in conjunction with Organize)
   :config
   (org-roam-db-autosync-mode)
   (setq org-roam-capture-templates
@@ -395,6 +557,13 @@
                  "* TODO %?\n%^T")))) ;; time. context/reason/event?
   (require 'org-roam-protocol))
 
+(use-package org-roam-bibtex
+  :ensure t
+  :after org-roam
+  :config
+  (require 'org-ref)
+  (org-roam-bibtex-mode))
+
 (use-package org-ref
   :ensure t
   :init
@@ -418,27 +587,24 @@
         org-ref-default-bibliography '("~/org/bibliotex/bibliotex.bib")
         org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks"))
   ;; put citation source materials, separated for enote access convenience
-  :bind ((:map bibtex-mode-map ("C-c b" . 'org-ref-bibtex-hydra/body))
+  :bind ((:map bibtex-mode-map ("C-c [" . 'org-ref-bibtex-hydra/body))
          (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
                              ("C-c [" . 'org-ref-insert-link-hydra/body)))))
 
-
-
-(use-package org-download
+(use-package citar
   :ensure t
-  :config
-  (setq org-download-screenshot-method "flameshot gui --raw > %s"))
+  :custom
+  (citar-bibliography '("~/org/bibliotex/bibliotex.bib"))
+  (setq citar-open-note-function 'orb-citar-edit-note) ;; replace default org note with org-roam-bibtex open note
+  (setq citar-templates
+        '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
+          (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
+          (note . "#+TITLE: ${author editor}, ${title}"))) ;; template applies regardless of open-note-function
+  (setq citar-notes-paths "~/org/zettles")
 
-(use-package ivy
-  :ensure t
-  :init
-  (ivy-mode 1)
-  :bind (:map ivy-minibuffer-map
-              ("TAB" . ivy-partial)))
-
-(use-package ivy-yasnippet
-  :ensure t
-  :bind ("C-c y" . ivy-yasnippet)) ;; ensure consistency with bind logic
+  :bind (("C-c [" . citar-insert-citation)
+         :map minibuffer-local-map
+         ("C-b" . citar-insert-preset)))
 
 (use-package ivy-bibtex
   :ensure t
@@ -469,6 +635,11 @@
               org-ref-insert-ref-function 'org-ref-insert-ref-link
               org-ref-cite-onclick-function (lambda (_) (org-ref-citation-hydra/body))))
 
+(use-package org-download
+  :ensure t
+  :config
+  (setq org-download-screenshot-method "flameshot gui --raw > %s"))
+
 (use-package yasnippet ;; extensible codeblock insertion utility
   :ensure t
   :config
@@ -492,7 +663,6 @@
   :bind (:map flyspell-mode-map
               (("C-."   . flyspell-auto-correct-word)
                ("C-,"   . flyspell-goto-next-error)
-               ("C-;"   . flyspell-correct-next)
                ("C-M-;" . flyspell-buffer))))
 
 (setq bindlist '((windmove-swap-states-right "C-M-s-f" "C-M-s-<right>")

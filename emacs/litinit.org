@@ -33,14 +33,18 @@ evaluation and tangle file.  Hooked to saving in org-mode
 :PROPERTIES:
 :ID:       b4267243-3252-4be5-aafd-2bf17e56b9bc
 :END:
-** TODO Theme, text display, feedback, selection and UI toggles
+** DONE Theme, text display, feedback, selection and UI toggles
 :PROPERTIES:
 :ID:       ef50006f-dbbb-4800-bebf-2f834b122c7f
+:END:
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-04 Tue 20:41]
 :END:
 #+begin_src emacs-lisp
   (load-theme 'doom-dark+ t)
   (setq inhibit-startup-screen t)
   (setq visible-bell t)
+  (column-number-mode 1)
 #+end_src
 Running the Emacs server necessitates disabling GUI menus, scrollbar,
 etc in early-init.el.
@@ -53,7 +57,10 @@ etc in early-init.el.
 - State "DONE"       from              [2022-01-03 Mon 02:13]
 :END:
 strikethrough done items
-*** TODO enable better tracking of line and column number
+*** DONE enable better tracking of line and column number
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-04 Tue 20:41]
+:END:
 ** TODO customize startup screen
 *** TODO show agenda on startup?
 *** CANCELED show perspective switcher on startup
@@ -151,34 +158,133 @@ waiting on sensitive mode installation (see bookmarks)
                 (("C-x C-b" . bufler)
                  ("C-x b" . bufler-switch-buffer))))
 #+end_src
+** TODO Virtual Buffer Management
+probably don't want tracking of recent files through either
+consult-buffer w/ recentf or consult-recent-file.
 
-** Editing
-*** Multiple Cursors
+probably do want consult to manage interface with registry and bookmarks.
+*** TODO bookmark management
+*** TODO register management
+consult-register-window and register-store replace register-preview
+and default store-load commands.
+** TODO frame management
+consult provides -buffer, -other-window, and -other-frame functions
+
+if they work with bufler, this could be sweet as hell.
+** DONE Editing
+:STATUSLOG:
+- State "DONE"       from              [2022-01-04 Tue 21:06]
+:END:
+*** DONE Multiple Cursors
+:STATUSLOG:
+- State "DONE"       from              [2022-01-04 Tue 21:06]
+:END:
 #+begin_src emacs-lisp
   (use-package multiple-cursors
+    :ensure t
     :bind
     ("C-S-c C-S-c" . mc/edit-lines)
     ("C->" . mc/mark-next-like-this)
     ("C-<" . mc/mark-previous-like-this)
     ("C-c C-<" . mc/mark-all-like-this))
 #+end_src
-** Movement
+*** kill-ring manipulation
+consult-yank-from-kill-ring and -yank-pop
+enhanced interface to familiar tools. if it's truely light, might be worth the added precision....
+*** TODO The Titular Editor Macros
+consult-kmacro makes the macro ring more obvious and easier to fill and use.
+*** Compile code error checking
+consult-compile-error jumps to a compilation error... might be useful
+when the going gets real.
+** DONE Movement
 :STATUSLOG:
+- State "DONE"       from              [2022-01-04 Tue 21:06]
 - State "DONE"       from              [2022-01-03 Mon 01:23]
 :END:
-*** Avy
+*** DONE Avy
+:STATUSLOG:
+- State "DONE"       from              [2022-01-04 Tue 18:54]
+:END:
+also this strongly integrates with embark so that contextual actions
+can be rapidly executed on any text in visible space
 #+begin_src emacs-lisp
   (use-package avy
     :ensure t
     :bind ("C-S-s" . avy-goto-char-2))
 #+end_src
-*** swiper
+*** CANCELED COMMENT swiper
+:STATUSLOG:
+- State "CANCELED"   from              [2022-01-04 Tue 21:06] \\
+  replaced by consult-line
+:END:
+replaced with consult-line
 #+begin_src emacs-lisp
   (use-package swiper
     :ensure t
     :bind (:map global-map
                 ("C-s" . swiper)))
 #+end_src
+*** DONE consult-line
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-04 Tue 18:54]
+:END:
+one of a few powerful commands using emacs completing read framework in the consult package.
+
+UI delivered by Vertico
+#+begin_src emacs-lisp
+  (use-package consult
+    :ensure t
+    :bind (:map global-map
+                ("C-s" . consult-line)))
+#+end_src
+*** DONE consult dir
+:STATUSLOG:
+- State "DONE"       from              [2022-01-06 Thu 12:21]
+:END:
+overwrite emacs directory buffer binding -- useless compared to dired.
+
+now consult-dir package serves rapid project access instead
+#+begin_src emacs-lisp
+  (use-package consult-dir
+  :ensure t
+  :config
+  ;; (setq consult-dir-shadow-filenames nil)
+  (setq consult-dir-project-list-function #'consult-dir-projectile-dirs)
+  :bind (:map global-map
+              (("C-x C-d" . consult-dir))
+         :map minibuffer-local-completion-map
+              (("C-x C-d" . consult-dir))))
+#+end_src
+*** grep
+consult-grep allows for easy searching of regular expressions in buffer
+consult-git-grep for whole projects
+
+uses emacs regexps...
+
+when paired with wgrep package grep can be used as a powerful
+grep-buffer editing tool for dired and file buffers alike.
+#+begin_src emacs-lisp
+  (use-package consult
+    :bind (("M-s g" . consult-grep)
+           ("M-s G" . consult-git-grep)
+           ("M-s r" . consult-ripgrep)))
+    ;; use the C-c s search bind paradigm for regexps
+  (use-package wgrep
+    :ensure t)
+#+end_src
+*** buffer Navigation
+consult-goto-line enhances goto-line
+
+consult-mark enhances mark-ring UI -- might even integrate with dogears through the global-mark-ring
+*** Contextual Navigation
+consult-org-heading for navigating org-mode buffers
+*** imenu navigation
+may be an aid for serious development projects.
+imenu + treesitter for getting node-based view of programs.
+consult for quickly flitting through those things.
+
+look specifically at consult-imenu-multi 
+
 ** Session and State Recovery
 :PROPERTIES:
 :ID:       95b10f12-2088-435c-a3aa-1db3880ec0ac
@@ -186,6 +292,9 @@ waiting on sensitive mode installation (see bookmarks)
 :STATUSLOG:
 - State "DONE"       from "TODO"       [2022-01-03 Mon 01:24]
 :END:
+automatically logs where you've been. interested in using it as a
+session recovery tool. (open closed frames, maybe). Could be useful in
+its default state as well.
 #+begin_src emacs-lisp
   (use-package dogears
     :ensure t
@@ -198,6 +307,332 @@ waiting on sensitive mode installation (see bookmarks)
                  ("M-g M-d" . dogears-list)
                  ("M-g M-D" . dogears-sidebar))))
 #+end_src
+* TODO modular, extended completion framework
+Extending emacs *completions* with a refreshed aesthetic based on a
+vertical scrolling minibuffer menu and offering a rich user-facing api
+both provided by vertico. Also, integrates a context-sensitive command
+execution framework into the completions UI using the Embark
+package. Also, marginalia provides rich candidate markup in the
+vertico buffer.
+** DONE Vertico core
+:STATUSLOG:
+- State "DONE"       from              [2022-01-04 Tue 18:28]
+:END:
+tests: vertico works with
+- [ ] bibtex selection
+- [ ] org roam bibtex
+- [X] bufler switch bufler
+- [X] in tramp sessions
+- [X] buffer search
+- [ ] snippet selection
+#+begin_src emacs-lisp
+  (use-package vertico
+    :ensure t
+    :init
+    (vertico-mode)
+    (setq vertico-scroll-margin 0
+          vertico-count 20
+          vertico-resize nil)
+    ;; (setq completion-styles '(basic substring partial-completion flex))
+    ;; orderless replaces this with more curated completion styles
+    :custom
+    (vertico-cycle t)
+    :bind (:map vertico-map ;; minibuffer-local-map derivation
+                (("C-n" . vertico-next)
+                 ("C-p" . vertico-previous)
+                 ("M-w" . vertico-save)
+                 ("M-<" . vertico-first)
+                 ("M->" . vertico-last)
+                 ("M-{" . vertico-previous-group)
+                 ("M-}" . vertico-next-group)
+                 ("TAB" . vertico-insert)
+                 ("RET" . vertico-exit)
+                 ("M-RET" . vertico-repeat))))
+#+end_src
+** DONE configure completing-read framework
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-04 Tue 18:10]
+- State "TODO"       from "CANCELED"   [2022-01-04 Tue 18:00] \\
+  seems necessary for searching keyword lists
+- State "CANCELED"   from              [2022-01-04 Tue 13:14] \\
+  don't want. prefer filtering
+:END:
+Orderless improves searching completion candidates.
+
+Less filtering but also less memorization needed, better for blind
+keyword stacking.  Also integrates with consult.
+
+Just be careful to include basic line-start completion for TRAMP dir completion
+#+begin_src emacs-lisp
+  (use-package orderless
+    :ensure t
+    :init
+    ;; Configure a custom style dispatcher (see the Consult wiki)
+    ;; (setq orderless-style-dispatchers '(+orderless-dispatch)
+    ;;       orderless-component-separator #'orderless-escapable-split-on-space)
+    (setq completion-styles '(orderless)
+          completion-category-defaults nil
+          completion-category-overrides '((file (styles basic partial-completion)))) ;; include basic
+    (setq read-file-name-completion-ignore-case t ;; case-insensitive search
+          read-buffer-completion-ignore-case t
+          completion-ignore-case t))
+#+end_src
+** COMMENT configure vertico visualization
+helps distinguish files from directories in find-file palette -- not sure it's necessary yet.
+#+begin_src emacs-lisp
+  (use-package vertico
+    :config
+    (defun pm/completion-category-highlight-files (cand)
+        (let ((len (length cand)))
+          (when (and (> len 0)
+                     (eq (aref cand (1- len)) ?/))
+            (add-face-text-property 0 len 'dired-directory 'append cand)))
+        cand)
+
+      (defvar pm/completion-category-hl-func-overrides
+        `((file . ,#'pm/completion-category-highlight-files))
+        "Alist mapping category to highlight functions.")
+
+      (advice-add #'vertico--arrange-candidates :around
+                  (defun vertico-format-candidates+ (func)
+                    (let ((hl-func (or (alist-get (vertico--metadata-get 'category)
+                                                  pm/completion-category-hl-func-overrides)
+                                       #'identity)))
+                      (cl-letf* (((symbol-function 'actual-vertico-format-candidate)
+                                  (symbol-function #'vertico--format-candidate))
+                                 ((symbol-function #'vertico--format-candidate)
+                                  (lambda (cand &rest args)
+                                    (apply #'actual-vertico-format-candidate
+                                           (funcall hl-func cand) args))))
+                        (funcall func)))))
+#+end_src
+** COMMENT Vertico extra funcs -- empowering embark
+useful for manipulating the minibuffer from outside the minibuffer!
+look into integrating with swiper or consult-line
+#+begin_src emacs-lisp
+  (defun down-from-outside ()
+    "Move to next candidate in minibuffer, even when minibuffer isn't selected."
+    (interactive)
+    (with-selected-window (active-minibuffer-window)
+      (execute-kbd-macro [down])))
+
+  (defun up-from-outside ()
+    "Move to previous candidate in minibuffer, even when minibuffer isn't selected."
+    (interactive)
+    (with-selected-window (active-minibuffer-window)
+      (execute-kbd-macro [up])))
+
+  (defun to-and-fro-minibuffer ()
+    "Go back and forth between minibuffer and other window."
+    (interactive)
+    (if (window-minibuffer-p (selected-window))
+        (select-window (minibuffer-selected-window))
+      (select-window (active-minibuffer-window))))
+#+end_src
+** DONE Marginalia UI Extension
+:STATUSLOG:
+- State "DONE"       from              [2022-01-04 Tue 22:20]
+:END:
+Marginalia uses the emacs builtin annotation-function and
+affixation-function as the source of its annotation contents.  it uses
+vertico to display them. it's neat and tidy.
+#+begin_src emacs-lisp
+  (use-package marginalia
+    :ensure t
+    :init
+    (marginalia-mode)
+    :bind (:map minibuffer-local-map
+                (("M-a" . marginalia-cycle))))
+#+end_src
+* Embark core
+contextual actions from the completion menu
+
+configuring actions for a type is easy. simply set embark-keymap-alist
+to cons-cells associating target types to variable keymaps
+#+begin_src emacs-lisp
+  (use-package embark
+    :ensure t
+    :bind (:map global-map (("C-;" . embark-act)                ;; pick some comfortable binding
+                            ("M-." . embark-dwim)               ;; Runs the default action (C-; RET) on a target 
+                            ("C-h B" . embark-bindings)         ;; alternative for `describe-bindings'
+                            ;; target selection is flexible -- minibuffer is glob matching, multicursor explicit, region, etc.
+                            ("C-:" . embark-act-all)            ;; run action on all selected targets
+                            ("C-(" . embark-collect-snapshot))) ;; buffer selected targets for leasurely execution
+
+    :init
+    ;; Optionally replace the key help with a completing-read interface
+    (setq prefix-help-command #'embark-prefix-help-command)
+    :config
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                   nil
+                   (window-parameters (mode-line-format . none))))
+
+    ;; below makes embark use which-key style display for verbose actions guide
+    ;; or toggle between whichkey and full menu ? kind of looses the consistency though....
+
+    ;; full display with docstrings appears on paging help command C-h.
+    (defun embark-which-key-indicator ()
+      "An embark indicator that displays keymaps using which-key.
+      The which-key help message will show the type and value of the
+      current target followed by an ellipsis if there are further
+      targets."
+      (lambda (&optional keymap targets prefix)
+        (if (null keymap)
+            (which-key--hide-popup-ignore-command)
+          (which-key--show-keymap
+           (if (eq (plist-get (car targets) :type) 'embark-become)
+               "Become"
+             (format "Act on %s '%s'%s"
+                     (plist-get (car targets) :type)
+                     (embark--truncate-target (plist-get (car targets) :target))
+                     (if (cdr targets) "…" "")))
+           (if prefix
+               (pcase (lookup-key keymap prefix 'accept-default)
+                 ((and (pred keymapp) km) km)
+                 (_ (key-binding prefix 'accept-default)))
+             keymap)
+           nil nil t (lambda (binding)
+                       (not (string-suffix-p "-argument" (cdr binding))))))))
+
+    (setq embark-indicators
+          '(embark-which-key-indicator
+            embark-highlight-indicator
+            embark-isearch-highlight-indicator))
+
+    (defun embark-hide-which-key-indicator (fn &rest args)
+      "Hide the which-key indicator immediately when using the completing-read prompter."
+      (which-key--hide-popup-ignore-command)
+      (let ((embark-indicators
+             (remq #'embark-which-key-indicator embark-indicators)))
+        (apply fn args)))
+
+    (advice-add #'embark-completing-read-prompter
+                :around #'embark-hide-which-key-indicator)
+
+    ;; instead of Hydras consider using embark as a persistent actions menu...
+    ;; (defun embark-act-noquit ()
+    ;;   "Run action but don't quit the minibuffer afterwards."
+    ;;   (interactive)
+    ;;   (let ((embark-quit-after-action nil))
+    ;;     (embark-act)))
+    )
+
+  ;; embark-consult adds support for exporting grep results to grep-mode buffer (wgrep selected)
+  ;; embark-export exposes a more feature rich action environment for any given set of targets of compatible type
+  ;; but wgrep is the best example
+  (use-package embark-consult
+    :ensure t
+    :after (embark consult)
+    :demand t ; only necessary for hook below
+    ;; activates consult previews as you move around an
+    ;; auto-updating embark collect buffer
+    :hook
+    (embark-collect-mode . consult-preview-at-point-mode)
+    :bind (:map global-map (("C-c C-;" . embark-export))))
+#+end_src
+** configure actions for pdf-view buffers
+think a little about how this is best done -- open the org-ref bibtex hydra body?
+
+from the embark readme:
+
+#+begin_quote
+Configuring which actions are offered for a type is particularly easy
+and requires no programming: the variable embark-keymap-alist
+associates target types with variables containing keymaps, and those
+keymaps containing bindings for the actions. (To examine the available
+categories and their associated keymaps, you can use C-h v
+embark-keymap-alist or customize that variable.) For example, in the
+default configuration the type file is associated with the symbol
+embark-file-map. That symbol names a keymap with single-letter key
+bindings for common Emacs file commands ...
+
+...
+
+Embark’s default configuration has actions for the following target
+types: files, buffers, symbols, packages, URLs, bookmarks, and as a
+somewhat special case, actions for when the region is active. You can
+read about the default actions and their key bindings on the GitHub
+project wiki.
+#+end_quote
+** configuring targets
+default targets:
+- files (link in buffer, entry in minibuffer, etc)
+- urls
+- emails
+- elisp exps -- (eval)
+  - elisp defun, defvar, macro -- (goto definition)
+  - elisp lib -- (goto lib file)
+** configuring custom target keymaps
+#+begin_quote
+(embark-define-keymap embark-file-map
+  "Example keymap with a few file actions"
+  ("d" delete-file)
+  ("r" rename-file)
+  ("c" copy-file))
+#+end_quote
+** embark commands
+embark just runs interactive emacs functions exactly like M-x -- define custom funcs accordingly
+
+embark also supports passing target as arguement to non-interactive function
+** embark-collect-live
+#+begin_quote
+There is also the embark-collect-live variant of
+embark-collect-snapshot which produces “live” Embark Collect buffers,
+meaning they auto-update as the set of candidates changes. Most users
+of visual completion UIs such as Vertico, Icomplete, Selectrum or Ivy
+will probably either not want to use this from the minibuffer, to
+avoid seeing double (the list of candidates is displayed both by
+Embark and by the completion UI), or to configure their completion UI
+to hide while using embark-collect-live. See the Embark wiki for
+sample configuration for Selectrum. This command can also be used
+outside the minibuffer if you have a relevant candidate collector
+registered in embark-candidate-collectors. Users of the embark-consult
+package, for example, get such a candidate collector registered for
+them, and can produce a live-updating table of contents for any
+buffer, whose items are the lines matching outline-regexp.
+#+end_quote
+** post embark-inject actions
+easily modify the post inject actions of embark for specific targets
+
+- ex :: the embark shell command action uses this to wait for user to
+  input cmd by assigning embark--allow-edit to this plist
+
+#+begin_quote
+(add-to-list 'embark-allow-edit-actions 'my-command)
+#+end_quote
+
+* DONE ivy completion framework for UI that still needs it
+:PROPERTIES:
+:ID:       2780bde7-52be-4524-af10-bbf9f8bff9dc
+:END:
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-04 Tue 18:46]
+:END:
+ivy is being phased out in favor of vertico.
+#+begin_src emacs-lisp
+  (use-package ivy
+    :ensure t
+    :init
+    (ivy-mode -1) ;;deactivated
+    :bind (:map ivy-minibuffer-map
+                ("TAB" . ivy-partial)))
+
+  (use-package ivy-yasnippet
+    :ensure t
+    :bind ("C-c y" . ivy-yasnippet)) ;; ensure consistency with bind logic
+#+end_src
+ivy is a completion framework with speed dial. Offers ability to
+execute actions on selected items on the fly in combination with
+abo-abo's counsel. I never used counsel.
+
+has a lot of integration with other modes
+** DONE Consider replacing ivy with vertico and its utilities
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-04 Tue 18:44]
+:END:
+Citar is neat and works best with vertico. That'll do, boys.
 * TODO dired mode
 :PROPERTIES:
 :ID:       3d554912-ac86-4ca1-8723-220fe537b110
@@ -802,9 +1237,15 @@ this is not critical, but nov.el has noter integration and may help with reading
 #+begin_src emacs-lisp
   (use-package org
     :ensure t
-    :bind (("C-c l" . org-store-link) ;; global organization bindings
-           ("C-c a" . org-agenda) 
-           ("C-c c" . org-capture)))
+    :bind ((:map global-map
+                 (("C-c l" . org-store-link) ;; global organization bindings
+                  ("C-c a" . org-agenda) 
+                  ("C-c c" . org-capture)))
+           (:map org-mode-map
+                 (("M-[" . org-backward-paragraph) ;; org-file navigation customizations
+                  ("M-]" . org-forward-paragraph)
+                  ("M-{" . org-backward-element)
+                  ("M-}" . org-forward-element)))))
 #+end_src
 C-c is the conventional org mode command prefix. More specific sub modes and more general global modes should adopt philosophically consistent standards
 *** TODO conditional keybinds...
@@ -821,7 +1262,7 @@ make babel blocks behave like jupyter a bit
 #+end_src
 OK. Org-babel provides demarcations functions for writing src blocks
 Demarcation utilizes completion framework by default
-Demarcation utilizes dynamics list of ?supported? src languages
+Demarcation utilizes dynamic list of ?supported? src languages
 makes literate programing in org a little easier
 
 org-tempo may help with inserting other kinds of blocks. not src blocks.
@@ -841,11 +1282,11 @@ org-tempo may help with inserting other kinds of blocks. not src blocks.
            ("C-c n r" . org-roam-node-random)		    
            (:map org-mode-map
                  (("C-c n i" . org-roam-node-insert) ;; Insert
-                  ("C-c n o" . org-id-get-create) ;; Organize
+                  ("C-c n o" . org-id-get-create) ;; Organize (index small topics or Create zettles)
                   ("C-c n t" . org-roam-tag-add) ;; Tag
                   ("C-c n a" . org-roam-alias-add) ;; Alias
-                  ("C-c n l" . org-roam-buffer-toggle) ;; backLink
-                  ("C-c n c" . org-roam-extract-subtree)))) ;; Create (use in conjunction with organize)
+                  ("C-c n l" . org-roam-buffer-toggle) ;; view backlinks
+                  ("C-c n c" . org-roam-extract-subtree)))) ;; Create (use in conjunction with Organize)
     :config
     (org-roam-db-autosync-mode)
     (setq org-roam-capture-templates
@@ -895,6 +1336,26 @@ their methods.
 #+END_FIELD
 #+END_ANKI
 #+end_example
+* DONE org-roam-bibtex
+:PROPERTIES:
+:ID:       203c0449-3a6a-40e8-bf46-0564bf1f91e0
+:END:
+:STATUSLOG:
+- State "DONE"       from "NEXT"       [2022-01-06 Thu 19:41]
+- State "NEXT"       from              [2022-01-06 Thu 13:39]
+:END:
+library notes integration with org-roam -- and more?
+#+begin_quote
+Connector between Org-roam, BibTeX-completion, and Org-ref
+#+end_quote
+#+begin_src emacs-lisp
+    (use-package org-roam-bibtex
+      :ensure t
+      :after org-roam
+      :config
+      (require 'org-ref)
+      (org-roam-bibtex-mode))
+#+end_src
 * TODO org-ref
 :PROPERTIES:
 :ID:       bdd2ec7c-473c-49dd-9cde-2659de304a93
@@ -923,85 +1384,83 @@ their methods.
           org-ref-default-bibliography '("~/org/bibliotex/bibliotex.bib")
           org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks"))
     ;; put citation source materials, separated for enote access convenience
-    :bind ((:map bibtex-mode-map ("C-c b" . 'org-ref-bibtex-hydra/body))
+    :bind ((:map bibtex-mode-map ("C-c [" . 'org-ref-bibtex-hydra/body))
            (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
                                ("C-c [" . 'org-ref-insert-link-hydra/body)))))
 #+end_src
 note: this is not portable.... melpa vs elpa?
-** INACTIVE Org-Ref
-I think that was a sample config I saved. too much planning
 
-;; org-ref for manuscripting -- see this in action first -- it seems
-;; to want to centralize the library -- sensible
-;; org-roam-bibtex might be a more suitable workflow
+Org-ref centralizes the library. org-roam-bibtex improves note taking workflow over manual captures.
 
-;; In either case, ivy-bibtex must also be installed and fully configured
-
-;; (use-package org-ref
-;;   :ensure t
-;;   :config
-;;   (setq reftex-default-bibliography '("~/org/bibliography/references.bib"))
-;; 
-;;   ;; see org-ref for use of these variables
-;;   (setq org-ref-bibliography-notes "~/org/bibliography/notes.org"
-;; 	org-ref-default-bibliography '("~/org/bibliography/references.bib")
-;; 	org-ref-pdf-directory "~/Dropbox/bibliography/bibtex-pdfs/")
-;;   (setq bibtex-completion-bibliography "~/Dropbox/bibliography/references.bib"
-;; 	bibtex-completion-library-path "~/Dropbox/bibliography/bibtex-pdfs"
-;; 	bibtex-completion-notes-path "~/Dropbox/bibliography/bibtex-notes"))
+does it provide
+- customizable literature notes template?
+- notes creation/access from the ivy-bibtex (or replacement??) hydra?
 ** TODO Make Org-Ref references a choice of type
 by default, latex sections are referenced in org export using label:
 figures referenced by org ref should use fig:
 tables tbl:
 equations eq:
-etc... There's a bunch of specific "counters" used for specif auto-numbering.
+etc... There's a bunch of specific "counters" used for specific auto-numbering.
 ** TODO give option in bibtex hydra to link references to git repos (leverage projectile machinery)
 sometimes, full repo are installed for exploration -- beyond simple
 notebooks but not personal projects.  They may go under ~/src/ just
 like any non-manuscript git repo. or they may go elswhere in the rare
 case that makes more sense, so the linkage should be able to find any
 REPO systemwide
-* TODO org-noter
+** TODO bindkey to take notes from pdf view
+** TODO version control roam files.
+* NEXT Citar framework for bibliography actions
 :PROPERTIES:
-:ID:       cdd817bc-f97e-49e0-9e4b-46ce34c504b1
+:ID:       ee32313b-1a94-438c-86d7-2519fe3f7ed0
 :END:
+:STATUSLOG:
+- State "NEXT"       from "TODO"       [2022-01-06 Thu 13:39]
+:END:
+ivy-bibtex embetterment for vertico...  Citar will automatically
+integrate with Embark offering contextual access to actions in the
+minibuffer and at-point. Some citation commands prompt for multiple
+citation keys, for which Consult offers an enhanced interface
 #+begin_src emacs-lisp
-
+  (use-package citar
+    :ensure t
+    :custom
+    (citar-bibliography '("~/org/bibliotex/bibliotex.bib"))
+    (setq citar-open-note-function 'orb-citar-edit-note) ;; replace default org note with org-roam-bibtex open note
+    (setq citar-templates
+          '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
+            (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
+            (note . "#+TITLE: ${author editor}, ${title}"))) ;; template applies regardless of open-note-function
+    (setq citar-notes-paths "~/org/zettles")
+    
+    :bind (("C-c [" . citar-insert-citation)
+           :map minibuffer-local-map
+           ("C-b" . citar-insert-preset)))
 #+end_src
-* TODO org-pdf-tools
-* TODO org-roam-bibtex
-* TODO org-download
-:PROPERTIES:
-:ID:       5ecc8d01-150a-46f9-a9b8-83f3cd1fd6c5
+** templates instructions
+You may include multiple variables in a field; the formatter will print the first one it finds.
+If you plan to use CSL JSON at all, you can and should include CSL JSON variables names where appropriate as such options. The default main template dates field demonstrates this.
+The asterisk signals to the formatter to use available space for the column.
+The note template does not take widths, as formatting is inline there rather than columnar.
+** option for predefining search terms
+not sure why this could be useful.
+set citar-presets variable
+** refresh citar cache
+citar caches bibliography for performance.
+
+refresh the cache when needed by calling any citar command with universal argument.
+[[cite:&kingma-2014-adam]]
+** TODO add an "association" function (bind to l in C-c b hydra)
+a simple function to link from non-pdf source material citations back
+to their source material -- use org-ref machinery and the completion buffer
+** TODO add a github/repository webfunction to C-c C-o hydra
+open action on citations for notebooks is less than functional.
+accomodate basic digging with weblookup recipes for github at least
+* CANCELED ivy framework for literature notes
+:STATUSLOG:
+- State "CANCELED"   from "TODO"       [2022-01-07 Fri 16:21] \\
+  responcibilities for global bibliography and citation functionality moved to citar and org framework
 :END:
 #+begin_src emacs-lisp
-  (use-package org-download
-    :ensure t
-    :config
-    (setq org-download-screenshot-method "flameshot gui --raw > %s"))
-#+end_src
-Provides integration between org attachment machinery and system's screen capture utility.
-awesome tool for note taking.
-** TODO better organize where figures captured in notes are kept.
-Objective: figures taken and contextualized in notes should be readily available for linking into manuscripts, backing-up, etc.
-linking is easy as long as the note containing the figure can be found... It is *critical* to be able to rediscover notes on demand.
-** TODO Enable display of in-line gifs
-* TODO ivy and friends
-:PROPERTIES:
-:ID:       2780bde7-52be-4524-af10-bbf9f8bff9dc
-:END:
-#+begin_src emacs-lisp
-  (use-package ivy
-    :ensure t
-    :init
-    (ivy-mode 1)
-    :bind (:map ivy-minibuffer-map
-                ("TAB" . ivy-partial)))
-
-  (use-package ivy-yasnippet
-    :ensure t
-    :bind ("C-c y" . ivy-yasnippet)) ;; ensure consistency with bind logic
-
   (use-package ivy-bibtex
     :ensure t
     :init
@@ -1031,16 +1490,24 @@ linking is easy as long as the note containing the figure can be found... It is 
                 org-ref-insert-ref-function 'org-ref-insert-ref-link
                 org-ref-cite-onclick-function (lambda (_) (org-ref-citation-hydra/body))))
 #+end_src
-ivy is a completion framework with speed dial. Offers ability to execute actions on selected items on the fly.
-has a lot of integration with other modes
-** TODO add an "association" function (bind to l in C-c b hydra)
-a simple function to link from non-pdf source material citations back
-to their source material -- use org-ref machinery and the completion buffer
-** TODO add a github/repository webfunction to C-c C-o hydra
-open action on citations for notebooks is less than functional.
-accomodate basic digging with weblookup recipes for github at least
-** TODO What is Counsel? Swiper?
-** TODO Consider replacing ivy with vertico and its utilities
+* TODO org-pdf-tools
+don't remember what this is supposed to be about anymore...
+* TODO org-download
+:PROPERTIES:
+:ID:       5ecc8d01-150a-46f9-a9b8-83f3cd1fd6c5
+:END:
+#+begin_src emacs-lisp
+  (use-package org-download
+    :ensure t
+    :config
+    (setq org-download-screenshot-method "flameshot gui --raw > %s"))
+#+end_src
+Provides integration between org attachment machinery and system's screen capture utility.
+awesome tool for note taking.
+** TODO better organize where figures captured in notes are kept.
+Objective: figures taken and contextualized in notes should be readily available for linking into manuscripts, backing-up, etc.
+linking is easy as long as the note containing the figure can be found... It is *critical* to be able to rediscover notes on demand.
+** TODO Enable display of in-line gifs
 * TODO global minor modes
 :PROPERTIES:
 :ID:       7eb5ca6a-0022-4aba-abdb-049f81af30a7
@@ -1069,7 +1536,6 @@ accomodate basic digging with weblookup recipes for github at least
     :bind (:map flyspell-mode-map
                 (("C-."   . flyspell-auto-correct-word)
                  ("C-,"   . flyspell-goto-next-error)
-                 ("C-;"   . flyspell-correct-next)
                  ("C-M-;" . flyspell-buffer))))
 #+end_src
 *** TODO wucuo looks better than flyspell, but make sure
@@ -1152,7 +1618,12 @@ discover my major? get similar effect to discover for dired. See the available c
      ("M-`"   . popper-cycle)
      ("C-~" . popper-toggle-type)))
 #+end_src
-** TODO COMMENT Perspective
+** CANCELED COMMENT Perspective
+:STATUSLOG:
+- State "CANCELED"   from "TODO"       [2022-01-04 Tue 13:40] \\
+  text kept for posterity
+:END:
+oh my god it's so trash. bufler does everything better especially when used in conjuction with emacs-server.
 :PROPERTIES:
 :ID:       9f82beed-818b-4e68-924b-224b3e3c9a83
 :END:
@@ -1173,9 +1644,17 @@ discover my major? get similar effect to discover for dired. See the available c
     ;;              (("g" . persp-ibuffer)
     ;;               ("/ B" . persp-ibuffer-set-filter-groups))))
 #+end_src
-*** TODO set up default list of open perspectives
+*** CANCELED #+setupfile:  up default list of open perspectives
+:STATUSLOG:
+- State "CANCELED"   from "TODO"       [2022-01-04 Tue 13:38] \\
+  bad shit
+:END:
 on startup, show comprehensive agenda and offer interface for opening/building perspectives
-*** TODO make so persp-save and load functions navigate to perspectives directory
+*** CANCELED make so persp-save and load functions navigate to perspectives directory
+:STATUSLOG:
+- State "CANCELED"   from "TODO"       [2022-01-04 Tue 13:40] \\
+  never using this again
+:END:
 ** TODO Discoverablity
 :PROPERTIES:
 :ID:       2f56a136-3572-4341-a307-5081357ff31b
