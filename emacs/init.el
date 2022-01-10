@@ -336,9 +336,9 @@
                     "CONTACT(c!)"
                     "MEETING(m!)"
                     "|")
-          (sequence "ATTEND(a!)" "|" "DONE(d!)" "MISSED(f!)") ;; pure calendar events?
           (sequence "SEQ(s)" "|"))) ;; notebook navigational labels?
-  ;;        (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED"))) ;; development task labels
+          ;; (sequence "ATTEND(a!)" "|" "DONE(d!)" "MISSED(f!)"))) ;; uneeded in distributed scheduled task paradigm
+          ;; (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED"))) ;; development task labels
   (defun pm/modify-org-done-face ()
     (setq org-fontify-done-headline t)
     (set-face-attribute 'org-done nil :strike-through t)
@@ -369,15 +369,15 @@
 (use-package org
   :ensure t
   :init
-  (setq org-default-notes-file (concat org-directory "/refile.org")) ;; org-capture file -- compiles capture entries (all entries tagged :refile)     
+  (setq org-default-notes-file (concat org-directory "/refile.org")) ;; capture rapid incoming (autotagged :refile)     
   ;; default cabinets for refiling outstanding captures + organized sources populating org-agenda.
-  (setq org-cabinets (list (concat org-directory "/logbook.org") ;; datetree chronicling clocktime, timestamped captures, with journal entries
-                           (concat org-directory "/research.org") ;; my research, school, and study -- to be populated explicitly by capturing
-                           (concat org-directory "/addressbook.org") ;; CRM file. Network contacts by linking manually (so it sticks), use roam
-                           (concat org-directory "/occurance.org")
-                           (concat org-directory "/zettles/")
-                           "~/src/"
-                           "~/.config/emacs/litinit.org")))
+  (setq org-cabinets (list (concat org-directory "/zettles/")
+                           (concat (getenv "HOME") "/src/")
+                           (concat (getenv "HOME") "/.config/emacs/litinit.org"))))
+;; following org files phased out in favor of the zettles roam database
+;; logfile -- datetree chronicling clocktime, timestamped captures, with journal entries
+;; research -- my research, school, and study -- to be populated explicitly by capturing
+;; addressbook -- CRM file. Network contacts by linking manually (so it sticks), use roam
 
 (use-package org
   :ensure t
@@ -402,47 +402,6 @@
   (setq org-clock-idle-time 10) ;; and prompt to resolve running clocks when restarting, or after 10 minutes of emacs idle time.
   :config
   (org-clock-persistence-insinuate))  ;; set up hooks for clock persistence through sessions
-
-(use-package org
-  :ensure t
-  :init
-  (setq org-capture-templates
-        (quote (("p" "project outlining") ;; new project definitions and reports on predefined projects
-                ("pt" "todo" entry (file "~/org/refile.org") ;; a new task needing to be defined and inserted into ongoing project
-                 "* TODO %?\n%U\n%a\n")
-                ("ps" "todo" entry (file "~/org/refile.org") ;; schedule a new event.
-                 "* TODO %?\n%^T")
-                ;; template current time, link in ring (or current file), capture new task name, pause other clocks, clock time, resume other clocks
-                ;; ex :: good for a job in any given piece of code because it links to the line that inspired it.
-                ;;		("pr" "reflect" entry (file "~/org/refile.org")
-                ;;		 "* JOURNAL")
-                ;; OR
-                ;;		("n" "note" entry (file "~/org/refile.org")
-                ;;               "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-                ;; not sure what this looks like yet. On-the-clock thoughts about current work (look at %k), look at organizing by :tag
-                ("i" "interruptions")
-                ("ir" "respond" entry (file "~/org/refile.org")
-                 "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-                ;; fully automated reaction cache for differed inquiries, requests, solicitations, etc.
-                ("ii" "idea" entry (file "~/org/refile.org")
-                 "* INACTIVE")
-                ;; for academic questions, topics of investigation, project proposals, paper subject.
-                ;;		("w" "org-protocol" entry (file "~/org/refile.org")
-                ;;		 "* TODO Review %c\n%U\n" :immediate-finish t)
-                ;; tracking org workflow and planning adaptations TAG = :ENV?
-                ("m" "Meeting" entry (file "~/org/refile.org")
-                 "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-                ;; documenting essentials of scheduled and spontaneous meetings/encounters.
-                ("c" "Contact" entry (file "~/org/refile.org") ;; document professional contact
-                 "* CONTACT"))))
-  :config
-  (defun pm/remove-empty-drawer-on-clock-out ()
-    "Remove empty STATUSLOG drawers on clock out, use as hook to de-clutter ephemeral captures"
-    (interactive)
-    (save-excursion
-      (beginning-of-line 0)
-      (org-remove-empty-drawer-at "STATUSLOG" (point))))
-  (add-hook 'org-clock-out-hook 'pm/remove-empty-drawer-on-clock-out 'append))
 
 (use-package org
   :ensure t
@@ -560,13 +519,40 @@
 (use-package org-roam-bibtex
   :ensure t
   :after org-roam
+  :init
+  (setq orb-insert-link-description 'title)
+  ;; without numeric arg, insert roam link to bib notes node with description set to title of (node? or bibtex entry title?)
+  ;; orb-note-actions command exposes
+  ;; 1. orb-note-actions-default -- not to be modified -- bibtex-completion actions
+  ;; 2. orb-note-actions-extra -- org-roam-bibtex (and other packages?)
+  ;; 3. orb-note-actions-user -- meant for user customization -- set below as (DESCRIPTION . FUNCTION)
+  ;; the org-ref-hydra/body function applies many such functions
+  ;; it is desirable to move this to a embark based interface with optional persistance
+  ;; (with-eval-after-load 'orb-note-actions
+  ;;   (add-to-list 'orb-note-actions-user (cons "My note action" #'my-note-action)))
+
+  ;; (defun my-note-action (citekey)
+  ;;   (let ((key (car citekey)))
+  ;;     ...))
+  ;; :custom ;; the following must be set in custom
+  ;; (orb-insert-interface 'generic) ;; usable by vertico, but only cite keys are listed
+  ;; (orb-note-actions-interface 'default) ;; alternatively can be set to a custom function
+  ;; make custom function take (CITEKEY) arguement and present embark target binding...? 
+  ;; or just skip all this -- it's an orb binding convenience -- and insted directly target CITEKEYs
+  ;; with embark-act
   :config
   (require 'org-ref)
-  (org-roam-bibtex-mode))
+  (org-roam-bibtex-mode)) ;; turn on minor mode
 
 (use-package org-ref
   :ensure t
   :init
+  ;; likely unnecessary for or in conflict with the vertico completion framework
+  ;;(setq org-ref-insert-link-function 'org-ref-insert-link-hydra/body
+  ;;      org-ref-insert-cite-function 'org-ref-cite-insert-ivy
+  ;;      org-ref-insert-label-function 'org-ref-insert-label-link
+  ;;      org-ref-insert-ref-function 'org-ref-insert-ref-link
+  ;;      org-ref-cite-onclick-function (lambda (_) (org-ref-citation-hydra/body))) 
   (setq org-ref-completion-library 'org-ref-ivy-cite) ;; org-ref manager use ivy-bibtex's retreival machinery
   ;; (setq org-ref-default-citation-link "autocite") ;; decide which natbib style is predominant
   (require 'bibtex)
@@ -577,63 +563,19 @@
         bibtex-autokey-titlewords 2
         bibtex-autokey-titlewords-stretch 1
         bibtex-autokey-titleword-length 5) ;; variables informing entry cleanup function
-  (require 'org-ref-ivy)
+  ;; (require 'org-ref-ivy) ;; phased out in favor of citar
   (require 'org-ref-arxiv)
   (require 'org-ref-scopus)
   (require 'org-ref-wos)
   :config
-  (setq reftex-default-bibliography '("~/org/bibliotex/bibliotex.bib")) ;; redundant?
-  (setq org-ref-bibliography-notes "~/org/zettles/" ;; replace this variable with the setting from orb?
+  (setq reftex-default-bibliography '("~/org/bibliotex/bibliotex.bib")) ;; redundant? 
+  (setq org-ref-bibliography-notes "~/org/zettles/" ;; orb and org-ref can agree but must they?
         org-ref-default-bibliography '("~/org/bibliotex/bibliotex.bib")
-        org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks"))
-  ;; put citation source materials, separated for enote access convenience
-  :bind ((:map bibtex-mode-map ("C-c [" . 'org-ref-bibtex-hydra/body))
-         (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
-                             ("C-c [" . 'org-ref-insert-link-hydra/body)))))
-
-(use-package citar
-  :ensure t
-  :custom
-  (citar-bibliography '("~/org/bibliotex/bibliotex.bib"))
-  (setq citar-open-note-function 'orb-citar-edit-note) ;; replace default org note with org-roam-bibtex open note
-  (setq citar-templates
-        '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
-          (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
-          (note . "#+TITLE: ${author editor}, ${title}"))) ;; template applies regardless of open-note-function
-  (setq citar-notes-paths "~/org/zettles")
-
-  :bind (("C-c [" . citar-insert-citation)
-         :map minibuffer-local-map
-         ("C-b" . citar-insert-preset)))
-
-(use-package ivy-bibtex
-  :ensure t
-  :init
-  (setq bibtex-completion-bibliography '("~/org/bibliotex/bibliotex.bib") ;; feel free to expand
-        bibtex-completion-library-path '("~/org/bibliotex/papers_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks/")
-        ;; doi utils uses path to install pdf downloads. org ref uses path to open source material from cite
-        bibtex-completion-notes-path "~/org/zettles/" ;; Keep this concentrated. Might get heavy, but optimize later
-        bibtex-completion-notes-template-multiple-files "* ${author-or-editor}, ${title}, ${journal}, (${year}) :${=type=}: \n\nSee [[cite:&${=key=}]]\n"
-        bibtex-completion-additional-search-fields '(keywords)
-        bibtex-completion-display-formats
-        '((article       . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${journal:40}")
-          (inbook        . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} Chapter ${chapter:32}")
-          (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
-          (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
-          (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
-        bibtex-completion-pdf-open-function 'find-file)) ;;open pdfs in emacs--best, obviously.
-        ;;          (lambda (fpath)
-        ;;          (call-process "open" nil 0 nil fpath)))) ;;open pdfs
-
-(use-package org-ref-ivy
-  :disabled ;; this is not present on melpa, it's a scimax convenience for the ivy-bound
-  :ensure nil
-  :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
-  :init (setq org-ref-insert-link-function 'org-ref-insert-link-hydra/body
-              org-ref-insert-cite-function 'org-ref-cite-insert-ivy
-              org-ref-insert-label-function 'org-ref-insert-label-link
-              org-ref-insert-ref-function 'org-ref-insert-ref-link
-              org-ref-cite-onclick-function (lambda (_) (org-ref-citation-hydra/body))))
+        org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks")))
+  ;; citation source materials, separated for enote access convenience
+  ;;:bind ((:map bibtex-mode-map ("C-c [" . 'org-ref-bibtex-hydra/body)) ;; does consult have a better way?
+  ;;       (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
+  ;;                           ("C-c [" . 'org-ref-insert-link-hydra/body)))))
 
 (use-package org-download
   :ensure t
