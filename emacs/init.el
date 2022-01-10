@@ -497,9 +497,10 @@
         (quote (("d" "default" plain "%?"
                  :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}")
                  :unnarrowed t)
-                ("l" "Literatue Notes") ;; fully contextual notes. Necessarily Integrated with lit docs via org-noter and org-ref
-                ("ln" "noter" entry (file "~/org/zettles/") ;; noter academic pdf note. (consider dedicated epub template too.)
+                ("l" "Literatue Notes") ;; fully contextual notes. Integrated with org-ref via orb
+                ("ln" "noter" entry (file "~/org/zettles/")
                  "* TODO %?\n%U\n%a\n")
+                 ;; really think about the most general way to open a note. open a note from the ref key, from the source, from the bibtex entry -- embark actions seem most suitable and consistent
                 ("lb" "book" entry (file "~/org/zettles/") ;; physical book note. limited automation + meticulous capture
                  "* TODO %?\n%^T") ;;book, author, pagenumber, full manual bibtex?
                 ("r" "Reference Notes") ;; Reflective notes. lectures, seminars, videos; bookmarks; ongoing projects
@@ -542,7 +543,7 @@
   ;; with embark-act
   :config
   (require 'org-ref)
-  (org-roam-bibtex-mode)) ;; turn on minor mode
+  (org-roam-bibtex-mode))
 
 (use-package org-ref
   :ensure t
@@ -571,11 +572,59 @@
   (setq reftex-default-bibliography '("~/org/bibliotex/bibliotex.bib")) ;; redundant? 
   (setq org-ref-bibliography-notes "~/org/zettles/" ;; orb and org-ref can agree but must they?
         org-ref-default-bibliography '("~/org/bibliotex/bibliotex.bib")
-        org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks")))
+        org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks"))
   ;; citation source materials, separated for enote access convenience
-  ;;:bind ((:map bibtex-mode-map ("C-c [" . 'org-ref-bibtex-hydra/body)) ;; does consult have a better way?
-  ;;       (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
-  ;;                           ("C-c [" . 'org-ref-insert-link-hydra/body)))))
+  :bind ((:map bibtex-mode-map ("C-c [" . 'org-ref-bibtex-hydra/body)) ;; does consult/embark have a better way?
+         (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
+                             ("C-c [" . 'org-ref-insert-link-hydra/body)))))
+
+(use-package citar
+  :ensure t
+  :init
+  (setq bibtex-completion-bibliography '("~/org/bibliotex/bibliotex.bib")
+        bibtex-completion-library-path '("~/org/bibliotex/papers_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks/")
+        ;; doi utils uses path to install pdf downloads. org ref uses path to open source material from cite
+        bibtex-completion-notes-path "~/org/zettles/"
+        ;; bibtex-completion-notes-template-multiple-files "* ${author-or-editor}, ${title}, ${journal}, (${year}) :${=type=}: \n\nSee [[cite:&${=key=}]]\n"
+        ;; replaced by citar open note function and notes template
+        bibtex-completion-additional-search-fields '(keywords)
+        bibtex-completion-display-formats
+        '((article       . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${journal:40}")
+          (inbook        . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} Chapter ${chapter:32}")
+          (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+          (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+          (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
+        bibtex-completion-pdf-open-function 'find-file) ;;open pdfs in emacs--best, obviously. -- works inconsistently
+  (setq citar-open-at-point-function 'embark-act) ;; C-c C-o on citar ref should open embark menu
+  ;; issue -- conflicts with org-ref hydra on cite link
+  (setq citar-library-paths '("~/org/bibliotex/papers_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks/")
+        citar-notes-paths '("~/org/zettles/")
+        citar-file-extensions '("pdf" "org" "md")
+        citar-file-open-function #'find-file)
+  ;; these settings are troublesome....
+  ;; citar seems like it should take care of making org-ref citations embark targets
+  ;; it kind of does, but needs these variables
+  ;; or is it all that's needed?
+  :custom
+  (citar-bibliography '("~/org/bibliotex/bibliotex.bib"))
+  (setq citar-open-note-function 'orb-citar-edit-note) ;; replace default org open note with orb-edit-note
+  (setq citar-templates
+        '((main . "${author editor:30}     ${date year issued:4}     ${title:48}") ;; format completing read display
+          (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}") ;; add to display
+          (preview . "${author editor} ${title}, ${journal publisher container-title collection-title booktitle} ${volume} (${year issued date}).\n"))) ;; not sure
+  ;; (note . "#+TITLE: ${title}\n#+AUTHOR: ${author editor}") citar notes template overrun by roam templates due to orb-edit-note
+  (setq citar-notes-paths "~/org/zettles")
+  (setq orb-preformat-templates t) ;; default t
+  ;; expandable keywords in orb-templates or org-roam-capture-templates
+  (setq orb-preformat-keywords '("citekey" "entry-type" "date" "pdf?" "note?" "file" "author" "editor" "author-abbrev" "editor-abbrev" "author-or-editor-abbrev"))
+  :config
+  (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
+  ;; this is a consult configuration -- bibtex-completion is in the habit of using CRM
+  ;; consult helps embark deal with it.
+  :bind (:map org-mode-map
+              ("C-c b" . citar-insert-citation)
+              :map minibuffer-local-map
+              ("C-c i" . citar-insert-preset)))
 
 (use-package org-download
   :ensure t

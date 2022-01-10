@@ -1,3 +1,6 @@
+:PROPERTIES:
+:ID:       179ef7f8-81e1-4480-be38-813e3fd0b00e
+:END:
 #+TITLE: Emacs Configuration and Documentation
 #+startup: overview
 #+PROPERTY: header-args:emacs-lisp :tangle ~/.config/emacs/init.el
@@ -1298,9 +1301,10 @@ org-tempo may help with inserting other kinds of blocks. not src blocks.
           (quote (("d" "default" plain "%?"
                    :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}")
                    :unnarrowed t)
-                  ("l" "Literatue Notes") ;; fully contextual notes. Necessarily Integrated with lit docs via org-noter and org-ref
-                  ("ln" "noter" entry (file "~/org/zettles/") ;; noter academic pdf note. (consider dedicated epub template too.)
+                  ("l" "Literatue Notes") ;; fully contextual notes. Integrated with org-ref via orb
+                  ("ln" "noter" entry (file "~/org/zettles/")
                    "* TODO %?\n%U\n%a\n")
+                   ;; really think about the most general way to open a note. open a note from the ref key, from the source, from the bibtex entry -- embark actions seem most suitable and consistent
                   ("lb" "book" entry (file "~/org/zettles/") ;; physical book note. limited automation + meticulous capture
                    "* TODO %?\n%^T") ;;book, author, pagenumber, full manual bibtex?
                   ("r" "Reference Notes") ;; Reflective notes. lectures, seminars, videos; bookmarks; ongoing projects
@@ -1349,10 +1353,19 @@ their methods.
 - State "DONE"       from "NEXT"       [2022-01-06 Thu 19:41]
 - State "NEXT"       from              [2022-01-06 Thu 13:39]
 :END:
-library notes integration with org-roam -- and more?
-#+begin_quote
-Connector between Org-roam, BibTeX-completion, and Org-ref
-#+end_quote
+library notes integration with org-roam
+
+minor mode enables accessing bib notes in org-roam-directory org/zettles
+
+orb mode modifies org-ref to use orb-edit-note instead of org-note
+
+orb-note-actions command exposes additional commands in notes buffer with ROAM_REFS set
+actions explained in comments below -- prioritize embark actions
+
+(not for cite at point)
+
+orb-insert-link command to directly insert roam link to note node via
+citekey instead of citation source via citekey. (more direct option)
 #+begin_src emacs-lisp
   (use-package org-roam-bibtex
     :ensure t
@@ -1380,7 +1393,7 @@ Connector between Org-roam, BibTeX-completion, and Org-ref
     ;; with embark-act
     :config
     (require 'org-ref)
-    (org-roam-bibtex-mode)) ;; turn on minor mode
+    (org-roam-bibtex-mode))
 #+end_src
 ** TODO enable in-note reference scraping
 orb provides orb-note-action binding active only in org-roam buffers with #+ROAM_KEY: set
@@ -1427,6 +1440,17 @@ help.  The emacs interface is equipped to help.
 :PROPERTIES:
 :ID:       bdd2ec7c-473c-49dd-9cde-2659de304a93
 :END:
+org ref provides a featureful citation key (v3 form: cite:&key) and an interactive hydra for interacting with the
+source, notes, bibtex entry, and beyond....
+
+Ideally all these functionalities (not simply wrapping existing
+bibtex-completion functions) should be added to orb-note-actions-extra?
+
+Or should be exposed directly for org-ref and org-cite (for foreign
+interop) cite targets via a custom embark map
+
+the below config is left functionally untouched from what was working prior to the vertico switch.
+except for removing org-ref-ivy requirement
 #+begin_src emacs-lisp
   (use-package org-ref
     :ensure t
@@ -1455,19 +1479,13 @@ help.  The emacs interface is equipped to help.
     (setq reftex-default-bibliography '("~/org/bibliotex/bibliotex.bib")) ;; redundant? 
     (setq org-ref-bibliography-notes "~/org/zettles/" ;; orb and org-ref can agree but must they?
           org-ref-default-bibliography '("~/org/bibliotex/bibliotex.bib")
-          org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks")))
+          org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks"))
     ;; citation source materials, separated for enote access convenience
-    ;;:bind ((:map bibtex-mode-map ("C-c [" . 'org-ref-bibtex-hydra/body)) ;; does consult have a better way?
-    ;;       (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
-    ;;                           ("C-c [" . 'org-ref-insert-link-hydra/body)))))
+    :bind ((:map bibtex-mode-map ("C-c [" . 'org-ref-bibtex-hydra/body)) ;; does consult/embark have a better way?
+           (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
+                               ("C-c [" . 'org-ref-insert-link-hydra/body)))))
 #+end_src
 note: this is not portable.... melpa vs elpa?
-
-Org-ref centralizes the library. org-roam-bibtex improves note taking workflow over non-roam org captures.
-
-does it provide
-- customizable literature notes template? -- yes
-- notes creation/access from the ivy-bibtex (or replacement??) hydra? -- citar uses embark enhanced interface?
 ** TODO Make Org-Ref references a choice of type
 by default, latex sections are referenced in org export using label:
 figures referenced by org ref should use fig:
@@ -1482,14 +1500,14 @@ case that makes more sense, so the linkage should be able to find any
 REPO systemwide
 ** TODO bindkey to take notes from pdf view
 ** TODO version control roam files.
-* NEXT COMMENT Citar framework for bibliography actions
+* NEXT Citar framework for bibliography actions
 :PROPERTIES:
 :ID:       ee32313b-1a94-438c-86d7-2519fe3f7ed0
 :END:
 :STATUSLOG:
 - State "NEXT"       from "TODO"       [2022-01-06 Thu 13:39]
 :END:
-ivy-bibtex embetterment for vertico...  Citar will automatically
+ivy-bibtex embitterment for vertico...  Citar will automatically
 integrate with Embark offering contextual access to actions in the
 minibuffer and at-point. Some citation commands prompt for multiple
 citation keys, for which Consult offers an enhanced interface
@@ -1511,23 +1529,49 @@ citation keys, for which Consult offers an enhanced interface
             (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
             (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
           bibtex-completion-pdf-open-function 'find-file) ;;open pdfs in emacs--best, obviously. -- works inconsistently
+    (setq citar-open-at-point-function 'embark-act) ;; C-c C-o on citar ref should open embark menu
+    ;; issue -- conflicts with org-ref hydra on cite link
+    (setq citar-library-paths '("~/org/bibliotex/papers_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks/")
+          citar-notes-paths '("~/org/zettles/")
+          citar-file-extensions '("pdf" "org" "md")
+          citar-file-open-function #'find-file)
+    ;; these settings are troublesome....
+    ;; citar seems like it should take care of making org-ref citations embark targets
+    ;; it kind of does, but needs these variables
+    ;; or is it all that's needed?
     :custom
     (citar-bibliography '("~/org/bibliotex/bibliotex.bib"))
-    (setq citar-open-note-function 'orb-citar-edit-note) ;; replace default org open note with org-roam-bibtex open note
+    (setq citar-open-note-function 'orb-citar-edit-note) ;; replace default org open note with orb-edit-note
     (setq citar-templates
-          '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
-            (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
-            (preview . "${author editor} ${title}, ${journal publisher container-title collection-title booktitle} ${volume} (${year issued date}).\n")
-            (note . "#+TITLE: ${title}\n#+AUTHOR: ${author editor}"))) ;; template applies regardless of open-note-function
+          '((main . "${author editor:30}     ${date year issued:4}     ${title:48}") ;; format completing read display
+            (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}") ;; add to display
+            (preview . "${author editor} ${title}, ${journal publisher container-title collection-title booktitle} ${volume} (${year issued date}).\n"))) ;; not sure
+    ;; (note . "#+TITLE: ${title}\n#+AUTHOR: ${author editor}") citar notes template overrun by roam templates due to orb-edit-note
     (setq citar-notes-paths "~/org/zettles")
     (setq orb-preformat-templates t) ;; default t
     ;; expandable keywords in orb-templates or org-roam-capture-templates
     (setq orb-preformat-keywords '("citekey" "entry-type" "date" "pdf?" "note?" "file" "author" "editor" "author-abbrev" "editor-abbrev" "author-or-editor-abbrev"))
+    :config
+    (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
+    ;; this is a consult configuration -- bibtex-completion is in the habit of using CRM
+    ;; consult helps embark deal with it.
     :bind (:map org-mode-map
-                ("C-c [" . citar-insert-citation)
-           :map minibuffer-local-map
+                ("C-c b" . citar-insert-citation)
+                :map minibuffer-local-map
                 ("C-c i" . citar-insert-preset)))
 #+end_src
+** troubleshooting
+the citar open notes function is troubling.
+it opens the default citar-templates note, it doesn't use the roam template dispatch...
+
+hmmmmmmmmm. or is citar a high level configuration that obviates the need for explicit bibtex completion config?
+
+might even obviate detailed org-ref config...
+
+it does seem to work nicely with embark from the minibuffer so far...
+
+if it can be made to work well from in-buffer targets too, then it might be best to trim down to citar...
+
 ** embark target mapping plan
 orb-insert-link command is like org-roam-node-insert with bibliographic note template.
 - it prompts user to choose from bibliography (currently keys only, not bibtex-completion formatted display.)
@@ -1558,24 +1602,6 @@ to their source material -- use org-ref machinery and the completion buffer
 ** TODO add a github/repository webfunction to C-c C-o hydra
 open action on citations for notebooks is less than functional.
 accomodate basic digging with weblookup recipes for github at least
-* CANCELED COMMENT ivy framework for literature notes
-:STATUSLOG:
-- State "CANCELED"   from "TODO"       [2022-01-07 Fri 16:21] \\
-  responcibilities for global bibliography and citation functionality moved to citar and org framework
-:END:
-#+begin_src emacs-lisp
-  (use-package ivy-bibtex
-    :ensure t
-    :init
-    ;; bunch of bibtex variables moved to be set elsewhere
-          ;;          (lambda (fpath)
-          ;;          (call-process "open" nil 0 nil fpath)))) ;;open pdfs
-
-  (use-package org-ref-ivy
-    :disabled ;; this is not present on melpa, it's a scimax convenience for the ivy-bound
-    :ensure nil
-    :load-path (lambda () (expand-file-name "org-ref" scimax-dir)))
-#+end_src
 * TODO org-pdf-tools
 don't remember what this is supposed to be about anymore...
 * TODO org-download
@@ -2101,3 +2127,22 @@ use dmenu or make it work with ivy and council linux apps?
 	(kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
 #+end_src
 Org agenda scheduling keymacros
+
+* CANCELED COMMENT ivy framework for literature notes
+:STATUSLOG:
+- State "CANCELED"   from "TODO"       [2022-01-07 Fri 16:21] \\
+  responcibilities for global bibliography and citation functionality moved to citar and org framework
+:END:
+#+begin_src emacs-lisp
+  (use-package ivy-bibtex
+    :ensure t
+    :init
+    ;; bunch of bibtex variables moved to be set elsewhere
+          ;;          (lambda (fpath)
+          ;;          (call-process "open" nil 0 nil fpath)))) ;;open pdfs
+
+  (use-package org-ref-ivy
+    :disabled ;; this is not present on melpa, it's a scimax convenience for the ivy-bound
+    :ensure nil
+    :load-path (lambda () (expand-file-name "org-ref" scimax-dir)))
+#+end_src
