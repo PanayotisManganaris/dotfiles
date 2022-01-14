@@ -427,6 +427,7 @@
   (setq org-image-actual-width '(200)))
 
 (use-package ob-ipython
+  ;;:disabled
   :ensure t
   :config
   (add-to-list 'company-backends 'company-ob-ipython)
@@ -435,16 +436,25 @@
   :bind (:map org-mode-map (("M-." . ob-ipython-inspect)))) ;; idea: bind ide doc tools to C-c lang-abbrev i?
 
 (use-package jupyter
-  :ensure t)
+  :ensure t
+  :config
+  (setq jupyter-repl-echo-eval-p t))
 
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (python . t)
-   (ipython . t)
-   (latex . t)
-   (ditaa . t)
-   (ruby . t)))
+(use-package ob
+  :after (org jupyter)
+  :config
+  (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (python . t)
+     ;; (ipython . t)
+     (latex . t)
+     (ditaa . t)
+     (ruby . t)
+     ;; jupyter always must be last
+     (jupyter . t))))
+
 (use-package org
   :ensure t
   :config
@@ -651,6 +661,8 @@
 ;;   (add-hook 'text-mode-hook #'flyspell-mode))
 (use-package flyspell-correct
   :after wucuo
+  :config
+  (unbind-key "C-;" flyspell-mode-map) ;; be free my action button
   :bind (:map flyspell-mode-map
               (("C-."   . flyspell-auto-correct-word)
                ("C-,"   . flyspell-goto-next-error)
