@@ -790,8 +790,37 @@ easy pgp assistant helps to deal with encrypted files quickly
     :ensure t)
 #+end_src
 ** literate programing
-*** org babel
+*** CANCELED COMMENT ob-ipython
+:STATUSLOG:
+- State "CANCELED"   from              [2022-01-21 Fri 14:15] \\
+  replaced by more robust and featureful jupter based literate programing environement.
+:END:
+an attempt at exanding on john kitchin's scimax environment starting
+from a more recent and featureful version of ob ipython.
+
+many lessons learned including that a conda base environment should
+include the jupyter suite
+#+begin_src emacs-lisp
+  (use-package ob-ipython
+    :disabled
+    :ensure t
+    :config
+    (add-to-list 'company-backends 'company-ob-ipython)
+    (setq ob-ipython-command "jupyter")
+    (setq org-babel-python-command "python")
+    :bind (:map org-mode-map (("M-." . ob-ipython-inspect)))) ;; idea: bind ide doc tools to C-c lang-abbrev i?
+#+end_src
 *** emacs jupyter
+customize to ideal configuration.
+- easy figure naming for manuscript generation
+- easy remote session connectivity
+- more robust display options using pandoc? the html>org table conversion script seems really good for now....
+#+begin_src emacs-lisp
+  (use-package jupyter
+    :ensure t
+    :config
+    (setq jupyter-repl-echo-eval-p t))
+#+end_src
 * TODO Org-mode
 ** TODO Org TODO hierarchies presentation and UI
 :PROPERTIES:
@@ -1100,7 +1129,7 @@ are made on basis of inclusion in paper)
     :ensure t
     :init
     (setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
-    (setq org-image-actual-width '(200)))
+    (setq org-image-actual-width '(1000)))
 #+end_src
 **** TODO manage attachment directories
 ***** where to keep downloads?
@@ -1111,20 +1140,6 @@ are made on basis of inclusion in paper)
 :ID:       b9ef07e9-a022-4c1f-a75d-1336bd88fa07
 :END:
 #+begin_src emacs-lisp
-  (use-package ob-ipython
-    ;;:disabled
-    :ensure t
-    :config
-    (add-to-list 'company-backends 'company-ob-ipython)
-    (setq ob-ipython-command "jupyter")
-    (setq org-babel-python-command "python")
-    :bind (:map org-mode-map (("M-." . ob-ipython-inspect)))) ;; idea: bind ide doc tools to C-c lang-abbrev i?
-
-  (use-package jupyter
-    :ensure t
-    :config
-    (setq jupyter-repl-echo-eval-p t))
-
   (use-package ob
     :after (org jupyter)
     :config

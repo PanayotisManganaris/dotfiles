@@ -313,6 +313,11 @@
 (use-package lsp-mode
   :ensure t)
 
+(use-package jupyter
+  :ensure t
+  :config
+  (setq jupyter-repl-echo-eval-p t))
+
 (use-package org
   :ensure t
   :init (setq org-export-backends '(ascii html icalendar latex odt)) ;; org exports establish prior to loading org.el
@@ -424,21 +429,7 @@
   :ensure t
   :init
   (setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
-  (setq org-image-actual-width '(200)))
-
-(use-package ob-ipython
-  ;;:disabled
-  :ensure t
-  :config
-  (add-to-list 'company-backends 'company-ob-ipython)
-  (setq ob-ipython-command "jupyter")
-  (setq org-babel-python-command "python")
-  :bind (:map org-mode-map (("M-." . ob-ipython-inspect)))) ;; idea: bind ide doc tools to C-c lang-abbrev i?
-
-(use-package jupyter
-  :ensure t
-  :config
-  (setq jupyter-repl-echo-eval-p t))
+  (setq org-image-actual-width '(1000)))
 
 (use-package ob
   :after (org jupyter)
