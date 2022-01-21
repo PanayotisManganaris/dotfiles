@@ -1141,7 +1141,7 @@ are made on basis of inclusion in paper)
 :END:
 #+begin_src emacs-lisp
   (use-package ob
-    :after (org jupyter)
+    :after (:all org jupyter)
     :config
     (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
     (org-babel-do-load-languages
@@ -1727,7 +1727,9 @@ discover my major? get similar effect to discover for dired. See the available c
   (use-package pdf-tools
     :ensure t
     :magic ("%PDF" .  pdf-view-mode) ;; open pdfs please, thank you
-    :config (pdf-tools-install)) ;; don't break when libpoppler.so updates.
+    :config (pdf-tools-install)
+    :bind (:map pdf-isearch-minor-mode-map
+                ("C-s" . isearch-forward-regexp))) ;; don't break when libpoppler.so updates.
 #+end_src
 * TODO Extending Fundamental Functionality
 ** TODO Popper

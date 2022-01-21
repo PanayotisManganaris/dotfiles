@@ -432,7 +432,7 @@
   (setq org-image-actual-width '(1000)))
 
 (use-package ob
-  :after (org jupyter)
+  :after (:all org jupyter)
   :config
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
   (org-babel-do-load-languages
@@ -683,7 +683,9 @@
 (use-package pdf-tools
   :ensure t
   :magic ("%PDF" .  pdf-view-mode) ;; open pdfs please, thank you
-  :config (pdf-tools-install)) ;; don't break when libpoppler.so updates.
+  :config (pdf-tools-install)
+  :bind (:map pdf-isearch-minor-mode-map
+              ("C-s" . isearch-forward-regexp))) ;; don't break when libpoppler.so updates.
 
 (use-package popper
   :ensure t
