@@ -763,11 +763,8 @@ uses smerge to resolve merge conflicts by default
   (use-package projectile
     :ensure t
     :config
-    (require 'subr-x)
-    (setq projectile-completion-system 'ivy)
     (projectile-mode +1)
-    :bind (:map global-map
-                (("C-c p" . projectile-command-map))))
+    :bind-keymap ("C-c p" . projectile-command-map))
 #+end_src
 easily pull up projects defined by a version controlling repository and avoid excessive file finding.
 
@@ -782,44 +779,6 @@ easy pgp assistant helps to deal with encrypted files quickly
   (use-package epa-file
     :config
     (epa-file-enable))
-#+end_src
-* Emacs as an IDE
-** TODO LSP mode
-#+begin_src emacs-lisp
-  (use-package lsp-mode
-    :ensure t)
-#+end_src
-** literate programing
-*** CANCELED COMMENT ob-ipython
-:STATUSLOG:
-- State "CANCELED"   from              [2022-01-21 Fri 14:15] \\
-  replaced by more robust and featureful jupter based literate programing environement.
-:END:
-an attempt at exanding on john kitchin's scimax environment starting
-from a more recent and featureful version of ob ipython.
-
-many lessons learned including that a conda base environment should
-include the jupyter suite
-#+begin_src emacs-lisp
-  (use-package ob-ipython
-    :disabled
-    :ensure t
-    :config
-    (add-to-list 'company-backends 'company-ob-ipython)
-    (setq ob-ipython-command "jupyter")
-    (setq org-babel-python-command "python")
-    :bind (:map org-mode-map (("M-." . ob-ipython-inspect)))) ;; idea: bind ide doc tools to C-c lang-abbrev i?
-#+end_src
-*** emacs jupyter
-customize to ideal configuration.
-- easy figure naming for manuscript generation
-- easy remote session connectivity
-- more robust display options using pandoc? the html>org table conversion script seems really good for now....
-#+begin_src emacs-lisp
-  (use-package jupyter
-    :ensure t
-    :config
-    (setq jupyter-repl-echo-eval-p t))
 #+end_src
 * TODO Org-mode
 ** TODO Org TODO hierarchies presentation and UI
@@ -1141,7 +1100,6 @@ are made on basis of inclusion in paper)
 :END:
 #+begin_src emacs-lisp
   (use-package ob
-    :after (:all org jupyter)
     :config
     (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
     (org-babel-do-load-languages
@@ -1835,12 +1793,20 @@ Provides on-the-fly navigation of key hierarchies.
     :bind (:map global-map
                 ("C-x m" . notmuch)
                 ("C-x C-m" . notmuch-mua-new-mail)))
+
+  (use-package ol-notmuch
+    :ensure t)
 #+end_src
-** TODO thunderbird mailbox reformat
+
+#+RESULTS:
+
+** DONE thunderbird mailbox reformat
 :PROPERTIES:
 :ID:       967b614e-bac1-4fe6-9f67-93a80a660171
 :END:
-   
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-25 Tue 20:47]
+:END:
 ** TODO configure send mail to Thunderbird for sending
 ** DONE Feed Reader
 :STATUSLOG:
@@ -1862,47 +1828,78 @@ it would be great to optionally automatically download pulications as they come 
 ** Stack Exchange for Emacs
 browse technical Q&A in emacs
 SX.el on github
-* TODO Integrated Development Environment
-** TODO LSP protocol integration
-** TODO Company Back-ends and Virtual Environment Integration
-*** TODO Python
+* Emacs as an IDE
+** TODO LSP mode
+#+begin_src emacs-lisp
+  (use-package lsp-mode
+    :ensure t)
+#+end_src
+* Programming
+** python
 :PROPERTIES:
 :ID:       12165476-71a2-4170-ae11-4f9c10337935
 :END:
 #+begin_src emacs-lisp
-    (use-package python
-      :ensure t
-      :config
-      (setq python-shell-interpreter "ipython"
-            python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
+  (use-package python
+    :ensure t
+    :config
+    (setq python-shell-interpreter "ipython"
+          python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
 
-      (defun set-company-backends-for-python ()
-        (setq-local company-backends '(company-yasnippet
-                                       company-capf
-                                       company-files
-                                       (company-dabbrev-code company-keywords)
-                                       company-dabbrev)))
-      (add-hook 'python-mode-hook 'set-company-backends-for-python))
-
-    (use-package conda
-      :ensure t
-      :config
-      (setq conda-anaconda-home "/opt/miniconda3") ;; specify install location
-      (setq conda-env-home-directory "/opt/miniconda3") ;;conda envs explicit location
-      (conda-env-initialize-interactive-shells) ;; conda awareness will be enabled for inferior shell processes
-      (conda-env-initialize-eshell) ;; and eshell
-      ;; NOTE: eshell and emacs share an evironment. Change one change the other.
-      ;;set current environment from instance of interactive shell
-      (conda-env-activate (getenv-internal "CONDA_DEFAULT_ENV" (split-string (shell-command-to-string "$SHELL --interactive -c printenv") "\n")))
-      ;; display env in modline ~ if modline is customized, :exec keyword can be redirected there.
-      (setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
-      (conda-env-autoactivate-mode -1)) ;; t causes annoying error. But useful for jumping projectile python projects
-
-    (use-package poetry
-      :ensure t
-      :bind ("C-x p" . poetry))
+    (defun set-company-backends-for-python ()
+      (setq-local company-backends '(company-yasnippet
+                                     company-capf
+                                     company-files
+                                     (company-dabbrev-code company-keywords)
+                                     company-dabbrev)))
+    (add-hook 'python-mode-hook 'set-company-backends-for-python))
 #+end_src
-**** DONE set conda default env properly
+
+*** conda
+#+begin_src emacs-lisp
+  (use-package conda
+    :ensure t
+    :demand
+    :config
+    (setq conda-anaconda-home "/opt/miniconda3") ;; specify install location
+    (setq conda-env-home-directory "/opt/miniconda3") ;;conda envs explicit location
+    (conda-env-initialize-interactive-shells) ;; conda awareness will be enabled for inferior shell processes
+    (conda-env-initialize-eshell) ;; and eshell
+    ;; NOTE: eshell and emacs share an evironment. Change one change the other.
+    ;;set current environment from instance of interactive shell
+    (conda-env-activate
+     (getenv-internal "CONDA_DEFAULT_ENV"
+                      (split-string (shell-command-to-string "$SHELL --interactive -c printenv") "\n")))
+    ;; display env in modline ~ if modline is customized, :exec keyword can be redirected there.
+    (setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
+    ;; t causes annoying error. But useful for jumping projectile python projects
+    (conda-env-autoactivate-mode -1))
+#+end_src
+
+*** poetry
+#+begin_src emacs-lisp
+  (use-package poetry
+    :ensure t
+    :bind ("C-x p" . poetry))
+#+end_src
+
+** jupyter
+customize to ideal configuration.
+- easy figure naming for manuscript generation
+- easy remote session connectivity
+- more robust display options using pandoc? the html>org table conversion script seems really good for now....
+
+#+begin_src emacs-lisp
+  (use-package jupyter
+    :ensure t
+    :config
+    (setq jupyter-repl-echo-eval-p t)
+
+    (defun jupyter-ansi-color-apply-on-region (begin end)
+      (ansi-color-apply-on-region begin end t)))
+#+end_src
+
+** DONE set conda default env properly
 :STATUSLOG:
 - State "DONE"       from "TODO"       [2021-10-28 Thu 15:15]
 :END:
@@ -1916,7 +1913,7 @@ from noninteractive shell on startup, some environments will not be
 communicated. To see the difference between interactive and
 noninteractive process-environments view the process-environment
 variable and run printenv in a shell buffer.
-**** CANCELED use conda environment selectively
+** CANCELED use conda environment selectively
 activate when python mode/shell is activated
 * TODO COMMENT ESHELL
 Eshell is a fully independent shell written in elisp. Its only

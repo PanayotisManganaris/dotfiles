@@ -300,23 +300,12 @@
 (use-package projectile
   :ensure t
   :config
-  (require 'subr-x)
-  (setq projectile-completion-system 'ivy)
   (projectile-mode +1)
-  :bind (:map global-map
-              (("C-c p" . projectile-command-map))))
+  :bind-keymap ("C-c p" . projectile-command-map))
 
 (use-package epa-file
   :config
   (epa-file-enable))
-
-(use-package lsp-mode
-  :ensure t)
-
-(use-package jupyter
-  :ensure t
-  :config
-  (setq jupyter-repl-echo-eval-p t))
 
 (use-package org
   :ensure t
@@ -432,7 +421,6 @@
   (setq org-image-actual-width '(1000)))
 
 (use-package ob
-  :after (:all org jupyter)
   :config
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
   (org-babel-do-load-languages
@@ -736,6 +724,9 @@
               ("C-x m" . notmuch)
               ("C-x C-m" . notmuch-mua-new-mail)))
 
+(use-package ol-notmuch
+  :ensure t)
+
 (use-package elfeed
   :ensure t
   :init
@@ -744,6 +735,9 @@
           "https://github.com/Ramprasad-Group/polyga.atom"
           "https://github.com/rougier.atom"))
   :bind ("C-x w" . elfeed))
+
+(use-package lsp-mode
+  :ensure t)
 
 (use-package python
   :ensure t
@@ -761,6 +755,7 @@
 
 (use-package conda
   :ensure t
+  :demand
   :config
   (setq conda-anaconda-home "/opt/miniconda3") ;; specify install location
   (setq conda-env-home-directory "/opt/miniconda3") ;;conda envs explicit location
@@ -768,14 +763,25 @@
   (conda-env-initialize-eshell) ;; and eshell
   ;; NOTE: eshell and emacs share an evironment. Change one change the other.
   ;;set current environment from instance of interactive shell
-  (conda-env-activate (getenv-internal "CONDA_DEFAULT_ENV" (split-string (shell-command-to-string "$SHELL --interactive -c printenv") "\n")))
+  (conda-env-activate
+   (getenv-internal "CONDA_DEFAULT_ENV"
+                    (split-string (shell-command-to-string "$SHELL --interactive -c printenv") "\n")))
   ;; display env in modline ~ if modline is customized, :exec keyword can be redirected there.
   (setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
-  (conda-env-autoactivate-mode -1)) ;; t causes annoying error. But useful for jumping projectile python projects
+  ;; t causes annoying error. But useful for jumping projectile python projects
+  (conda-env-autoactivate-mode -1))
 
 (use-package poetry
   :ensure t
   :bind ("C-x p" . poetry))
+
+(use-package jupyter
+  :ensure t
+  :config
+  (setq jupyter-repl-echo-eval-p t)
+
+  (defun jupyter-ansi-color-apply-on-region (begin end)
+    (ansi-color-apply-on-region begin end t)))
 
 ;; org agenda and calendar customization and automation
 ;;(defun my-open-calendar ()
