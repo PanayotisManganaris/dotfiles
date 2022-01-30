@@ -718,10 +718,8 @@
 
 (use-package notmuch
   :ensure t
-  :init
-  (setq message-sendmail-envelope-from 'header)
   :config
-  ;; (add-to-list 'company-backends )
+  (setq notmuch-always-prompt-for-sender t)
   (setq-default notmuch-search-oldest-first nil)
   (setq my-searches '((:name "mannodi group" :query "from:amannodi@purdue.edu OR from:yang1494@purdue.edu OR from:pmangana@purdue.edu OR from:dfarache@purdue.edu OR from:rahma103@purdue.edu" :key "j")))
   (unless (member (car my-searches) notmuch-saved-searches)
@@ -729,6 +727,12 @@
   :bind (:map global-map
               ("C-x m" . notmuch)
               ("C-x C-m" . notmuch-mua-new-mail)))
+
+(use-package message
+  :config
+  (setq message-sendmail-envelope-from 'header)
+  (setq message-sendmail-function 'mailclient-send-it)
+  (add-hook 'message-mode-hook 'turn-on-orgtbl))
 
 (use-package ol-notmuch
   :ensure t)
