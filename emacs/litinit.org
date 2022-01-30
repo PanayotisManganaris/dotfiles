@@ -1,4 +1,11 @@
 :PROPERTIES:
+#+BEGIN: clocktable :scope file :maxlevel 2
+#+CAPTION: Clock summary at [2022-01-30 Sun 15:13]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *0:00* |
+#+END:
+
 :ID:       179ef7f8-81e1-4480-be38-813e3fd0b00e
 :END:
 #+TITLE: Emacs Configuration and Documentation
@@ -72,6 +79,37 @@ strikethrough done items
   perspectives are trash. replaced with bufler and builtin registry.
 :END:
 * TODO Emacs Foundations
+** DONE keybinds
+:PROPERTIES:
+:ID:       c1e4c0c0-bc84-482f-8152-05c47909214a
+:END:
+:STATUSLOG:
+- State "DONE"       from "TODO"       [2022-01-30 Sun 15:17]
+:END:
+#+begin_src emacs-lisp
+  (setq bindlist '((windmove-swap-states-right "C-M-s-f" "C-M-s-<right>")
+                   (windmove-swap-states-up "C-M-s-p" "C-M-s-<up>")
+                   (windmove-swap-states-left "C-M-s-b" "C-M-s-<left>")
+                   (windmove-swap-states-down "C-M-s-n" "C-M-s-<down>")
+                   (windmove-right "C-s-f" "C-s-<right>")
+                   (windmove-up "C-s-p" "C-s-<up>")
+                   (windmove-left "C-s-b" "C-s-<left>")
+                   (windmove-down "C-s-n" "C-s-<down>")
+                   ;;                 (spell-fu-goto-next-error "C-,")
+                   ;;                 (+spell/correct "C-.")
+                   (backward-delete-char-untabify "C-S-d")))
+
+  (dolist (bind-to bindlist)
+    (let ((keys (cdr bind-to)))
+      (dolist (key keys)
+        (define-key (current-global-map) (kbd key) (car bind-to)))))
+
+  ;; minimize window just freezes it in dwm -- not nice
+  (unbind-key "C-z")
+  (unbind-key "C-x C-z")
+#+end_src
+these keybindings are specifically for windmove, anything else? or deal with these usign a use package declaration?
+what's the advantage here?
 ** DONE Package Management
 :PROPERTIES:
 :ID:       84ecd110-a05a-48f9-815c-bb2d78dacc45
@@ -1647,34 +1685,6 @@ wucuo prior to sending for check. Multiple Dictionaries can be
 defined in ispell-aspell-dictionary-alist claimed to work for
 hunspell to?. not sure if wucuo-hunspell-dictionary-base-name
 behaves the same.
-** TODO keybinds
-:PROPERTIES:
-:ID:       c1e4c0c0-bc84-482f-8152-05c47909214a
-:END:
-#+begin_src emacs-lisp
-  (setq bindlist '((windmove-swap-states-right "C-M-s-f" "C-M-s-<right>")
-		   (windmove-swap-states-up "C-M-s-p" "C-M-s-<up>")
-		   (windmove-swap-states-left "C-M-s-b" "C-M-s-<left>")
-		   (windmove-swap-states-down "C-M-s-n" "C-M-s-<down>")
-		   (windmove-right "C-s-f" "C-s-<right>")
-		   (windmove-up "C-s-p" "C-s-<up>")
-		   (windmove-left "C-s-b" "C-s-<left>")
-		   (windmove-down "C-s-n" "C-s-<down>")
-		   ;;                 (spell-fu-goto-next-error "C-,")
-		   ;;                 (+spell/correct "C-.")
-		   (backward-delete-char-untabify "C-S-d")))
-
-  (dolist (bind-to bindlist)
-    (let ((keys (cdr bind-to)))
-      (dolist (key keys)
-	(define-key (current-global-map) (kbd key) (car bind-to)))))
-
-  ;; minimize window just freezes it in dwm -- not nice
-  ;;(unbind-key "C-z")
-  ;;(unbind-key "C-x C-z")
-#+end_src
-these keybindings are specifically for windmove, anything else? or deal with these usign a use package declaration?
-what's the advantage here?
 ** TODO ibuffer integration with perspective and projectile
 persp-ibuffer should be able to limit view of buffers in ibuffer to those of the current perspective
 Within this, the ibuffer-projectile package should be able to group buffers by project root...

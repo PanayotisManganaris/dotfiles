@@ -11,6 +11,27 @@
 (setq visible-bell t)
 (column-number-mode 1)
 
+(setq bindlist '((windmove-swap-states-right "C-M-s-f" "C-M-s-<right>")
+                 (windmove-swap-states-up "C-M-s-p" "C-M-s-<up>")
+                 (windmove-swap-states-left "C-M-s-b" "C-M-s-<left>")
+                 (windmove-swap-states-down "C-M-s-n" "C-M-s-<down>")
+                 (windmove-right "C-s-f" "C-s-<right>")
+                 (windmove-up "C-s-p" "C-s-<up>")
+                 (windmove-left "C-s-b" "C-s-<left>")
+                 (windmove-down "C-s-n" "C-s-<down>")
+                 ;;                 (spell-fu-goto-next-error "C-,")
+                 ;;                 (+spell/correct "C-.")
+                 (backward-delete-char-untabify "C-S-d")))
+
+(dolist (bind-to bindlist)
+  (let ((keys (cdr bind-to)))
+    (dolist (key keys)
+      (define-key (current-global-map) (kbd key) (car bind-to)))))
+
+;; minimize window just freezes it in dwm -- not nice
+(unbind-key "C-z")
+(unbind-key "C-x C-z")
+
 (require 'package)
      (add-to-list 'package-archives
 		  '("melpa" . "https://melpa.org/packages/") t)
@@ -652,27 +673,6 @@
               (("C-."   . flyspell-auto-correct-word)
                ("C-,"   . flyspell-goto-next-error)
                ("C-M-;" . flyspell-buffer))))
-
-(setq bindlist '((windmove-swap-states-right "C-M-s-f" "C-M-s-<right>")
-		 (windmove-swap-states-up "C-M-s-p" "C-M-s-<up>")
-		 (windmove-swap-states-left "C-M-s-b" "C-M-s-<left>")
-		 (windmove-swap-states-down "C-M-s-n" "C-M-s-<down>")
-		 (windmove-right "C-s-f" "C-s-<right>")
-		 (windmove-up "C-s-p" "C-s-<up>")
-		 (windmove-left "C-s-b" "C-s-<left>")
-		 (windmove-down "C-s-n" "C-s-<down>")
-		 ;;                 (spell-fu-goto-next-error "C-,")
-		 ;;                 (+spell/correct "C-.")
-		 (backward-delete-char-untabify "C-S-d")))
-
-(dolist (bind-to bindlist)
-  (let ((keys (cdr bind-to)))
-    (dolist (key keys)
-      (define-key (current-global-map) (kbd key) (car bind-to)))))
-
-;; minimize window just freezes it in dwm -- not nice
-;;(unbind-key "C-z")
-;;(unbind-key "C-x C-z")
 
 (use-package pdf-tools
   :ensure t
