@@ -149,6 +149,17 @@
   :bind (:map minibuffer-local-map
               (("M-a" . marginalia-cycle))))
 
+(use-package corfu
+  :ensure t
+  :config
+  (setq corfu-auto t
+        corfu-quit-at-boundary t
+        corfu-auto-delay 0
+        corfu-cycle t
+        corfu-preselect-first nil)
+  (unbind-key "RET" corfu-map)
+  (corfu-global-mode 1))
+
 (use-package embark
   :ensure t
   :bind (:map global-map (("C-;" . embark-act)                ;; pick some comfortable binding
@@ -286,11 +297,6 @@
 
 (use-package calc
   :bind ("M-#" . calc-dispatch))
-
-(use-package company
-  :ensure t
-  :config
-  (global-company-mode))
 
 (use-package magit
   :ensure t
@@ -743,15 +749,7 @@
   :ensure t
   :config
   (setq python-shell-interpreter "ipython"
-        python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
-
-  (defun set-company-backends-for-python ()
-    (setq-local company-backends '(company-yasnippet
-                                   company-capf
-                                   company-files
-                                   (company-dabbrev-code company-keywords)
-                                   company-dabbrev)))
-  (add-hook 'python-mode-hook 'set-company-backends-for-python))
+        python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True"))
 
 (use-package conda
   :ensure t

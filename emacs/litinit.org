@@ -447,6 +447,20 @@ vertico to display them. it's neat and tidy.
     :bind (:map minibuffer-local-map
                 (("M-a" . marginalia-cycle))))
 #+end_src
+** corfu
+replaces company. inline completion mechanism
+#+begin_src emacs-lisp
+  (use-package corfu
+    :ensure t
+    :config
+    (setq corfu-auto t
+          corfu-quit-at-boundary t
+          corfu-auto-delay 0
+          corfu-cycle t
+          corfu-preselect-first nil)
+    (unbind-key "RET" corfu-map)
+    (corfu-global-mode 1))
+#+end_src
 * Embark core
 contextual actions from the completion menu
 
@@ -723,17 +737,6 @@ when window is resized, execute calc-refresh
 starting with trail commands, get trail navigation to lock on with t n/p
 maybe lock in general and unlock when new prefix is pressed?
 or unlock when universal unlock key is pressed?
-* TODO company mode
-:PROPERTIES:
-:ID:       8adb25c3-de90-4f62-ae57-f6f3cf3505ba
-:END:
-#+begin_src emacs-lisp
-  (use-package company
-    :ensure t
-    :config
-    (global-company-mode))
-#+end_src
-all purpose backend for on-the-fly code and text completion  
 * DONE Version Control
 :STATUSLOG:
 - State "DONE"       from "TODO"       [2022-01-03 Mon 02:50]
@@ -1799,7 +1802,11 @@ Provides on-the-fly navigation of key hierarchies.
 #+end_src
 
 #+RESULTS:
-
+*** DONE link mail to org docs
+:STATUSLOG:
+- State "DONE"       from              [2022-01-30 Sun 13:36]
+:END:
+package provided by default, yay.
 ** DONE thunderbird mailbox reformat
 :PROPERTIES:
 :ID:       967b614e-bac1-4fe6-9f67-93a80a660171
@@ -1807,7 +1814,6 @@ Provides on-the-fly navigation of key hierarchies.
 :STATUSLOG:
 - State "DONE"       from "TODO"       [2022-01-25 Tue 20:47]
 :END:
-** TODO configure send mail to Thunderbird for sending
 ** DONE Feed Reader
 :STATUSLOG:
 - State "DONE"       from "TODO"       [2021-11-19 Fri 16:10]
@@ -1844,15 +1850,7 @@ SX.el on github
     :ensure t
     :config
     (setq python-shell-interpreter "ipython"
-          python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
-
-    (defun set-company-backends-for-python ()
-      (setq-local company-backends '(company-yasnippet
-                                     company-capf
-                                     company-files
-                                     (company-dabbrev-code company-keywords)
-                                     company-dabbrev)))
-    (add-hook 'python-mode-hook 'set-company-backends-for-python))
+          python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True"))
 #+end_src
 
 *** conda
