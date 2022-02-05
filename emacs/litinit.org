@@ -1911,6 +1911,18 @@ customize to ideal configuration.
       (ansi-color-apply-on-region begin end t)))
 #+end_src
 
+** common-lisp
+#+begin_src emacs-lisp
+  (use-package slime
+    :ensure t
+    :init
+    (setq inferior-lisp-program "sbcl")
+    (setq slime-contribs '(slime-scratch slime-editing-commands))
+    :config
+    (add-to-list 'load-path "~/.config/emacs/elpa/slime-20220204.1357")
+    (require 'slime-autoloads))
+#+end_src
+
 ** DONE set conda default env properly
 :STATUSLOG:
 - State "DONE"       from "TODO"       [2021-10-28 Thu 15:15]
@@ -2042,7 +2054,7 @@ but its call to ssh in remote buffers appear not to respect ssh-agent
             (cond 
              ((equal (tramp-file-name-method tstruct) "ssh")
               (process-send-string bufname (format
-                                            (concat  "ssh -t %s@%s '"
+                                            (concat  "ssh -t %s@%s'"
                                                      cd-str
                                                      "exec bash'; exec bash; clear\n")
                                             (tramp-file-name-user tstruct)
@@ -2058,6 +2070,16 @@ but its call to ssh in remote buffers appear not to respect ssh-agent
 :ID:       a909cafc-561b-471d-a157-dd57c0ed019e
 :END:
 #+begin_src emacs-lisp
+  (defun rcl-2-purduebox ()
+    "ssh remote connection to nanohub.org home"
+    (interactive)
+    (find-file "/rclone:purduebox:/"))
+
+  (defun ssh-2-nhub ()
+    "ssh remote connection to nanohub.org home"
+    (interactive)
+    (find-file "/ssh:pmangana@nanohub.org:/home/nanohub/pmangana"))
+
   (defun scp-bell-ipython ()
     "scp remote jupyter session files from Purdue HPC cluster bell.rcac.purdue.edu to local"
     (interactive)

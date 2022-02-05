@@ -785,6 +785,15 @@
   (defun jupyter-ansi-color-apply-on-region (begin end)
     (ansi-color-apply-on-region begin end t)))
 
+(use-package slime
+  :ensure t
+  :init
+  (setq inferior-lisp-program "sbcl")
+  (setq slime-contribs '(slime-scratch slime-editing-commands))
+  :config
+  (add-to-list 'load-path "~/.config/emacs/elpa/slime-20220204.1357")
+  (require 'slime-autoloads))
+
 ;; org agenda and calendar customization and automation
 ;;(defun my-open-calendar ()
 ;;  (interactive)
@@ -819,7 +828,7 @@
           (cond 
            ((equal (tramp-file-name-method tstruct) "ssh")
             (process-send-string bufname (format
-                                          (concat  "ssh -t %s@%s '"
+                                          (concat  "ssh -t %s@%s'"
                                                    cd-str
                                                    "exec bash'; exec bash; clear\n")
                                           (tramp-file-name-user tstruct)
@@ -829,6 +838,16 @@
                      (tramp-file-name-method tstruct)))))
       (process-send-string bufname (format (concat cd-str " exec bash;clear\n")
                                            path)))))
+
+(defun rcl-2-purduebox ()
+  "ssh remote connection to nanohub.org home"
+  (interactive)
+  (find-file "/rclone:purduebox:/"))
+
+(defun ssh-2-nhub ()
+  "ssh remote connection to nanohub.org home"
+  (interactive)
+  (find-file "/ssh:pmangana@nanohub.org:/home/nanohub/pmangana"))
 
 (defun scp-bell-ipython ()
   "scp remote jupyter session files from Purdue HPC cluster bell.rcac.purdue.edu to local"
