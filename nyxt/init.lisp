@@ -1,0 +1,1 @@
+;; my nyxt browser config
