@@ -1129,7 +1129,7 @@ are made on basis of inclusion in paper)
     :ensure t
     :init
     (setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
-    (setq org-image-actual-width '(1000)))
+    (setq org-image-actual-width '(800)))
 #+end_src
 **** TODO manage attachment directories
 ***** where to keep downloads?
@@ -1233,7 +1233,7 @@ if no :results output keyword arg header is provided to org, output is still ava
     :ensure t
     :init
     (setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
-    (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0)))
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0)))
     ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 #+end_src
 LaTeX exporter setting and in-line math formula display preferences
@@ -1579,8 +1579,8 @@ citation keys, for which Consult offers an enhanced interface
     (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
     ;; this is a consult configuration -- bibtex-completion is in the habit of using CRM
     ;; consult helps embark deal with it.
-    :bind (:map org-mode-map
-                ("C-c b" . citar-insert-citation)
+    :bind (:map global-map
+                ("C-c [" . citar-insert-citation)
                 :map minibuffer-local-map
                 ("C-c i" . citar-insert-preset)))
 #+end_src

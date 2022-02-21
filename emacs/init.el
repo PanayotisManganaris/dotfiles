@@ -445,7 +445,7 @@
   :ensure t
   :init
   (setq org-id-link-to-org-use-id t) ;; always make unique id for attachments
-  (setq org-image-actual-width '(1000)))
+  (setq org-image-actual-width '(800)))
 
 (use-package ob
   :config
@@ -471,7 +471,7 @@
   :ensure t
   :init
   (setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0)))
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0)))
   ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 
 (use-package org
@@ -637,8 +637,8 @@
   (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
   ;; this is a consult configuration -- bibtex-completion is in the habit of using CRM
   ;; consult helps embark deal with it.
-  :bind (:map org-mode-map
-              ("C-c b" . citar-insert-citation)
+  :bind (:map global-map
+              ("C-c [" . citar-insert-citation)
               :map minibuffer-local-map
               ("C-c i" . citar-insert-preset)))
 
@@ -920,3 +920,16 @@
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
 (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:inherit nil :extend nil :stipple nil :background "#1e1e1e" :foreground "#d4d4d4" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight regular :height 102 :width normal :foundry "GOOG" :family "Liberation Mono"))))
+ '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))
