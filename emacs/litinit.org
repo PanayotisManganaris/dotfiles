@@ -305,11 +305,17 @@ uses emacs regexps...
 when paired with wgrep package grep can be used as a powerful
 grep-buffer editing tool for dired and file buffers alike.
 #+begin_src emacs-lisp
+  (defun make-case-sensitive (orig-fun &rest args)
+    (let ((case-fold-search nil))
+      (apply orig-fun args)))
+
+  (advice-add 'consult-grep :around #'make-case-sensitive)
+
   (use-package consult
     :bind (("M-s g" . consult-grep)
            ("M-s G" . consult-git-grep)
            ("M-s r" . consult-ripgrep)))
-    ;; use the C-c s search bind paradigm for regexps
+  ;; use the C-c s search bind paradigm for regexps
   (use-package wgrep
     :ensure t)
 #+end_src
@@ -1798,7 +1804,13 @@ Provides on-the-fly navigation of key hierarchies.
     :config
     (setq notmuch-always-prompt-for-sender t)
     (setq-default notmuch-search-oldest-first nil)
-    (setq my-searches '((:name "mannodi group" :query "from:amannodi@purdue.edu OR from:yang1494@purdue.edu OR from:pmangana@purdue.edu OR from:dfarache@purdue.edu OR from:rahma103@purdue.edu" :key "j")))
+    (setq my-searches '((:name "today" :query "date:<today>.." :key "j")
+                        ;;(:name "read" :query "tag:" :key "n")
+                        (:name "recent" :query "date:<[3]months>.." :key "r")
+                        (:name "purdue" :query "fromf/:*@purdue.edu/" :key "p")
+                        (:name "mannodi group" :query "from:amannodi@purdue.edu OR from:yang1494@purdue.edu OR from:pmangana@purdue.edu OR from:dfarache@purdue.edu OR from:rahma103@purdue.edu" :key "g")
+                        (:name "home econ" :query "hunter properties" :key "h")
+                        (:name "deleted" :query "tag:deleted" :key "k")))
     (unless (member (car my-searches) notmuch-saved-searches)
       (setq notmuch-saved-searches (append notmuch-saved-searches my-searches)))
     :bind (:map global-map
@@ -2016,7 +2028,10 @@ clean and enable ssh-add to work on the fly.
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 appended to ~/.zshenv
 and service started with user tag
-
+** Extend ssh-agent activation to emacs server
+#+begin_src emacs-lisp
+  (setenv "SSH_AUTH_SOCK" "/run/user/1000/ssh-agent.socket")
+#+end_src
 ** TODO COMMENT Configure Remote Shell
 is this necessary?
 :PROPERTIES:
@@ -2070,82 +2085,83 @@ but its call to ssh in remote buffers appear not to respect ssh-agent
 :ID:       a909cafc-561b-471d-a157-dd57c0ed019e
 :END:
 #+begin_src emacs-lisp
-  (defun rcl-2-purduebox ()
-    "ssh remote connection to nanohub.org home"
-    (interactive)
-    (find-file "/rclone:purduebox:/"))
+      (defun ssh-2-scholar ()
+        "ssh remote connection to Purdue Scholar cluster home"
+        (interactive)
+        (find-file "/ssh:pmangana@scholar.rcac.purdue.edu:/home/pmangana"))
 
-  (defun ssh-2-nhub ()
-    "ssh remote connection to nanohub.org home"
-    (interactive)
-    (find-file "/ssh:pmangana@nanohub.org:/home/nanohub/pmangana"))
+      (defun rcl-2-purduebox ()
+        "DONT USE: dired to purdue box
+        the rclone protocol is experimental and crashes emacs daemon"
+        (interactive)
+        (find-file "/rclone:purduebox:/"))
 
-  (defun scp-bell-ipython ()
-    "scp remote jupyter session files from Purdue HPC cluster bell.rcac.purdue.edu to local"
-    (interactive)
-    (find-file "/scp:pmangana@bell.rcac.purdue.edu:/home/pmangana/.local/share/jupyter/runtime/*.json /run/user/1000/jupyter"))
+      (defun ssh-2-nhub ()
+        "ssh remote connection to nanohub.org home"
+        (interactive)
+        (find-file "/ssh:pmangana@nanohub.org:/home/nanohub/pmangana"))
+      ;; need a good way to connect emacs jupyter to remote kernels
+      (defun ssh-2-bell ()
+        "ssh remote connection to Purdue HPC cluster bell.rcac.purdue.edu"
+        (interactive)
+        (find-file "/ssh:pmangana@bell.rcac.purdue.edu:/home/pmangana"))
 
-  (defun ssh-2-bell ()
-    "ssh remote connection to Purdue HPC cluster bell.rcac.purdue.edu"
-    (interactive)
-    (find-file "/ssh:pmangana@bell.rcac.purdue.edu:/home/pmangana"))
+      (defun smb-2-dee ()
+        "smb remote connection to Uc's ceas1 domain clusterfsnew server"
+        (interactive)
+        (find-file "/smb:manganpt%ceas1@clusterfsnew.ceas1.uc.edu:/DEE/"))
 
-  (defun smb-2-dee ()
-    "smb remote connection to Uc's ceas1 domain clusterfsnew server"
-    (interactive)
-    (find-file "/smb:manganpt%ceas1@clusterfsnew.ceas1.uc.edu:/DEE/"))
+      (defun copy-file-to-tmp (file)
+        "delegate for dired-open-remote-tmpfile"
+        (copy-file file "/tmp/" 1)
+        (let* ((extension (file-name-extension file))
+               (base (file-name-base file)))
+          (format "/tmp/%s.%s" base extension)))
 
-  (defun copy-file-to-tmp (file)
-    "delegate for dired-open-remote-tmpfile"
-    (copy-file file "/tmp/" 1)
-    (let* ((extension (file-name-extension file))
-           (base (file-name-base file)))
-      (format "/tmp/%s.%s" base extension)))
+      (defun dired-open-remote-tmpfile (localprog)
+        "copies file in remote dired to local tmp, opens with local program, and returns modified file to remote dired"
+        (interactive "sLocal Program Name: ")
+        (let* ((remote-file (dired-filename-at-point))
+               (tmpfile (copy-file-to-tmp remote-file)))
+          (async-start-process localprog
+                               localprog
+                               (lambda (process-obj)
+                                 "move tmpfile back to remote directory"
+                                 (copy-file tmpfile remote-file 1))
+                               tmpfile)))
+      (use-package macrostep
+        :ensure t
+        :bind ((:map emacs-lisp-mode-map
+                     ("C-c C-e" . macrostep-expand))
+               (:map lisp-interaction-mode-map
+                     ("C-c C-e" . macrostep-expand))))
 
-  (defun dired-open-remote-tmpfile (localprog)
-    "copies file in remote dired to local tmp, opens with local program, and returns modified file to remote dired"
-    (interactive "sLocal Program Name: ")
-    (let* ((remote-file (dired-filename-at-point))
-           (tmpfile (copy-file-to-tmp remote-file)))
-      (async-start-process localprog
-                           localprog
-                           (lambda (process-obj)
-                             "move tmpfile back to remote directory"
-                             (copy-file tmpfile remote-file 1))
-                           tmpfile)))
-  (use-package macrostep
-    :ensure t
-    :bind ((:map emacs-lisp-mode-map
-                 ("C-c C-e" . macrostep-expand))
-           (:map lisp-interaction-mode-map
-                 ("C-c C-e" . macrostep-expand))))
+      (defun toggle-window-split ()
+        (interactive)
+        (if (= (count-windows) 2)
+            (let* ((this-win-buffer (window-buffer))
+                   (next-win-buffer (window-buffer (next-window)))
+                   (this-win-edges (window-edges (selected-window)))
+                   (next-win-edges (window-edges (next-window)))
+                   (this-win-2nd (not (and (<= (car this-win-edges)
+                                               (car next-win-edges))
+                                           (<= (cadr this-win-edges)
+                                               (cadr next-win-edges)))))
+                   (splitter
+                    (if (= (car this-win-edges)
+                           (car (window-edges (next-window))))
+                        'split-window-horizontally
+                      'split-window-vertically)))
+              (delete-other-windows)
+              (let ((first-win (selected-window)))
+                (funcall splitter)
+                (if this-win-2nd (other-window 1))
+                (set-window-buffer (selected-window) this-win-buffer)
+                (set-window-buffer (next-window) next-win-buffer)
+                (select-window first-win)
+                (if this-win-2nd (other-window 1))))))
 
-  (defun toggle-window-split ()
-    (interactive)
-    (if (= (count-windows) 2)
-        (let* ((this-win-buffer (window-buffer))
-               (next-win-buffer (window-buffer (next-window)))
-               (this-win-edges (window-edges (selected-window)))
-               (next-win-edges (window-edges (next-window)))
-               (this-win-2nd (not (and (<= (car this-win-edges)
-                                           (car next-win-edges))
-                                       (<= (cadr this-win-edges)
-                                           (cadr next-win-edges)))))
-               (splitter
-                (if (= (car this-win-edges)
-                       (car (window-edges (next-window))))
-                    'split-window-horizontally
-                  'split-window-vertically)))
-          (delete-other-windows)
-          (let ((first-win (selected-window)))
-            (funcall splitter)
-            (if this-win-2nd (other-window 1))
-            (set-window-buffer (selected-window) this-win-buffer)
-            (set-window-buffer (next-window) next-win-buffer)
-            (select-window first-win)
-            (if this-win-2nd (other-window 1))))))
-
-  (global-set-key (kbd "C-x |") 'toggle-window-split) ;; ediff-like keybinding
+      (global-set-key (kbd "C-x |") 'toggle-window-split) ;; ediff-like keybinding
 #+end_src
 Implementation that functions for more than 2 windows... maybe try merging the two. The first is clearly more functional.
   #+begin_example

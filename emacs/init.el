@@ -108,11 +108,17 @@
        :map minibuffer-local-completion-map
             (("C-x C-d" . consult-dir))))
 
+(defun make-case-sensitive (orig-fun &rest args)
+  (let ((case-fold-search nil))
+    (apply orig-fun args)))
+
+(advice-add 'consult-grep :around #'make-case-sensitive)
+
 (use-package consult
   :bind (("M-s g" . consult-grep)
          ("M-s G" . consult-git-grep)
          ("M-s r" . consult-ripgrep)))
-  ;; use the C-c s search bind paradigm for regexps
+;; use the C-c s search bind paradigm for regexps
 (use-package wgrep
   :ensure t)
 
@@ -721,7 +727,13 @@
   :config
   (setq notmuch-always-prompt-for-sender t)
   (setq-default notmuch-search-oldest-first nil)
-  (setq my-searches '((:name "mannodi group" :query "from:amannodi@purdue.edu OR from:yang1494@purdue.edu OR from:pmangana@purdue.edu OR from:dfarache@purdue.edu OR from:rahma103@purdue.edu" :key "j")))
+  (setq my-searches '((:name "today" :query "date:<today>.." :key "j")
+                      ;;(:name "read" :query "tag:" :key "n")
+                      (:name "recent" :query "date:<[3]months>.." :key "r")
+                      (:name "purdue" :query "fromf/:*@purdue.edu/" :key "p")
+                      (:name "mannodi group" :query "from:amannodi@purdue.edu OR from:yang1494@purdue.edu OR from:pmangana@purdue.edu OR from:dfarache@purdue.edu OR from:rahma103@purdue.edu" :key "g")
+                      (:name "home econ" :query "hunter properties" :key "h")
+                      (:name "deleted" :query "tag:deleted" :key "k")))
   (unless (member (car my-searches) notmuch-saved-searches)
     (setq notmuch-saved-searches (append notmuch-saved-searches my-searches)))
   :bind (:map global-map
@@ -808,6 +820,8 @@
 ;;    (cfw:ical-create-source "gcal" "https://..../basic.ics" "IndianRed") ; google calendar ICS
 ;;   )))
 
+(setenv "SSH_AUTH_SOCK" "/run/user/1000/ssh-agent.socket")
+
 (defun pm/ansi-term (&optional path name)
   "Opens an ansi terminal at PATH. If no PATH is given, it uses
     the value of `default-directory'. PATH may be a tramp remote path.
@@ -839,8 +853,14 @@
       (process-send-string bufname (format (concat cd-str " exec bash;clear\n")
                                            path)))))
 
+(defun ssh-2-scholar ()
+  "ssh remote connection to Purdue Scholar cluster home"
+  (interactive)
+  (find-file "/ssh:pmangana@scholar.rcac.purdue.edu:/home/pmangana"))
+
 (defun rcl-2-purduebox ()
-  "ssh remote connection to nanohub.org home"
+  "DONT USE: dired to purdue box
+  the rclone protocol is experimental and crashes emacs daemon"
   (interactive)
   (find-file "/rclone:purduebox:/"))
 
@@ -848,12 +868,7 @@
   "ssh remote connection to nanohub.org home"
   (interactive)
   (find-file "/ssh:pmangana@nanohub.org:/home/nanohub/pmangana"))
-
-(defun scp-bell-ipython ()
-  "scp remote jupyter session files from Purdue HPC cluster bell.rcac.purdue.edu to local"
-  (interactive)
-  (find-file "/scp:pmangana@bell.rcac.purdue.edu:/home/pmangana/.local/share/jupyter/runtime/*.json /run/user/1000/jupyter"))
-
+;; need a good way to connect emacs jupyter to remote kernels
 (defun ssh-2-bell ()
   "ssh remote connection to Purdue HPC cluster bell.rcac.purdue.edu"
   (interactive)
@@ -920,16 +935,3 @@
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down M-down ?\C-c ?\C-p ?\C-c ?\C-p] 0 "%d"))
 (fset 'pm/org-clone-2d-subtree-with-1w-timeshift
       (kmacro-lambda-form [?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p ?\C-c ?\C-x ?c ?1 return ?+ ?1 ?w return ?\C-c ?\C-n M-down ?\C-c ?\C-p] 0 "%d"))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :extend nil :stipple nil :background "#1e1e1e" :foreground "#d4d4d4" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight regular :height 102 :width normal :foundry "GOOG" :family "Liberation Mono"))))
- '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))
