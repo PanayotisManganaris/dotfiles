@@ -176,6 +176,15 @@
   :bind (:map minibuffer-local-map
               (("M-a" . marginalia-cycle))))
 
+(use-package cape
+  :ensure t
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-keyword)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  :config
+  (setq cape-dabbrev-check-other-buffers nil))
+
 (use-package corfu
   :ensure t
   :config
@@ -852,6 +861,11 @@
                      (tramp-file-name-method tstruct)))))
       (process-send-string bufname (format (concat cd-str " exec bash;clear\n")
                                            path)))))
+
+(defun ssh-2-gilbreth ()
+  "ssh remote connection to Purdue Scholar cluster home"
+  (interactive)
+  (find-file "/ssh:pmangana@gilbreth.rcac.purdue.edu:/home/pmangana"))
 
 (defun ssh-2-scholar ()
   "ssh remote connection to Purdue Scholar cluster home"
