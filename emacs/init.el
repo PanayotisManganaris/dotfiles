@@ -485,9 +485,45 @@
 (use-package org
   :ensure t
   :init
-  (setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0)))
+  (setq org-export-dispatch-use-expert-ui t)
+  (setq org-latex-pdf-process
+        (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+  ;; use of latex keyword will include the org-latex[-default]-package-alist lists
+  ;; defaults: article, report, book. org-beamer adds beamer class.
+  :config
+  (setq user-full-name "Panayotis Manganaris")
+  (setq user-mail-address "panos.manganaris@gmail.com")
+  ;; probably best if these are defined in a dedicated startup area
+  (eval-after-load 'ox-latex
+    (add-to-list 'org-latex-classes
+                 '("revtex"
+                   \\documentclass[]{revtex4-2}
+                   [DEFAULT-PACKAGES]
+
+                   ("\\section{%s}" . "\\section*{%s}")
+                   ("\\subsection{%s}" . "\\subsection*{%s}")
+                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))))
   ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
+
+(use-package ox-publish
+  :init
+  (setq org-publish-project-alist
+        '(("org-notes" ;;handle org files
+           :base-directory "~/org/zettles/"
+           :base-extension "org"
+           :publishing-directory "~/MannodiGroup/website/"
+           :recursive t
+           :publishing-function org-html-publish-to-html
+           :headline-levels 4 ;;readjust
+           :auto-preamble t)
+           ("org-static" ;; copy over supplementary files
+            :base-directory "~/org/zettles/"
+            :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+            :publishing-directory "~/MannodiGroup/website/"
+            :recursive t
+            :publishing-function org-publish-attachment)
+           ("PanosNotes" :components ("org-notes" "org-static")))))
 
 (use-package org
   :ensure t
@@ -791,8 +827,9 @@
                     (split-string (shell-command-to-string "$SHELL --interactive -c printenv") "\n")))
   ;; display env in modline ~ if modline is customized, :exec keyword can be redirected there.
   (setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
-  ;; t causes annoying error. But useful for jumping projectile python projects
-  (conda-env-autoactivate-mode -1))
+  (conda-env-autoactivate-mode t))
+  ;;(add-hook 'find-file-hook (lambda () (when (boundp 'conda-project-env-path)
+  ;;                                       (conda-env-activate-for-buffer)))))
 
 (use-package poetry
   :ensure t
