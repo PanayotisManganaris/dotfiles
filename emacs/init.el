@@ -496,14 +496,11 @@
   (setq user-mail-address "panos.manganaris@gmail.com")
   ;; probably best if these are defined in a dedicated startup area
   (eval-after-load 'ox-latex
-    (add-to-list 'org-latex-classes
-                 '("revtex"
-                   \\documentclass[]{revtex4-2}
-                   [DEFAULT-PACKAGES]
-
-                   ("\\section{%s}" . "\\section*{%s}")
-                   ("\\subsection{%s}" . "\\subsection*{%s}")
-                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))))
+    '(add-to-list 'org-latex-classes
+                  '("revtex" "\\documentclass[]{revtex4-2}"
+                    ("\\section{%s}" . "\\section*{%s}")
+                    ("\\subsection{%s}" . "\\subsection*{%s}")
+                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))))
   ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 
 (use-package ox-publish
