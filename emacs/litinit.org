@@ -845,6 +845,19 @@ easy pgp assistant helps to deal with encrypted files quickly
     (epa-file-enable))
 #+end_src
 * TODO Org-mode
+** Org Export
+defaults (beamer options are exposed through latex)
+#+begin_src emacs-lisp
+  (use-package org
+    :ensure t
+     ;; org exports establish prior to loading org.el
+    :init (setq org-export-backends '(ascii html icalendar latex odt)))
+#+end_src
+*** ipynb
+#+begin_src emacs-lisp
+  (use-package ox-ipynb
+    :load-path "~/src/ox-ipynb/")
+#+end_src
 ** TODO Org TODO hierarchies presentation and UI
 :PROPERTIES:
 :ID:       7e51f71f-4166-40f4-8701-cea7edf58451
@@ -855,7 +868,6 @@ finally certain organization tools are given default definitions or behaviors to
 #+begin_src emacs-lisp
   (use-package org
     :ensure t
-    :init (setq org-export-backends '(ascii html icalendar latex odt)) ;; org exports establish prior to loading org.el
     :config
     (setq org-startup-indented t) ;; simplify heirarchies management in org
     (setq org-ellipsis " [+]") ;; Custom fold indicator because I often use ellipses and it's confusing

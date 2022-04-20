@@ -351,7 +351,14 @@
 
 (use-package org
   :ensure t
-  :init (setq org-export-backends '(ascii html icalendar latex odt)) ;; org exports establish prior to loading org.el
+   ;; org exports establish prior to loading org.el
+  :init (setq org-export-backends '(ascii html icalendar latex odt)))
+
+(use-package ox-ipynb
+  :load-path "~/src/ox-ipynb/")
+
+(use-package org
+  :ensure t
   :config
   (setq org-startup-indented t) ;; simplify heirarchies management in org
   (setq org-ellipsis " [+]") ;; Custom fold indicator because I often use ellipses and it's confusing
