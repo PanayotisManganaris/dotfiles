@@ -1995,6 +1995,17 @@ customize to ideal configuration.
       (ansi-color-apply-on-region begin end t)))
 #+end_src
 
+*** DONE trying to fix jupyter backtrace presentation
+:STATUSLOG:
+- State "DONE"       from              [2022-04-20 Wed 21:23]
+:END:
+ANSI SRG color sequences are fontified by the above function.  The
+default ansi base faces (ansi-color-COLOR) are bright and very nearly
+match the jupyter textface.
+- ansi-color-yellow is the source of the bright highlights in-buffer
+  - set it to grey30 for a clear but neutral highlight
+- jupyter-traceback-face is the source of the red highlights in-repl
+  - set it it to doom dark background color #1e1e1e
 ** common-lisp
 #+begin_src emacs-lisp
   (use-package slime
