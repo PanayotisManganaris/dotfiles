@@ -10,6 +10,8 @@
 (setq inhibit-startup-screen t)
 (setq visible-bell t)
 (column-number-mode 1)
+(setq custom-file (concat user-emacs-directory "custom.el"))
+(load custom-file)
 
 (setq bindlist '((windmove-swap-states-right "C-M-s-f" "C-M-s-<right>")
                  (windmove-swap-states-up "C-M-s-p" "C-M-s-<up>")
@@ -347,12 +349,19 @@
 
 (use-package epa-file
   :config
-  (epa-file-enable))
+  (epa-file-enable)
+  (setq epa-file-name-regexp "\\.\\(gpg\\|asc\\)$")
+  (epa-file-name-regexp-update)
+  ;;(setq epa-armor nil)
+  )
 
 (use-package org
   :ensure t
    ;; org exports establish prior to loading org.el
-  :init (setq org-export-backends '(ascii html icalendar latex odt)))
+  :init (setq org-export-backends '(ascii html icalendar latex odt))
+  :config
+  (add-hook 'org-export-before-parsing-hook 'org-ref-glossary-before-parsing)
+  (add-hook 'org-export-before-parsing-hook 'org-ref-acronyms-before-parsing))
 
 (use-package ox-ipynb
   :load-path "~/src/ox-ipynb/")

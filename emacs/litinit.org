@@ -55,7 +55,10 @@ evaluation and tangle file.  Hooked to saving in org-mode
   (setq inhibit-startup-screen t)
   (setq visible-bell t)
   (column-number-mode 1)
+  (setq custom-file (concat user-emacs-directory "custom.el"))
+  (load custom-file)
 #+end_src
+
 Running the Emacs server necessitates disabling GUI menus, scrollbar,
 etc in early-init.el.
 *** DONE adjust "dull" color face for comments
@@ -842,7 +845,11 @@ easy pgp assistant helps to deal with encrypted files quickly
 #+begin_src emacs-lisp
   (use-package epa-file
     :config
-    (epa-file-enable))
+    (epa-file-enable)
+    (setq epa-file-name-regexp "\\.\\(gpg\\|asc\\)$")
+    (epa-file-name-regexp-update)
+    ;;(setq epa-armor nil)
+    )
 #+end_src
 * TODO Org-mode
 ** Org Export
@@ -851,7 +858,10 @@ defaults (beamer options are exposed through latex)
   (use-package org
     :ensure t
      ;; org exports establish prior to loading org.el
-    :init (setq org-export-backends '(ascii html icalendar latex odt)))
+    :init (setq org-export-backends '(ascii html icalendar latex odt))
+    :config
+    (add-hook 'org-export-before-parsing-hook 'org-ref-glossary-before-parsing)
+    (add-hook 'org-export-before-parsing-hook 'org-ref-acronyms-before-parsing))
 #+end_src
 *** ipynb
 #+begin_src emacs-lisp
@@ -1915,6 +1925,7 @@ package provided by default, yay.
 :STATUSLOG:
 - State "DONE"       from "TODO"       [2021-11-19 Fri 16:10]
 :END:
+rss
 #+begin_src emacs-lisp
       (use-package elfeed
         :ensure t
