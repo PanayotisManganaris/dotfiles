@@ -859,10 +859,14 @@ defaults (beamer options are exposed through latex)
     :ensure t
      ;; org exports establish prior to loading org.el
     :init (setq org-export-backends '(ascii html icalendar latex odt))
+    (add-to-list 'org-ref-acronym-types '("acr" "Dynamic acronym"))
+    (add-to-list 'org-ref-acronym-types '("Acr" "Capitalized dynamic acronym"))
+    (add-to-list 'org-ref-acronym-types '("ACR" "ALL-CAPS dynamic acronym"))
     :config
     (add-hook 'org-export-before-parsing-hook 'org-ref-glossary-before-parsing)
-    (add-hook 'org-export-before-parsing-hook 'org-ref-acronyms-before-parsing))
+    (add-hook 'org-export-before-parsing-hook 'org-ref-acronyms-before-parsing 'append))
 #+end_src
+
 *** ipynb
 #+begin_src emacs-lisp
   (use-package ox-ipynb
@@ -1292,7 +1296,8 @@ if no :results output keyword arg header is provided to org, output is still ava
                     '("revtex" "\\documentclass[]{revtex4-2}"
                       ("\\section{%s}" . "\\section*{%s}")
                       ("\\subsection{%s}" . "\\subsection*{%s}")
-                      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))))
+                      ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+    (setq org-footnote-define-inline t))
     ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 #+end_src
 LaTeX exporter setting and in-line math formula display preferences
@@ -1563,38 +1568,42 @@ interop) cite targets via a custom embark map
 the below config is left functionally untouched from what was working prior to the vertico switch.
 except for removing org-ref-ivy requirement
 #+begin_src emacs-lisp
-  (use-package org-ref
-    :ensure t
-    :init
-    ;; likely unnecessary for or in conflict with the vertico completion framework
-    ;;(setq org-ref-insert-link-function 'org-ref-insert-link-hydra/body
-    ;;      org-ref-insert-cite-function 'org-ref-cite-insert-ivy
-    ;;      org-ref-insert-label-function 'org-ref-insert-label-link
-    ;;      org-ref-insert-ref-function 'org-ref-insert-ref-link
-    ;;      org-ref-cite-onclick-function (lambda (_) (org-ref-citation-hydra/body))) 
-    (setq org-ref-completion-library 'org-ref-ivy-cite) ;; org-ref manager use ivy-bibtex's retreival machinery
-    ;; (setq org-ref-default-citation-link "autocite") ;; decide which natbib style is predominant
-    (require 'bibtex)
-    (setq bibtex-autokey-year-length 4
-          bibtex-autokey-name-year-separator "-"
-          bibtex-autokey-year-title-separator "-"
-          bibtex-autokey-titleword-separator "-"
-          bibtex-autokey-titlewords 2
-          bibtex-autokey-titlewords-stretch 1
-          bibtex-autokey-titleword-length 5) ;; variables informing entry cleanup function
-    ;; (require 'org-ref-ivy) ;; phased out in favor of citar
-    (require 'org-ref-arxiv)
-    (require 'org-ref-scopus)
-    (require 'org-ref-wos)
-    :config
-    (setq reftex-default-bibliography '("~/org/bibliotex/bibliotex.bib")) ;; redundant? 
-    (setq org-ref-bibliography-notes "~/org/zettles/" ;; orb and org-ref can agree but must they?
-          org-ref-default-bibliography '("~/org/bibliotex/bibliotex.bib")
-          org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks"))
-    ;; citation source materials, separated for enote access convenience
-    :bind ((:map bibtex-mode-map ("C-c [" . 'org-ref-bibtex-hydra/body)) ;; does consult/embark have a better way?
-           (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
-                               ("C-c [" . 'org-ref-insert-link-hydra/body)))))
+    (use-package org-ref
+      :ensure t
+      :init
+      ;; likely unnecessary for or in conflict with the vertico completion framework
+      ;;(setq org-ref-insert-link-function 'org-ref-insert-link-hydra/body
+      ;;      org-ref-insert-cite-function 'org-ref-cite-insert-ivy
+      ;;      org-ref-insert-label-function 'org-ref-insert-label-link
+      ;;      org-ref-insert-ref-function 'org-ref-insert-ref-link
+      ;;      org-ref-cite-onclick-function (lambda (_) (org-ref-citation-hydra/body))) 
+      (setq org-ref-completion-library 'org-ref-ivy-cite) ;; org-ref manager use ivy-bibtex's retreival machinery
+      ;; (setq org-ref-default-citation-link "autocite") ;; decide which natbib style is predominant
+      (require 'bibtex)
+      (setq bibtex-autokey-year-length 4
+            bibtex-autokey-name-year-separator "-"
+            bibtex-autokey-year-title-separator "-"
+            bibtex-autokey-titleword-separator "-"
+            bibtex-autokey-titlewords 2
+            bibtex-autokey-titlewords-stretch 1
+            bibtex-autokey-titleword-length 5) ;; variables informing entry cleanup function
+      ;; (require 'org-ref-ivy) ;; phased out in favor of citar
+      (require 'org-ref-arxiv)
+      (require 'org-ref-scopus)
+      (require 'org-ref-wos)
+      :config
+      (setq bibtex-dialect 'biblatex) ;; modern .bib (biblatex) should be backward compatable with .bibtex
+      ;; if this becomes a problem, the .bib can be cloned. name the bibtex version .bibtex
+      ;; then, set the dialect in the file thus:
+      ;; % -*- mode:bibtex; eval: (bibtex-set-dialect 'biblatex); -*-
+      (setq reftex-default-bibliography '("~/org/bibliotex/bibliotex.bib")) ;; redundant? 
+      (setq org-ref-bibliography-notes "~/org/zettles/" ;; orb and org-ref can agree but must they?
+            org-ref-default-bibliography '("~/org/bibliotex/bibliotex.bib")
+            org-ref-pdf-directory '("~/org/bibliotex/paper_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks"))
+      ;; citation source materials, separated for enote access convenience
+      :bind ((:map bibtex-mode-map ("C-c [" . 'org-ref-bibtex-hydra/body)) ;; does consult/embark have a better way?
+             (:map org-mode-map (("C-c ]" . 'org-ref-insert-link)
+                                 ("C-c [" . 'org-ref-insert-link-hydra/body)))))
 #+end_src
 note: this is not portable.... melpa vs elpa?
 ** TODO Make Org-Ref references a choice of type
@@ -1639,7 +1648,7 @@ citation keys, for which Consult offers an enhanced interface
             (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
             (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
             (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
-          bibtex-completion-pdf-open-function 'find-file) ;;open pdfs in emacs--best, obviously. -- works inconsistently
+          bibtex-completion-pdf-open-function 'find-file)
     (setq citar-open-at-point-function 'embark-act) ;; C-c C-o on citar ref should open embark menu
     ;; issue -- conflicts with org-ref hydra on cite link
     (setq citar-library-paths '("~/org/bibliotex/papers_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks/")
@@ -1671,6 +1680,10 @@ citation keys, for which Consult offers an enhanced interface
                 :map minibuffer-local-map
                 ("C-c i" . citar-insert-preset)))
 #+end_src
+
+#+RESULTS:
+: citar-insert-preset
+
 ** troubleshooting
 the citar open notes function is troubling.
 it opens the default citar-templates note, it doesn't use the roam template dispatch...

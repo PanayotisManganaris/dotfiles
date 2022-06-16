@@ -359,9 +359,12 @@
   :ensure t
    ;; org exports establish prior to loading org.el
   :init (setq org-export-backends '(ascii html icalendar latex odt))
+  (add-to-list 'org-ref-acronym-types '("acr" "Dynamic acronym"))
+  (add-to-list 'org-ref-acronym-types '("Acr" "Capitalized dynamic acronym"))
+  (add-to-list 'org-ref-acronym-types '("ACR" "ALL-CAPS dynamic acronym"))
   :config
   (add-hook 'org-export-before-parsing-hook 'org-ref-glossary-before-parsing)
-  (add-hook 'org-export-before-parsing-hook 'org-ref-acronyms-before-parsing))
+  (add-hook 'org-export-before-parsing-hook 'org-ref-acronyms-before-parsing 'append))
 
 (use-package ox-ipynb
   :load-path "~/src/ox-ipynb/")
@@ -516,7 +519,8 @@
                   '("revtex" "\\documentclass[]{revtex4-2}"
                     ("\\section{%s}" . "\\section*{%s}")
                     ("\\subsection{%s}" . "\\subsection*{%s}")
-                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))))
+                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+  (setq org-footnote-define-inline t))
   ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 
 (use-package ox-publish
@@ -649,6 +653,10 @@
   (require 'org-ref-scopus)
   (require 'org-ref-wos)
   :config
+  (setq bibtex-dialect 'biblatex) ;; modern .bib (biblatex) should be backward compatable with .bibtex
+  ;; if this becomes a problem, the .bib can be cloned. name the bibtex version .bibtex
+  ;; then, set the dialect in the file thus:
+  ;; % -*- mode:bibtex; eval: (bibtex-set-dialect 'biblatex); -*-
   (setq reftex-default-bibliography '("~/org/bibliotex/bibliotex.bib")) ;; redundant? 
   (setq org-ref-bibliography-notes "~/org/zettles/" ;; orb and org-ref can agree but must they?
         org-ref-default-bibliography '("~/org/bibliotex/bibliotex.bib")
@@ -674,7 +682,7 @@
           (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
           (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
           (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
-        bibtex-completion-pdf-open-function 'find-file) ;;open pdfs in emacs--best, obviously. -- works inconsistently
+        bibtex-completion-pdf-open-function 'find-file)
   (setq citar-open-at-point-function 'embark-act) ;; C-c C-o on citar ref should open embark menu
   ;; issue -- conflicts with org-ref hydra on cite link
   (setq citar-library-paths '("~/org/bibliotex/papers_pdfs/" "~/org/bibliotex/ebooks/" "~/org/bibliotex/srcbooks/")
