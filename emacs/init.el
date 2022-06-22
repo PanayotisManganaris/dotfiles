@@ -501,12 +501,23 @@
   (setq org-confirm-babel-evaluate nil)
   (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append))
 
+(use-package engrave-faces
+  :ensure t)
+
+(use-package engrave-faces-latex
+  :after ox-latex
+  :config
+
+  (setq org-latex-listings 'engraved))
+
 (use-package org
   :ensure t
   :init
+  (add-to-list 'exec-path "/usr/bin/vendor_perl")
   (setq org-export-dispatch-use-expert-ui t)
   (setq org-latex-pdf-process
-        (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
+        (list "latexmk -f -pdf -%latex -bibtex -interaction=nonstopmode -output-directory=%o %f"))
+  ;;(list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f")
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
   ;; use of latex keyword will include the org-latex[-default]-package-alist lists
   ;; defaults: article, report, book. org-beamer adds beamer class.
@@ -520,7 +531,7 @@
                     ("\\section{%s}" . "\\section*{%s}")
                     ("\\subsection{%s}" . "\\subsection*{%s}")
                     ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
-  (setq org-footnote-define-inline t))
+  (setq org-footnote-define-inline nil))
   ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 
 (use-package ox-publish
@@ -705,10 +716,6 @@
   (setq orb-preformat-templates t) ;; default t
   ;; expandable keywords in orb-templates or org-roam-capture-templates
   (setq orb-preformat-keywords '("citekey" "entry-type" "date" "pdf?" "note?" "file" "author" "editor" "author-abbrev" "editor-abbrev" "author-or-editor-abbrev"))
-  :config
-  (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
-  ;; this is a consult configuration -- bibtex-completion is in the habit of using CRM
-  ;; consult helps embark deal with it.
   :bind (:map global-map
               ("C-c [" . citar-insert-citation)
               :map minibuffer-local-map

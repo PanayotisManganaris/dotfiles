@@ -1210,6 +1210,38 @@ are made on basis of inclusion in paper)
     (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append))
 #+end_src
 use babel for jupyter notebooks? ein?
+*** DONE engrave faces for src block export
+:STATUSLOG:
+- State "DONE"       from              [2022-06-17 Fri 21:38]
+:END:
+engrave faces is an attempt to improve the generality of displaying
+org babel code blocks in org exports. It takes the code as it appears
+in emacs, preserves the font locking, and gives it to the export
+back-end to display as it will.
+#+begin_src emacs-lisp
+  (use-package engrave-faces
+    :ensure t)
+
+  (use-package engrave-faces-latex
+    :after ox-latex
+    :config
+    
+    (setq org-latex-listings 'engraved))
+#+end_src
+in conjunction with the latex pseudoclass provided by chameleon.el,
+latex presentations can be generated that resemble the org buffer used
+to produce them. potentially great for improving productive output.
+**** relevant org headers and meta lines
+#+ latex_engraved_theme and attr_latex: :engraved-theme
+***** creating custom export font locking theme
+ "default2" with pink comments
+#+begin_example
+(setq default2 (alist-get 'default engrave-faces-themes))
+;; Make comments hot pink
+(plist-put (alist-get 'font-lock-comment-face default2) :foreground "#ff69b4")
+;; Any other customisations...
+(add-to-list 'engrave-faces-themes (cons 'default2 default2))
+#+end_example
 *** org capture throws JSON read table error
 :PROPERTIES:
 :ID:       8247e288-af77-4961-93fc-55c9cc65016d
@@ -1281,9 +1313,11 @@ if no :results output keyword arg header is provided to org, output is still ava
   (use-package org
     :ensure t
     :init
+    (add-to-list 'exec-path "/usr/bin/vendor_perl")
     (setq org-export-dispatch-use-expert-ui t)
     (setq org-latex-pdf-process
-          (list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f"))
+          (list "latexmk -f -pdf -%latex -bibtex -interaction=nonstopmode -output-directory=%o %f"))
+    ;;(list "latexmk -pdflatex='lualatex -shell-escape -bibtex -interaction nonstopmode' -pdf -f %f")
     (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
     ;; use of latex keyword will include the org-latex[-default]-package-alist lists
     ;; defaults: article, report, book. org-beamer adds beamer class.
@@ -1297,26 +1331,9 @@ if no :results output keyword arg header is provided to org, output is still ava
                       ("\\section{%s}" . "\\section*{%s}")
                       ("\\subsection{%s}" . "\\subsection*{%s}")
                       ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
-    (setq org-footnote-define-inline t))
+    (setq org-footnote-define-inline nil))
     ;;(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 #+end_src
-LaTeX exporter setting and in-line math formula display preferences
-**** TODO configure exporter to use minted package or alternative for code block faces setting
-there was that one package that the one guy wrote for emacs? for latex? makes emacs quality font "engraving?"
-**** TODO configure exporter to handle bibtex as well
-**** DONE configure emacs to open pdfs using pdftools and keep pdf tools up to date
-:STATUSLOG:
-- State "DONE"       from "TODO"       [2021-09-17 Fri 21:33]
-:END:
-I think that's done? Some applications that handle sending files
-to receiving applications may not recognize emacs as a pdf viewer
-without configuration on their side (and this side, maybe?)
-**** TODO pdf display update automatically when PDF is rebuilt
-**** TODO A cool little lisp project:
-create a convenient parser to interpret and flowchart/display the
-formulae defined in a TBLFM keyword for use by a table. In other
-words, make it possible to export tables with their formula
-displayed per column
 *** DONE Org for website publishing
 :STATUSLOG:
 - State "DONE"       from "TODO"       [2022-04-10 Sun 02:49]
@@ -1671,18 +1688,11 @@ citation keys, for which Consult offers an enhanced interface
     (setq orb-preformat-templates t) ;; default t
     ;; expandable keywords in orb-templates or org-roam-capture-templates
     (setq orb-preformat-keywords '("citekey" "entry-type" "date" "pdf?" "note?" "file" "author" "editor" "author-abbrev" "editor-abbrev" "author-or-editor-abbrev"))
-    :config
-    (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
-    ;; this is a consult configuration -- bibtex-completion is in the habit of using CRM
-    ;; consult helps embark deal with it.
     :bind (:map global-map
                 ("C-c [" . citar-insert-citation)
                 :map minibuffer-local-map
                 ("C-c i" . citar-insert-preset)))
 #+end_src
-
-#+RESULTS:
-: citar-insert-preset
 
 ** troubleshooting
 the citar open notes function is troubling.
@@ -2047,7 +2057,7 @@ match the jupyter textface.
 - State "DONE"       from "TODO"       [2021-10-28 Thu 15:15]
 :END:
 The subshell started by emacs must be informed of the scope of the zsh
-though running an instance of an interactive subsection.
+though running an instance of an interactive sub-session.
 
 ~/.emacs_zsh or ~/.emacs.d/init_zsh.sh are read by interactive
 sessions.  if these files exist, they are read when a new interactive
