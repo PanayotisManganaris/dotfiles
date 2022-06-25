@@ -1225,7 +1225,6 @@ back-end to display as it will.
   (use-package engrave-faces-latex
     :after ox-latex
     :config
-    
     (setq org-latex-listings 'engraved))
 #+end_src
 in conjunction with the latex pseudoclass provided by chameleon.el,
@@ -1971,7 +1970,10 @@ SX.el on github
   (use-package lsp-mode
     :ensure t)
 #+end_src
-* Programming
+* Programming Languages
+** prog mode
+- prog's prettify-symbols-mode can be used to obfuscate any code
+  - see https://github.com/rust-lang/rust-mode for general customization with rs example
 ** python
 :PROPERTIES:
 :ID:       12165476-71a2-4170-ae11-4f9c10337935
@@ -2051,7 +2053,40 @@ match the jupyter textface.
     (add-to-list 'load-path "~/.config/emacs/elpa/slime-20220204.1357")
     (require 'slime-autoloads))
 #+end_src
-
+** rust
+*** DONE rust-mode
+:STATUSLOG:
+- State "DONE"       from              [2022-06-24 Fri 10:43]
+:END:
+- provide lightweight formatting and whitespace standardization
+- rustfmt add-on automatically formats rust
+- rust-clippy add-on automatically lints rust
+- offers easy integration with rust playpen website
+  - share your region/buffer with a url through playpen
+#+begin_src emacs-lisp
+  (use-package rust-mode
+    :ensure t
+    :config
+    (add-hook 'rust-mode-hook
+              (lambda () (setq indent-tabs-mode nil)))
+    :bind (:map rust-mode-map
+                ("C-c C-c" . rust-run)
+                ("C-c C-b" . rust-compile)
+                ("C-c C-r" . rust-compile-release)
+                ("C-c C-t" . rust-test)
+                ("C-c C-x C-f" . rust-format-buffer)
+                ("C-c C-x C-c" . rust-run-clippy)
+                ("C-c C-d" . rust-dbg-wrap-or-unwrap)
+                ("C-c C-v" . rust-toggle-mutability)))
+#+end_src
+*** rustic
+- built on rust-mode
+- integration with lsp-mode
+  - rust.analyzer is the official language server
+  - provides autocompletion (make work with corfu)
+- disables rust-mode rust ecosystem integration in favor of it's own
+  extensions (rust-load-optional-libraries nil)
+  - might be desirable to use cargo-mode.el as well instead of these keybinds in this case
 ** DONE set conda default env properly
 :STATUSLOG:
 - State "DONE"       from "TODO"       [2021-10-28 Thu 15:15]

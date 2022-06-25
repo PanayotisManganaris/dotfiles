@@ -507,7 +507,6 @@
 (use-package engrave-faces-latex
   :after ox-latex
   :config
-
   (setq org-latex-listings 'engraved))
 
 (use-package org
@@ -879,6 +878,21 @@
   :config
   (add-to-list 'load-path "~/.config/emacs/elpa/slime-20220204.1357")
   (require 'slime-autoloads))
+
+(use-package rust-mode
+  :ensure t
+  :config
+  (add-hook 'rust-mode-hook
+            (lambda () (setq indent-tabs-mode nil)))
+  :bind (:map rust-mode-map
+              ("C-c C-c" . rust-run)
+              ("C-c C-b" . rust-compile)
+              ("C-c C-r" . rust-compile-release)
+              ("C-c C-t" . rust-test)
+              ("C-c C-x C-f" . rust-format-buffer)
+              ("C-c C-x C-c" . rust-run-clippy)
+              ("C-c C-d" . rust-dbg-wrap-or-unwrap)
+              ("C-c C-v" . rust-toggle-mutability)))
 
 ;; org agenda and calendar customization and automation
 ;;(defun my-open-calendar ()
