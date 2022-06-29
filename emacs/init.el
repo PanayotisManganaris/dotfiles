@@ -839,25 +839,6 @@
   (setq python-shell-interpreter "ipython"
         python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True"))
 
-(use-package conda
-  :ensure t
-  :demand
-  :config
-  (setq conda-anaconda-home "/opt/miniconda3") ;; specify install location
-  (setq conda-env-home-directory "/opt/miniconda3") ;;conda envs explicit location
-  (conda-env-initialize-interactive-shells) ;; conda awareness will be enabled for inferior shell processes
-  (conda-env-initialize-eshell) ;; and eshell
-  ;; NOTE: eshell and emacs share an evironment. Change one change the other.
-  ;;set current environment from instance of interactive shell
-  (conda-env-activate
-   (getenv-internal "CONDA_DEFAULT_ENV"
-                    (split-string (shell-command-to-string "$SHELL --interactive -c printenv") "\n")))
-  ;; display env in modline ~ if modline is customized, :exec keyword can be redirected there.
-  (setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
-  (conda-env-autoactivate-mode t))
-  ;;(add-hook 'find-file-hook (lambda () (when (boundp 'conda-project-env-path)
-  ;;                                       (conda-env-activate-for-buffer)))))
-
 (use-package poetry
   :ensure t
   :bind ("C-x p" . poetry))

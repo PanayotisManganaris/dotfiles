@@ -1986,7 +1986,11 @@ SX.el on github
           python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True"))
 #+end_src
 
-*** conda
+*** CANCELED COMMENT conda
+:STATUSLOG:
+- State "CANCELED"   from              [2022-06-29 Wed 15:09] \\
+  there is no point to this anymore
+:END:
 #+begin_src emacs-lisp
   (use-package conda
     :ensure t
