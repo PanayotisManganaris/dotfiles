@@ -515,15 +515,20 @@ be tried after the capfs in the buffer local value.
 replaces company. inline completion mechanism
 #+begin_src emacs-lisp
   (use-package corfu
-    :ensure t
+    :init
+    (global-corfu-mode 1)
     :config
     (setq corfu-auto t
+          corfu-auto-prefix 2
           corfu-quit-at-boundary t
           corfu-auto-delay 0
           corfu-cycle t
           corfu-preselect-first nil)
     (unbind-key "RET" corfu-map)
-    (corfu-global-mode 1))
+    :hook (shell-mode . (lambda ()
+                          (setq-local corfu-quit-at-boundary t
+                                      corfu-quit-no-match t
+                                      corfu-auto nil))))
 #+end_src
 * Embark core
 contextual actions from the completion menu
