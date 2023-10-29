@@ -28,6 +28,19 @@
   (setq visible-bell t)
   (setq inhibit-startup-screen t))
 					; user interface
+(use-package wgrep
+  :ensure t)
+
+(use-package unkillable-scratch
+  :ensure t
+  :config
+  (unkillable-scratch t))
+
+(use-package ws-butler
+  :ensure t
+  :config
+  (ws-butler-global-mode 1))
+
 (use-package emacs
   :config
   (setq skeleton-pair t)
