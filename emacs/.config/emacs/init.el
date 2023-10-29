@@ -284,3 +284,10 @@
   :bind (:map global-map
               (("C-x C-b" . bufler)
                ("C-x b" . bufler-switch-buffer))))
+
+(use-package project)
+					; source control
+(use-package magit
+  :ensure t
+  :bind
+  ("C-x g" . magit-status))
