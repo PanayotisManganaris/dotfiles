@@ -28,6 +28,28 @@
   (setq visible-bell t)
   (setq inhibit-startup-screen t))
 					; user interface
+(use-package popper
+  :ensure t
+  :config
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Org Select\\*"
+          "\\*Backtrace\\*"
+          "\\*ob-ipython-out\\*"
+          "\\*ob-ipython-traceback\\*"
+          "\\*Async Shell Command\\*"
+          "\\*Python\\*"
+          "shell\\*$"
+          help-mode
+          compilation-mode))
+  (popper-mode 1)
+  (popper-echo-mode 1)
+  :bind
+  (("C-`" . popper-toggle-latest)
+   ("M-`" . popper-cycle)
+   ("C-~" . popper-toggle-type)))
+
 (use-package calc
   :bind ("M-#" . calc-dispatch))
 
