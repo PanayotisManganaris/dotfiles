@@ -315,3 +315,8 @@
   (put 'dired-find-alternate-file 'disabled nil)
   :bind (:map dired-mode-map
               (("C-c C-e" . wdired-change-to-wdired-mode))))
+					; direnv
+(use-package direnv
+  :ensure t
+  :config
+  (direnv-mode 1))
