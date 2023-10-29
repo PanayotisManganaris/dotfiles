@@ -291,3 +291,27 @@
   :ensure t
   :bind
   ("C-x g" . magit-status))
+					; contextual action framework
+
+					; directory edit
+(use-package dired
+  :init
+  (setq dired-listing-switches "-ahl -v --group-directories-first")
+  (setq dired-omit-files "\\`[.]?#\\|\\`[.][.]?\\|^[.].+\\'")
+  (setq dired-auto-revert-buffer t
+        dired-dwim-target t
+        dired-recursive-copies 'always
+        dired-recursive-deletes 'top)
+  :config
+  (add-hook 'dired-mode-hook 'dired-hide-details-mode)
+
+  (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers ()
+   "For when dired in tramp displays blank screen when remote system
+    does not use GNU ls, which is the only variant that supports
+    --group-directories-first."
+   (when (file-remote-p default-directory)
+     (setq-local dired-actual-switches (car args))))
+
+  (put 'dired-find-alternate-file 'disabled nil)
+  :bind (:map dired-mode-map
+              (("C-c C-e" . wdired-change-to-wdired-mode))))
