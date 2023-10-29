@@ -28,6 +28,9 @@
   (setq visible-bell t)
   (setq inhibit-startup-screen t))
 					; user interface
+(use-package calc
+  :bind ("M-#" . calc-dispatch))
+
 (use-package wgrep
   :ensure t)
 
