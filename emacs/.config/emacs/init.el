@@ -374,7 +374,6 @@
   (direnv-mode 1))
 					; org-mode notes
 (use-package org
-  :ensure t
   :init
   (setq org-directory (concat (getenv "HOME") "/org"))
   (setq org-startup-indented t)
@@ -435,8 +434,7 @@
   :bind ((:map global-map
                (("C-c n f" . org-roam-node-find)
 		("C-c n g" . org-roam-ui-mode)
-		("C-c n r" . org-roam-node-random)
-		("C-c l" . org-store-link)))
+		("C-c n r" . org-roam-node-random)))
          (:map org-mode-map
 	       (("C-c n i" . org-roam-node-insert)
 		("C-c n o" . org-id-get-create)
@@ -444,6 +442,10 @@
 		("C-c n a" . org-roam-alias-add)
 		("C-c n l" . org-roam-buffer-toggle)
 		("C-c n c" . org-roam-extract-subtree)))))
+
+(use-package ol
+  :bind ((:map global-map
+	       (("C-c l" . org-store-link)))))
 
 (use-package org-download
   :ensure t
