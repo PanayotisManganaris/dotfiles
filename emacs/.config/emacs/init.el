@@ -248,7 +248,7 @@
 
 (use-package avy
   :ensure t
-  :bind ("C-S-s" . avy-goto-char-2))
+  :bind ("M-j" . avy-goto-char-2))
 
 (use-package bufler
   :ensure t
