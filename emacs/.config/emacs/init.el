@@ -401,3 +401,23 @@
   (setq org-priority-default 3)
   (setq org-priority-highest 1)
   (setq org-priority-lowest 5))
+
+(use-package org-roam
+  :ensure t
+  :init (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory (file-truename (concat org-directory "/zettles/")))
+  :config
+  (org-roam-db-autosync-mode)
+  (require 'org-roam-protocol)
+  :bind (:map global-map
+              (("C-c n f" . org-roam-node-find)
+               ("C-c n g" . org-roam-ui-mode)
+               ("C-c n r" . org-roam-node-random))
+        (:map org-mode-map
+              (("C-c n i" . org-roam-node-insert)
+               ("C-c n o" . org-id-get-create)
+               ("C-c n t" . org-roam-tag-add)
+               ("C-c n a" . org-roam-alias-add)
+               ("C-c n l" . org-roam-buffer-toggle)
+               ("C-c n c" . org-roam-extract-subtree)))))
