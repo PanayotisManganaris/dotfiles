@@ -358,3 +358,46 @@
   :ensure t
   :config
   (direnv-mode 1))
+					; org-mode notes
+(use-package org
+  :ensure t
+  :init
+  (setq org-directory (concat (getenv "HOME") "/org"))
+  (setq org-startup-indented t)
+  (setq org-ellipsis " [+]")
+  (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))
+  :config
+  ;; GTD implementation
+  (setq org-use-fast-todo-selection 'auto)
+  (setq org-treat-S-cursor-todo-selection-as-state-change nil)
+  (setq org-todo-keywords
+        '((sequence "TODO(t)"
+                    "NEXT(n!)"
+                    "WAIT(w@/!)"
+                    "|"
+                    "DONE(d!)"
+                    "INACTIVE(i@)"
+                    "CANCELED(q@/@)")))
+  (setq org-todo-keyword-faces
+        (quote (("TODO" :foreground "blue" :weight bold)
+                ("NEXT" :foreground "red" :weight bold)
+                ("WAIT" :foreground "orange" :weight bold)
+                ("DONE" :foreground "forest green" :weight bold)
+                ("INACTIVE" :foreground "magenta" :weight bold)
+                ("CANCELED" :foreground "forest green" :weight bold))))
+
+  (defun pm/modify-org-done-face ()
+    (setq org-fontify-done-headline t)
+    (set-face-attribute 'org-done nil :strike-through t)
+    (set-face-attribute 'org-headline-done nil
+                        :strike-through t
+                        :foreground "light gray"))
+  (eval-after-load "org"
+    (add-hook 'org-add-hook 'pm/modify-org-done-face))
+
+  (setq org-enforce-todo-dependencies t)
+  (setq org-agenda-dim-blocked-tasks t)
+  (setq org-log-into-drawer t)
+  (setq org-priority-default 3)
+  (setq org-priority-highest 1)
+  (setq org-priority-lowest 5))
