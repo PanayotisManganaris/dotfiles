@@ -330,7 +330,15 @@
   :bind
   ("C-x g" . magit-status))
 					; contextual action framework
-
+(use-package embark
+  :ensure t
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command)
+  :bind (:map global-map (("C-;" . embark-act)
+                          ("M-." . embark-dwim)
+                          ("C-h B" . embark-bindings)
+                          ("C-:" . embark-act-all)
+                          ("C-(" . embark-collect-snapshot))))
 					; directory edit
 (use-package dired
   :init
