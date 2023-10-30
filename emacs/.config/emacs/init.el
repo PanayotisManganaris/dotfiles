@@ -403,6 +403,8 @@
   (eval-after-load "org"
     (add-hook 'org-add-hook 'pm/modify-org-done-face))
 
+  (setq org-stuck-projects
+        '("+LEVEL=1+TODO/-DONE-CANCELED-INACTIVE-NEXT" ("NEXT")))
   (setq org-enforce-todo-dependencies t)
   (setq org-agenda-dim-blocked-tasks t)
   (setq org-log-into-drawer t)
