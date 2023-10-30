@@ -53,6 +53,12 @@
 (use-package calc
   :bind ("M-#" . calc-dispatch))
 
+(use-package ediff
+  :config
+  (setq ediff-make-buffers-readonly-at-startup nil)
+  (setq ediff-split-window-function 'split-window-horizontally)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+
 (use-package wgrep
   :ensure t)
 
