@@ -416,7 +416,13 @@
   (setq org-log-into-drawer t)
   (setq org-priority-default 3)
   (setq org-priority-highest 1)
-  (setq org-priority-lowest 5))
+  (setq org-priority-lowest 5)
+  ;; tree-sitter org mode navigation?
+  :bind (:map org-mode-map
+              (("M-[" . org-backward-paragraph)
+               ("M-]" . org-forward-paragraph)
+               ("M-{" . org-backward-element)
+               ("M-}" . org-forward-element))))
 
 (use-package org-roam
   :ensure t
