@@ -429,7 +429,8 @@
   :bind ((:map global-map
                (("C-c n f" . org-roam-node-find)
 		("C-c n g" . org-roam-ui-mode)
-		("C-c n r" . org-roam-node-random)))
+		("C-c n r" . org-roam-node-random)
+		("C-c l" . org-store-link)))
          (:map org-mode-map
 	       (("C-c n i" . org-roam-node-insert)
 		("C-c n o" . org-id-get-create)
@@ -437,3 +438,11 @@
 		("C-c n a" . org-roam-alias-add)
 		("C-c n l" . org-roam-buffer-toggle)
 		("C-c n c" . org-roam-extract-subtree)))))
+
+(use-package org-download
+  :ensure t
+  :config
+  (setq org-image-actual-width '(800))
+  (setq org-download-display-inline-images nil
+	org-download-screenshot-method "flameshot gui --raw > %s"))
+
