@@ -444,6 +444,14 @@
 		("C-c n c" . org-roam-extract-subtree)))))
 
 (use-package ol
+  :init
+  (defface org-web-link '((t :inherit 'org-link
+			     :foreground "blue violet"))
+    "color web links"
+    :group 'org-faces)
+  :config
+  (org-link-set-parameters "https" :face 'org-web-link)
+  (org-link-set-parameters "http" :face 'org-web-link)
   :bind ((:map global-map
 	       (("C-c l" . org-store-link)))))
 
