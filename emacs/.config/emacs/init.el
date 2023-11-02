@@ -45,10 +45,9 @@
           compilation-mode))
   (popper-mode 1)
   (popper-echo-mode 1)
-  :bind
-  (("C-`" . popper-toggle-latest)
-   ("M-`" . popper-cycle)
-   ("C-~" . popper-toggle-type)))
+  :bind  (("C-`" . popper-toggle-latest)
+	  ("M-`" . popper-cycle)
+	  ("C-~" . popper-toggle-type)))
 
 (use-package calc
   :bind ("M-#" . calc-dispatch))
@@ -76,12 +75,12 @@
   :config
   (setq skeleton-pair t)
   :bind (:map global-map
-              (("C-S-d" . backward-delete-char-untabify)
-               ("C-%" . replace-regexp)
-               ("(" . skeleton-pair-insert-maybe)
-               ("[" . skeleton-pair-insert-maybe)
-               ("{" . skeleton-pair-insert-maybe)
-               ("\"" . skeleton-pair-insert-maybe))))
+              ("C-S-d" . backward-delete-char-untabify)
+              ("C-%" . replace-regexp)
+              ("(" . skeleton-pair-insert-maybe)
+              ("[" . skeleton-pair-insert-maybe)
+              ("{" . skeleton-pair-insert-maybe)
+              ("\"" . skeleton-pair-insert-maybe)))
 
 (global-set-key (kbd "C-z") 'ignore)
 (global-set-key (kbd "C-x C-z") 'ignore)
@@ -121,14 +120,14 @@
 (use-package windmove
   ;; replace this with the tm/functions and new vm
   :bind (:map global-map
-              (("C-M-s-f" . windmove-swap-states-right)
-               ("C-M-s-p" . windmove-swap-states-up)
-               ("C-M-s-b" . windmove-swap-states-left)
-               ("C-M-s-n" . windmove-swap-states-down)
-               ("C-s-f" . windmove-right)
-               ("C-s-p" . windmove-up)
-               ("C-s-b" . windmove-left)
-               ("C-s-n" . windmove-down))))
+              ("C-M-s-f" . windmove-swap-states-right)
+              ("C-M-s-p" . windmove-swap-states-up)
+              ("C-M-s-b" . windmove-swap-states-left)
+              ("C-M-s-n" . windmove-swap-states-down)
+              ("C-s-f" . windmove-right)
+              ("C-s-p" . windmove-up)
+              ("C-s-b" . windmove-left)
+              ("C-s-n" . windmove-down)))
 					; completion framework
 (use-package vertico
   :ensure t
@@ -141,16 +140,16 @@
   (vertico-cycle t)
   :bind (:map vertico-map
 	      ;; minibuffer local
-              (("C-n" . vertico-next)
-               ("C-p" . vertico-previous)
-               ("M-w" . vertico-save)
-               ("M-<" . vertico-first)
-               ("M->" . vertico-last)
-               ("M-{" . vertico-previous-group)
-               ("M-}" . vertico-next-group)
-               ("TAB" . vertico-insert)
-               ("RET" . vertico-exit)
-               ("M-RET" . vertico-exit-input))))
+              ("C-n" . vertico-next)
+              ("C-p" . vertico-previous)
+              ("M-w" . vertico-save)
+              ("M-<" . vertico-first)
+              ("M->" . vertico-last)
+              ("M-{" . vertico-previous-group)
+              ("M-}" . vertico-next-group)
+              ("TAB" . vertico-insert)
+              ("RET" . vertico-exit)
+              ("M-RET" . vertico-exit-input)))
 
 (use-package orderless
   :ensure t
@@ -168,7 +167,7 @@
   :init
   (marginalia-mode)
   :bind (:map minibuffer-local-map
-              (("M-a" . marginalia-cycle))))
+              ("M-a" . marginalia-cycle)))
 
 (use-package corfu
   :ensure t
@@ -218,10 +217,10 @@
   :config
   (unbind-key "C-;" flyspell-mode-map)
   :bind (:map flyspell-mode-map
-              (("C-,"   . flyspell-auto-correct-word)
-               ("C-."   . flyspell-goto-next-error)
-               ("C-M-;" . flyspell-buffer)
-               ("C-M-i" . nil))))
+              ("C-,"   . flyspell-auto-correct-word)
+              ("C-."   . flyspell-goto-next-error)
+              ("C-M-;" . flyspell-buffer)
+              ("C-M-i" . nil)))
 					; interactive command framework
 (use-package consult
   :ensure t
@@ -239,12 +238,11 @@
 
 (use-package multiple-cursors
   :ensure t
-  :bind
-  ("C-S-c C-S-c" . mc/edit-lines)
-  ("C->" . mc/mark-next-like-this)
-  ("C-<" . mc/mark-previous-like-this)
-  ("C-c C-<" . mc/mark-all-like-this)
-  ("C-S-<mouse-1>" . mc/add-cursor-on-click))
+  :bind (("C-S-c C-S-c" . mc/edit-lines)
+	 ("C->" . mc/mark-next-like-this)
+	 ("C-<" . mc/mark-previous-like-this)
+	 ("C-c C-<" . mc/mark-all-like-this)
+	 ("C-S-<mouse-1>" . mc/add-cursor-on-click)))
 
 (use-package avy
   :ensure t
@@ -326,8 +324,8 @@
   ;; (magit-section-toggle (magit-get-section (magit-section-ident)))
 
   :bind (:map global-map
-              (("C-x C-b" . bufler)
-               ("C-x b" . bufler-switch-buffer))))
+              ("C-x C-b" . bufler)
+              ("C-x b" . bufler-switch-buffer)))
 
 (use-package project)
 					; source control
@@ -340,11 +338,12 @@
   :ensure t
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
-  :bind (:map global-map (("C-;" . embark-act)
-                          ("M-." . embark-dwim)
-                          ("C-h B" . embark-bindings)
-                          ("C-:" . embark-act-all)
-                          ("C-(" . embark-collect-snapshot))))
+  :bind (:map global-map
+	      ("C-;" . embark-act)
+              ("M-." . embark-dwim)
+              ("C-h B" . embark-bindings)
+              ("C-:" . embark-act-all)
+              ("C-(" . embark-collect-snapshot)))
 					; directory edit
 (use-package dired
   :init
@@ -366,7 +365,7 @@
 
   (put 'dired-find-alternate-file 'disabled nil)
   :bind (:map dired-mode-map
-              (("C-c C-e" . wdired-change-to-wdired-mode))))
+              ("C-c C-e" . wdired-change-to-wdired-mode)))
 					; direnv
 (use-package direnv
   :ensure t
@@ -418,10 +417,10 @@
   (setq org-priority-lowest 5)
   ;; tree-sitter org mode navigation?
   :bind (:map org-mode-map
-              (("M-[" . org-backward-paragraph)
-               ("M-]" . org-forward-paragraph)
-               ("M-{" . org-backward-element)
-               ("M-}" . org-forward-element))))
+              ("M-[" . org-backward-paragraph)
+              ("M-]" . org-forward-paragraph)
+              ("M-{" . org-backward-element)
+              ("M-}" . org-forward-element)))
 
 (use-package org-roam
   :ensure t
@@ -432,16 +431,16 @@
   (org-roam-db-autosync-mode)
   (require 'org-roam-protocol)
   :bind ((:map global-map
-               (("C-c n f" . org-roam-node-find)
-		("C-c n g" . org-roam-ui-mode)
-		("C-c n r" . org-roam-node-random)))
+               ("C-c n f" . org-roam-node-find)
+	       ("C-c n g" . org-roam-ui-mode)
+	       ("C-c n r" . org-roam-node-random))
          (:map org-mode-map
-	       (("C-c n i" . org-roam-node-insert)
-		("C-c n o" . org-id-get-create)
-		("C-c n t" . org-roam-tag-add)
-		("C-c n a" . org-roam-alias-add)
-		("C-c n l" . org-roam-buffer-toggle)
-		("C-c n c" . org-roam-extract-subtree)))))
+	       ("C-c n i" . org-roam-node-insert)
+	       ("C-c n o" . org-id-get-create)
+	       ("C-c n t" . org-roam-tag-add)
+	       ("C-c n a" . org-roam-alias-add)
+	       ("C-c n l" . org-roam-buffer-toggle)
+	       ("C-c n c" . org-roam-extract-subtree))))
 
 (use-package ol
   :init
@@ -452,8 +451,9 @@
   :config
   (org-link-set-parameters "https" :face 'org-web-link)
   (org-link-set-parameters "http" :face 'org-web-link)
-  :bind ((:map global-map
-	       (("C-c l" . org-store-link)))))
+  (org-link-set-parameters "file" :face 'org-file-link)
+  :bind (:map global-map
+	      ("C-c l" . org-store-link)))
 
 (use-package org-download
   :ensure t
