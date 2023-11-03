@@ -105,6 +105,7 @@
 
   (winner-mode 1)
 
+  (setq bookmark-save-flag 1)
   (setq backup-directory-alist
 	'(("." . "~/.local/share/emacs/saves/")))
   (setq backup-by-copying t
