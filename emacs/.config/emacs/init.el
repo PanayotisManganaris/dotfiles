@@ -226,14 +226,17 @@
 (use-package consult
   :ensure t
   :init
-  (defun pm/make-case-sensitive (orig-fun &rest args)
-    (let ((case-fold-search nil))
-      (apply orig-fun args)))
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
 
-  (advice-add 'consult-ripgrep :around #'pm/make-case-sensitive)
+  (advice-add #'register-preview :override #'consult-register-window)
+
   :bind ((:map global-map
 	       ("C-x b" . consult-buffer)
                ("M-y" . consult-yank-pop)
+	       ("C-x R" . consult-register-store)
+	       ("C-x r l" . consult-register)
+	       ;; bookmarks listed in consult-buffer
                ("M-s l" . consult-line)
                ("M-s L" . consult-line-multi)
                ("M-s G" . consult-git-grep)
