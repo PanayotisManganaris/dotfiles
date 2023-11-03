@@ -229,12 +229,13 @@
     (let ((case-fold-search nil))
       (apply orig-fun args)))
 
-  (advice-add 'consult-grep :around #'make-case-sensitive)
+  (advice-add 'consult-ripgrep :around #'pm/make-case-sensitive)
   :bind (:map global-map
               ("C-s" . consult-line)
-	      ("M-s g" . consult-grep)
               ("M-s G" . consult-git-grep)
-              ("M-s r" . consult-ripgrep)))
+              ("M-s r" . consult-ripgrep)
+              ("M-s d" . consult-find)
+	      ("C-x p b" . consult-project-buffer)))
 
 (use-package multiple-cursors
   :ensure t
