@@ -244,6 +244,12 @@
 	 ("C-c C-<" . mc/mark-all-like-this)
 	 ("C-S-<mouse-1>" . mc/add-cursor-on-click)))
 
+(use-package phi-search
+  :ensure t
+  :bind (:map mc/keymap
+              ("C-s" . phi-search)
+              ("C-r" . phi-search-backward)))
+
 (use-package avy
   :ensure t
   :bind ("M-j" . avy-goto-char-2))
