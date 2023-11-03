@@ -451,14 +451,21 @@
 
 (use-package ol
   :init
-  (defface org-web-link '((t :inherit 'org-link
-			     :foreground "blue violet"))
-    "color web links"
-    :group 'org-faces)
+  (dolist (scheme '((org-web-link "blue violet" "color web links")
+		    (org-file-link "lime green" "color file links")
+		    (org-info-link "dark turquoise" "color texinfo links")))
+    (let ((linkey (nth 0 scheme))
+	  (color (nth 1 scheme))
+	  (doc (nth 2 scheme)))
+      (eval `(defface ,linkey '((t :inherit 'org-link
+				   :foreground ,color))
+	       ,doc
+	       :group 'org-faces))))
   :config
   (org-link-set-parameters "https" :face 'org-web-link)
   (org-link-set-parameters "http" :face 'org-web-link)
   (org-link-set-parameters "file" :face 'org-file-link)
+  (org-link-set-parameters "info" :face 'org-info-link)
   :bind (:map global-map
 	      ("C-c l" . org-store-link)))
 
