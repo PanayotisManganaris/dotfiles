@@ -230,12 +230,33 @@
       (apply orig-fun args)))
 
   (advice-add 'consult-ripgrep :around #'pm/make-case-sensitive)
-  :bind (:map global-map
-              ("C-s" . consult-line)
-              ("M-s G" . consult-git-grep)
-              ("M-s r" . consult-ripgrep)
-              ("M-s d" . consult-find)
-	      ("C-x p b" . consult-project-buffer)))
+  :bind ((:map global-map
+	       ("C-x b" . consult-buffer)
+               ("M-y" . consult-yank-pop)
+               ("M-s l" . consult-line)
+               ("M-s L" . consult-line-multi)
+               ("M-s G" . consult-git-grep)
+               ("M-s r" . consult-ripgrep)
+               ("M-s d" . consult-find)
+               ("M-g i" . consult-imenu)
+               ("M-g I" . consult-imenu-multi)
+               ("M-g m" . consult-mark)
+               ("M-g M" . consult-global-mark)
+               ("M-g e" . consult-compile-error)
+               ("C-c k" . consult-kmacro)
+               ("C-c m" . consult-minor-mode-menu)
+	       ("C-x p b" . consult-project-buffer))
+	 (:map minibuffer-local-map
+	       ("M-s" . consult-history))))
+
+(use-package embark-consult
+  :ensure t
+  :after (embark consult)
+  ;; :demand t
+  ;; :hook
+  ;; (embark-collect-mode . consult-preview-at-point-mode)
+  :bind (:map embark-collect-mode-map
+	      ("C-j" . #'consult-preview-at-point)))
 
 (use-package multiple-cursors
   :ensure t
