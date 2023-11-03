@@ -148,7 +148,7 @@
               ("M->" . vertico-last)
               ("M-{" . vertico-previous-group)
               ("M-}" . vertico-next-group)
-              ("TAB" . vertico-insert)
+              ("C-j" . vertico-insert)
               ("RET" . vertico-exit)
               ("M-RET" . vertico-exit-input)))
 
