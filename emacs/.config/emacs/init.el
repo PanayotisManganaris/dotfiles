@@ -206,22 +206,12 @@
 (use-package eglot)
 					; spell checking
 (use-package jinx
-  ;; use libenchant to talk to hunspell
   :ensure t
   :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
+         ("C-,"   . jinx-previous)
+         ("C-."   . jinx-next)
          ("C-M-$" . jinx-languages)))
-
-(use-package flyspell-correct
-  ;; avoid cursor slowdown
-  :after flyspell
-  :config
-  (unbind-key "C-;" flyspell-mode-map)
-  :bind (:map flyspell-mode-map
-              ("C-,"   . flyspell-auto-correct-word)
-              ("C-."   . flyspell-goto-next-error)
-              ("C-M-;" . flyspell-buffer)
-              ("C-M-i" . nil)))
 					; interactive command framework
 (use-package consult
   :ensure t
