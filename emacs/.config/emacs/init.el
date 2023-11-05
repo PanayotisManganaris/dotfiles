@@ -198,12 +198,20 @@
   :config
   (setq cape-dabbrev-check-other-buffers nil))
 
-(use-package abbrev
-  :config
-  (abbrev-mode t)
-  (setq save-abbrevs 'silently))
-
 (use-package eglot)
+					; snippets and templates
+(use-package abbrev
+  :init
+  (setq save-abbrevs 'silently
+	abbrev-suggest t)
+  :config
+  (abbrev-mode 1)
+  :bind (("C-x a r" . expand-region-abbrevs)
+	 ("C-x a a" . list-abbrevs)
+	 ("C-x a w" . edit-abbrevs)
+	 ("M-/" . hippie-expand)
+	 ("C-x a u" . unexpand-abbrev)))
+
 					; spell checking
 (use-package jinx
   :ensure t
