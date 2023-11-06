@@ -224,13 +224,15 @@
 (use-package consult
   :ensure t
   :init
-  (setq register-preview-delay 0.5
+  (setq consult-dir-shadow-filenames nil
+	register-preview-delay 0.5
         register-preview-function #'consult-register-format)
 
   (advice-add #'register-preview :override #'consult-register-window)
 
   :bind ((:map global-map
 	       ("C-x b" . consult-buffer)
+	       ("C-x C-d" . consult-dir)
                ("M-y" . consult-yank-pop)
 	       ("C-x R" . consult-register-store)
 	       ("C-x r l" . consult-register)
@@ -248,7 +250,8 @@
                ("C-c k" . consult-kmacro)
                ("C-c m" . consult-minor-mode-menu)
 	       ("C-x p b" . consult-project-buffer))
-	 (:map minibuffer-local-map
+	 (:map vertico-map
+	       ("C-x C-d" . consult-dir)
 	       ("M-s" . consult-history))))
 
 (use-package embark-consult
