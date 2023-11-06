@@ -182,7 +182,10 @@
         corfu-auto-delay 0
         corfu-cycle t
         corfu-preselect-first nil)
-  (unbind-key "RET" corfu-map)
+  :bind (:map corfu-map
+	      ("M-a" . corfu-reset)
+              ("C-j" . corfu-complete)
+              ("RET" . nil))
   :hook (shell-mode . (lambda ()
                         (setq-local corfu-quit-at-boundary t
                                     corfu-quit-no-match t
