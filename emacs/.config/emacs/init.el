@@ -156,9 +156,7 @@
   :ensure t
   :init
   (setq completion-styles '(orderless basic)
-        completion-category-defaults nil
-        ;; For tramp:
-        completion-category-overrides '((file (styles basic partial-completion))))
+        completion-category-defaults nil)
   (setq read-file-name-completion-ignore-case t
         read-buffer-completion-ignore-case t
         completion-ignore-case t))
@@ -193,8 +191,10 @@
   (add-to-list 'completion-at-point-functions #'cape-abbrev)
   (add-to-list 'completion-at-point-functions #'cape-dabbrev)
   (add-to-list 'completion-at-point-functions #'cape-dict)
+  (add-to-list 'completion-category-overrides
+	       '((cape-dict (styles . (basic)))))
+  ;; doesn't work?
   (add-to-list 'completion-at-point-functions #'cape-file)
-  (add-to-list 'completion-at-point-functions #'cape-tex)
   :config
   (setq cape-dabbrev-check-other-buffers nil)
   (setq cape-dict-file "/usr/share/dict/usa"))
@@ -502,3 +502,9 @@
   (setq org-download-display-inline-images nil
 	org-download-screenshot-method "flameshot gui --raw > %s"))
 
+					; TRAMP
+(use-package tramp
+  :init
+  (add-to-list 'completion-category-overrides
+	       '((file (styles . (basic partial-completion)))))
+  (add-to-list 'tramp-remote-path "~/.local/bin"))
