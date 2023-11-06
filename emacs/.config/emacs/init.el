@@ -164,7 +164,10 @@
 (use-package marginalia
   :ensure t
   :init
-  (marginalia-mode)
+  (marginalia-mode 1)
+  :custom
+  (marginalia-align 'right)
+  (marginalia-align-offset -5)
   :bind (:map minibuffer-local-map
               ("M-a" . marginalia-cycle)))
 
