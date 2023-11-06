@@ -212,6 +212,20 @@
 	 ("C-x a w" . edit-abbrevs)
 	 ("C-x a u" . unexpand-abbrev)))
 
+(use-package tempel
+  :ensure t
+  :init
+  (setq tempel-path (file-name-concat user-emacs-directory
+				      "templates/*/*.eld"))
+  :bind ((:map global-map
+               ("C-c y" . tempel-insert))
+         (:map tempel-map
+               ("M-}" . tempel-next)
+               ("M-{" . tempel-previous))))
+
+(use-package tempel-collection
+  :ensure t
+  :after tempel)
 					; spell checking
 (use-package jinx
   :ensure t
