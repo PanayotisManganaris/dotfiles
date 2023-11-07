@@ -205,7 +205,15 @@
   (setq cape-dabbrev-check-other-buffers nil)
   (setq cape-dict-file "/usr/share/dict/usa"))
 
-(use-package eglot)
+(use-package eglot
+  :config
+  ;; configure to increase performance OR reliability of completions
+  (setq-default eglot-workspace-configuration
+		'((haskell (maxCompletions . 200))))
+  ;; NOTICE: this can and SHOULD be configured per project directory
+  :init
+  (add-to-list 'completion-category-overrides
+	       '(eglot (styles . (orderless)))))
 					; snippets and templates
 (use-package abbrev
   :init
