@@ -134,10 +134,10 @@
   :ensure t
   :init
   (vertico-mode 1)
-  (setq vertico-scroll-margin 0
-        vertico-count 20
-        vertico-resize nil)
   :custom
+  (vertico-scroll-margin 0)
+  (vertico-count 20)
+  (vertico-resize nil)
   (vertico-cycle t)
   :bind (:map vertico-map
 	      ;; minibuffer local
