@@ -47,7 +47,7 @@
   (popper-echo-mode 1)
   :bind  (("C-`" . popper-toggle-latest)
 	  ("M-`" . popper-cycle)
-	  ("C-~" . popper-toggle-type)))
+	  ("M-~" . popper-toggle-type)))
 
 (use-package calc
   :bind ("M-#" . calc-dispatch))
@@ -148,6 +148,7 @@
               ("M->" . vertico-last)
               ("M-{" . vertico-previous-group)
               ("M-}" . vertico-next-group)
+              ("TAB" . nil)
               ("C-j" . vertico-insert)
               ("RET" . vertico-exit)
               ("M-RET" . vertico-exit-input)))
