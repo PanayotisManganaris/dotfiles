@@ -1,11 +1,11 @@
 ;; -*- lexical-binding: t; -*-
 					; supplementary files
 (setq custom-file (concat user-emacs-directory "custom.el"))
-(unless (load custom-file)
+(unless (load custom-file t)
   (write-region "" nil custom-file))
 
 (setq alias-file (concat user-emacs-directory "alias.el"))
-(unless (load alias-file)
+(unless (load alias-file t)
   (write-region "" nil alias-file))
 					; package repositories and use-package macro
 (require 'package)
