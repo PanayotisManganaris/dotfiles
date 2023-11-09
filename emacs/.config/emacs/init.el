@@ -166,16 +166,20 @@
   :ensure t
   :init
   (global-corfu-mode 1)
+  :custom
+  (corfu-cycle t)
+  (corfu-auto nil)
+  (corfu-auto-delay 0)
+  (corfu-auto-prefix 2)
+  (corfu-on-exact-match nil)
+  (corfu-quit-at-boundary nil)
+  (corfu-quit-no-match t)
   :config
-  (setq corfu-auto t
-        corfu-auto-prefix 2
-        corfu-quit-at-boundary t
-        corfu-auto-delay 0
-        corfu-cycle t
-        corfu-preselect-first nil)
+  (add-hook 'minibuffer-setup-hook #'corfu-mode)
   :bind (:map corfu-map
 	      ("M-a" . corfu-reset)
-              ("C-j" . corfu-complete)
+	      ([remap next-line] . nil)
+	      ([remap previous-line] . nil)
               ("RET" . nil))
   :hook (shell-mode . (lambda ()
                         (setq-local corfu-quit-at-boundary t
@@ -186,7 +190,6 @@
   :ensure t
   :init
   (add-to-list 'completion-at-point-functions #'cape-abbrev)
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
   (add-to-list 'completion-at-point-functions #'cape-dict)
   (add-to-list 'completion-category-overrides
 	       '((cape-dict (styles . (basic)))))
