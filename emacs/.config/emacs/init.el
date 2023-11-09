@@ -94,8 +94,8 @@
   (if (not (daemonp))
       (desktop-save-mode 1)
     (defun restore-desktop (frame)
-      "Restores desktop and cancels hook after first frame opens.
-     So the daemon can run at startup and it'll still work"
+      "Restores desktop and cancels hook after first frame opens. So the
+daemon can run at startup and it'll still work"
       (with-selected-frame frame
 	(desktop-save-mode 1)
 	(let ((desktop-load-locked-desktop t))
@@ -423,11 +423,11 @@ tried first."
   (add-hook 'dired-mode-hook 'dired-hide-details-mode)
 
   (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers ()
-   "For when dired in tramp displays blank screen when remote system
-    does not use GNU ls, which is the only variant that supports
-    --group-directories-first."
-   (when (file-remote-p default-directory)
-     (setq-local dired-actual-switches (car args))))
+    "For when dired in tramp displays blank screen when remote system
+does not use GNU ls, which is the only variant that supports
+--group-directories-first."
+    (when (file-remote-p default-directory)
+      (setq-local dired-actual-switches (car args))))
 
   (put 'dired-find-alternate-file 'disabled nil)
   :bind (:map dired-mode-map
