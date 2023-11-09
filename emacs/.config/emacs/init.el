@@ -188,6 +188,12 @@ daemon can run at startup and it'll still work"
 
 (use-package cape
   :ensure t
+  :bind (("C-c p a" . cape-abbrev)
+         ("C-c p d" . cape-dabbrev)
+         ("C-c p f" . cape-file)
+         ("C-c p w" . cape-dict)
+         ("C-c p \\" . cape-tex)
+	 ("C-c p p" . completion-at-point))
   :init
   (add-to-list 'completion-at-point-functions #'cape-abbrev)
   (add-to-list 'completion-at-point-functions #'cape-dict)
