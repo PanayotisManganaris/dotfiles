@@ -22,11 +22,11 @@
   (load-theme 'doom-dark+ t))
 
 (use-package emacs
-  :config
-  ;; (setq scroll-conservatively 5)
+  :init
   (column-number-mode 1)
-  (setq visible-bell t)
-  (setq inhibit-startup-screen t))
+  :custom
+  (visible-bell t)
+  (inhibit-startup-screen t))
 					; user interface
 (use-package popper
   :ensure t
