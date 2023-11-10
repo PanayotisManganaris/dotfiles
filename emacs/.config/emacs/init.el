@@ -195,12 +195,12 @@ daemon can run at startup and it'll still work"
          ("C-c p \\" . cape-tex)
 	 ("C-c p p" . completion-at-point))
   :init
-  (add-to-list 'completion-at-point-functions #'cape-abbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-dict)
   (add-to-list 'completion-category-overrides
 	       '((cape-dict (styles . (basic)))))
   ;; doesn't work?
-  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-abbrev)
   :config
   (setq cape-dabbrev-check-other-buffers nil)
   (setq cape-dict-file "/usr/share/dict/usa"))
