@@ -216,7 +216,18 @@
   :ensure t
   :init
   (setq tempel-path (file-name-concat user-emacs-directory
-				      "templates/*/*.eld"))
+				      "templates/*.eld"))
+  (defun tempel-setup-capf ()
+    "Add `tempel-complete' to `completion-at-point-functions' to check
+while typing. Add it *before* the mode's main Capf, so it will be
+tried first."
+    (setq-local completion-at-point-functions
+                (cons #'tempel-complete
+                      completion-at-point-functions)))
+
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
   :bind ((:map global-map
                ("C-c y" . tempel-insert))
          (:map tempel-map
