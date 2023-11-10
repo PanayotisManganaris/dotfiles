@@ -216,11 +216,8 @@ daemon can run at startup and it'll still work"
 	       '(eglot (styles . (orderless)))))
 					; snippets and templates
 (use-package abbrev
-  :init
-  (setq save-abbrevs 'silently
-	abbrev-suggest t)
-  :config
-  (abbrev-mode 1)
+  :custom
+  (save-abbrevs 'silently)
   :bind (("C-x a r" . expand-region-abbrevs)
 	 ("C-x a a" . list-abbrevs)
 	 ("C-x a w" . edit-abbrevs)
