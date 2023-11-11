@@ -214,7 +214,7 @@ daemon can run at startup and it'll still work"
   :init
   (add-to-list 'completion-category-overrides
 	       '(eglot (styles . (orderless)))))
-					; snippets and templates
+					; autotyping
 (use-package abbrev
   :custom
   (save-abbrevs 'silently)
@@ -244,10 +244,6 @@ tried first."
          (:map tempel-map
                ("M-}" . tempel-next)
                ("M-{" . tempel-previous))))
-
-(use-package tempel-collection
-  :ensure t
-  :after tempel)
 					; spell checking
 (use-package jinx
   :ensure t
