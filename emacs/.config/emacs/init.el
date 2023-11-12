@@ -175,9 +175,15 @@ daemon can run at startup and it'll still work"
   (corfu-quit-at-boundary nil)
   (corfu-quit-no-match t)
   :config
+  (defun pm/setup-vertico-capfs ()
+    (setq-local completion-at-point-functions '(cape-file)))
+
   (add-hook 'minibuffer-setup-hook #'corfu-mode)
+  (add-hook 'minibuffer-setup-hook #'pm/setup-vertico-capfs)
   :bind (:map corfu-map
 	      ("M-a" . corfu-reset)
+	      ([remap corfu-complete] . corfu-next)
+	      ("<backtab>" . corfu-previous)
 	      ([remap next-line] . nil)
 	      ([remap previous-line] . nil)
               ("RET" . nil))
