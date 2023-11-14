@@ -513,6 +513,12 @@ does not use GNU ls, which is the only variant that supports
 	       ("C-c n l" . org-roam-buffer-toggle)
 	       ("C-c n c" . org-roam-extract-subtree))))
 
+(use-package org-roam-ui
+  :after org-roam
+  :custom
+  (org-roam-ui-sync-theme t)
+  :ensure t)
+
 (use-package ob
   :after (org)
   :custom
