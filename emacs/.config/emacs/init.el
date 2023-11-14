@@ -517,10 +517,12 @@ does not use GNU ls, which is the only variant that supports
   :after (org)
   :custom
   (org-confirm-babel-evaluate nil)
+  (org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
   :config
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
+     (ditaa . t)
      (shell . t)))
 
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
