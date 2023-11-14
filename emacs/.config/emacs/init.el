@@ -515,6 +515,8 @@ does not use GNU ls, which is the only variant that supports
 
 (use-package ob
   :after (org)
+  :custom
+  (org-confirm-babel-evaluate nil)
   :config
   (org-babel-do-load-languages
    'org-babel-load-languages
