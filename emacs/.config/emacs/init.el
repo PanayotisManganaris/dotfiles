@@ -513,6 +513,16 @@ does not use GNU ls, which is the only variant that supports
 	       ("C-c n l" . org-roam-buffer-toggle)
 	       ("C-c n c" . org-roam-extract-subtree))))
 
+(use-package ob
+  :after (org)
+  :config
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (shell . t)))
+
+  (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
+
 (use-package ol
   :init
   (dolist (scheme '((org-web-link "blue violet" "color web links")
