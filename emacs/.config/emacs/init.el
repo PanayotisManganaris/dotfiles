@@ -28,6 +28,12 @@
   (visible-bell t)
   (inhibit-startup-screen t))
 					; user interface
+(use-package mermaid-mode
+  :config
+  (add-to-list 'auto-mode-alist
+	       '("\\.\\(mermaid\\|mmd\\)$" . mermaid-mode))
+  :ensure t)
+
 (use-package popper
   :ensure t
   :config
@@ -529,6 +535,7 @@ does not use GNU ls, which is the only variant that supports
    'org-babel-load-languages
    '((emacs-lisp . t)
      (ditaa . t)
+     (mermaid . t)
      (shell . t)))
 
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
