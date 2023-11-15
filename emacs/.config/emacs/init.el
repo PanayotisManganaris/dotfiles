@@ -567,6 +567,15 @@ does not use GNU ls, which is the only variant that supports
   (setq org-download-display-inline-images nil
 	org-download-screenshot-method "flameshot gui --raw > %s"))
 
+(use-package org-agenda
+  :after (org-roam)
+  :custom
+  (org-agenda-files (list org-roam-directory))
+  :bind ((:map org-mode-map
+	       ("C-'" . nil)
+	       ("C-," . nil))
+	 (:map global-map
+               ("C-c a" . org-agenda))))
 					; TRAMP
 (use-package tramp
   :init
