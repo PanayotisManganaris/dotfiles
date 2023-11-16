@@ -578,11 +578,20 @@ does not use GNU ls, which is the only variant that supports
                ("C-c a" . org-agenda))))
 					; org-mode and tex
 (use-package org
+  :config
+  (setf (plist-get (alist-get
+		    'imagemagick org-preview-latex-process-alist)
+		   :latex-compiler)
+        '("cd %o && pdflatex -interaction nonstopmode -output-directory %o --shell-escape %f"))
+
   (add-to-list 'org-latex-packages-alist
                '("" "tikz" t))
   (eval-after-load "preview"
     '(add-to-list 'preview-default-preamble
                   "\\PreviewEnvironment{tikzpicture}" t))
+  (eval-after-load "preview"
+    '(add-to-list 'preview-default-preamble
+                  "\\PreviewEnvironment{prooftree}" t))
   :custom
   (org-preview-latex-default-process 'imagemagick))
 					; TRAMP
