@@ -576,6 +576,15 @@ does not use GNU ls, which is the only variant that supports
 	       ("C-," . nil))
 	 (:map global-map
                ("C-c a" . org-agenda))))
+					; org-mode and tex
+(use-package org
+  (add-to-list 'org-latex-packages-alist
+               '("" "tikz" t))
+  (eval-after-load "preview"
+    '(add-to-list 'preview-default-preamble
+                  "\\PreviewEnvironment{tikzpicture}" t))
+  :custom
+  (org-preview-latex-default-process 'imagemagick))
 					; TRAMP
 (use-package tramp
   :init
