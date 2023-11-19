@@ -499,6 +499,11 @@ does not use GNU ls, which is the only variant that supports
               ("M-{" . org-backward-element)
               ("M-}" . org-forward-element)))
 
+(use-package org
+  ;; customize checklists
+  :custom
+  (org-cycle-include-plain-lists nil))
+
 (use-package org-roam
   :ensure t
   :init (setq org-roam-v2-ack t)
