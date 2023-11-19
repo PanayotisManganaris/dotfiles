@@ -501,6 +501,37 @@ does not use GNU ls, which is the only variant that supports
 
 (use-package org
   ;; customize checklists
+  :config
+  (defun pm/insert-stats-cookie (&optional arg)
+    "insert statistics cookie in list item/heading at point.
+Insert fractional progress cookie. With prefix, insert percentage
+cookie."
+    (interactive "p")
+    (save-excursion
+      (let* ((struct (ignore-errors (org-list-struct)))
+	     (cpos (cond ((not struct) (org-up-heading-safe) (point))
+			 ((org-in-item-p))))
+	     (parents (org-list-parents-alist struct))
+	     (cookie (cond ((eq arg 1) "[/] ")
+			   ((eq arg 4) "[%] "))))
+	(if struct
+	    (progn
+	      (if (member cpos (map-values parents))
+		  ;; there is children
+		  (beginning-of-line)
+		(if-let (ppos (map-elt parents cpos))
+		    ;; there is a parent
+		    (goto-char ppos)
+		  (error "Nothing to track in this task")))
+	      (looking-at org-list-full-item-re))
+	  (looking-at
+	   ;; create regexp from user's keywords
+	   "^\\(\\*+\\)\\(?: +\\(TODO\\|NEXT\\|WAIT\\|DONE\\) +\\)"))
+	(goto-char (match-end 0))
+	(insert cookie)))
+    (org-update-statistics-cookies 'nil))
+  :bind (:map org-mode-map
+	      ("C-c C-x s" . pm/insert-stats-cookie))
   :custom
   (org-cycle-include-plain-lists nil))
 
