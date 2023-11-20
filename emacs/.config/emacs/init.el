@@ -249,6 +249,23 @@ daemon can run at startup and it'll still work"
   (corfu-quit-at-boundary nil)
   (corfu-quit-no-match t)
   :config
+  (defun cycle-list (n in &optional arg)
+    "return copy of list `in' with element order incremented
+backward (`arg' = t) or forward (nil) `n' times. `n' must be
+positive and less than or equal to length of in."
+    (let (out)
+      (if arg
+	  (progn
+	    (setq out (butlast in n))
+	    (setq in (reverse in)))
+	(setq out (cl-subseq in 0 n))
+	(setq in (reverse (cl-subseq in n))))
+      (cl-dotimes (i (if arg n (length in)) out)
+	(setq out (cons (nth i in) out)))))
+
+  (defun pm/setup-vertico-capfs ()
+    (setq-local completion-at-point-functions '(cape-file)))
+
   (add-hook 'minibuffer-setup-hook #'corfu-mode)
   :bind (:map corfu-map
 	      ("M-a" . corfu-reset)
