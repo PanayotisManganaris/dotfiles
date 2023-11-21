@@ -263,6 +263,23 @@ positive and less than or equal to length of in."
       (cl-dotimes (i (if arg n (length in)) out)
 	(setq out (cons (nth i in) out)))))
 
+  (defun count-invocations (command)
+    "count number of times `command' was called in a row."
+    (save-current-buffer
+      (view-lossage)
+      (with-current-buffer (help-buffer)
+	(let ((n 0)
+	      (lossage-names
+	       (flatten-tree
+		(remove 'nil
+			(--map
+			 (cdr (s-split ";; " it))
+			 (reverse (s-lines (buffer-string))))))))
+	  (while-let ((bool (equal (symbol-name command)
+				   (nth n lossage-names))))
+	    (if bool (setq n (1+ n))))
+	  n))))
+
   (defun pm/setup-vertico-capfs ()
     (setq-local completion-at-point-functions '(cape-file)))
 
