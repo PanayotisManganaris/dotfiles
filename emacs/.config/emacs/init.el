@@ -280,11 +280,23 @@ positive and less than or equal to length of in."
 	(kill-buffer (help-buffer))
 	n)))
 
+  (defun corfu-cycle-capfs (&optional arg)
+    "Cycle `completion-at-point-functions' to propose different
+completions on the fly. Ensure the order of capfs always returns
+to the default setting after cycling"
+    (interactive "p")
+    (let* ((n (count-invocations 'corfu-cycle-capfs))
+	   (completion-at-point-functions
+	    (cycle-list n completion-at-point-functions arg)))
+      (completion-at-point)))
+
   (defun pm/setup-vertico-capfs ()
     (setq-local completion-at-point-functions '(cape-file)))
 
   (add-hook 'minibuffer-setup-hook #'corfu-mode)
   :bind (:map corfu-map
+	      ;; ("M-{" . corfu-cycle-capfs)
+	      ("M-}" . corfu-cycle-capfs)
 	      ("M-a" . corfu-reset)
 	      ([remap corfu-complete] . corfu-next)
 	      ("<backtab>" . corfu-previous)
