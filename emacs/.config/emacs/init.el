@@ -80,6 +80,13 @@
 (use-package emacs
   :after (tempel)
   :config
+  (defun tempel--region ()
+    "Return region bounds."
+    (when (use-region-p)
+      (when (< (mark) (point)) (exchange-point-and-mark))
+      ;; (deactivate-mark)
+      (cons (point-marker) (mark-marker))))
+
   (tempel-key "(" parenthesis-pair-maybe)
   :bind (:map global-map
               ("C-S-d" . backward-delete-char-untabify)
