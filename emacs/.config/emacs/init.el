@@ -256,6 +256,12 @@ tried first."
   (add-hook 'conf-mode-hook 'tempel-setup-capf)
   (add-hook 'prog-mode-hook 'tempel-setup-capf)
   (add-hook 'text-mode-hook 'tempel-setup-capf)
+  :config
+  (defun tempel--eval (form)
+    "Eval arbitrary forms in templates. The form should return a valid
+tempel element."
+    (eval form))
+  (add-to-list 'tempel-user-elements #'tempel--eval)
   :bind ((:map global-map
                ("C-c y" . tempel-insert))
          (:map tempel-map
