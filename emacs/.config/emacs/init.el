@@ -145,8 +145,21 @@ daemon can run at startup and it'll still work"
   (vertico-count 20)
   (vertico-resize nil)
   (vertico-cycle t)
+  :config
+  (defun vertico-partial-insert ()
+    "Insert next word of current candidate in minibuffer."
+    (interactive)
+    (when (> vertico--total 0)
+      (let* ((vertico--index (max 0 vertico--index))
+             (current (minibuffer-contents))
+             (candidate (vertico--candidate)))
+	(insert (car (s-slice-at
+		      (rx bow)
+		      (substring candidate
+                                 (+ (string-match current candidate)
+                                    (seq-length current)))))))))
   :bind (:map vertico-map
-              ("TAB" . nil)
+              ("TAB" . vertico-partial-insert)
               ("C-j" . vertico-insert)))
 
 (use-package orderless
@@ -181,11 +194,7 @@ daemon can run at startup and it'll still work"
   (corfu-quit-at-boundary nil)
   (corfu-quit-no-match t)
   :config
-  (defun pm/setup-vertico-capfs ()
-    (setq-local completion-at-point-functions '(cape-file)))
-
   (add-hook 'minibuffer-setup-hook #'corfu-mode)
-  (add-hook 'minibuffer-setup-hook #'pm/setup-vertico-capfs)
   :bind (:map corfu-map
 	      ("M-a" . corfu-reset)
 	      ([remap corfu-complete] . corfu-next)
