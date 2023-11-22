@@ -78,18 +78,14 @@
   (ws-butler-global-mode 1))
 
 (use-package emacs
+  :after (tempel)
   :config
-  (setq skeleton-pair t)
+  (tempel-key "(" parenthesis-pair-maybe)
   :bind (:map global-map
               ("C-S-d" . backward-delete-char-untabify)
               ("C-%" . replace-regexp)
-              ("(" . skeleton-pair-insert-maybe)
-              ("[" . skeleton-pair-insert-maybe)
-              ("{" . skeleton-pair-insert-maybe)
-              ("\"" . skeleton-pair-insert-maybe)))
-
-(global-set-key (kbd "C-z") 'ignore)
-(global-set-key (kbd "C-x C-z") 'ignore)
+	      ("C-z" . nil)
+	      ("C-x C-z" . nil)))
 					; failure recovery
 (use-package recentf
   :init

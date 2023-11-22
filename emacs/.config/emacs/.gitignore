@@ -9,7 +9,8 @@
 /eshell/
 /projects
 /recentf
-/templates/
+!templates/fundamental.eld
+/templates/**
 /tramp
 /transient/
 /url/
