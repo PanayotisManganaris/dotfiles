@@ -88,6 +88,11 @@
       (cons (point-marker) (mark-marker))))
 
   (tempel-key "(" parenthesis-pair-maybe)
+  (tempel-key "[" bracket-pair-maybe)
+  (tempel-key "{" brace-pair-maybe)
+  (tempel-key "<" abracket-pair-maybe)
+  (tempel-key "\"" qquote-pair-maybe)
+  (tempel-key "'" quote-pair-maybe)
   :bind (:map global-map
               ("C-S-d" . backward-delete-char-untabify)
               ("C-%" . replace-regexp)

@@ -6,3 +6,9 @@ fundamental-mode ;; Available everywhere
 (tomorrow (format-time-string "<%Y-%0m-%0d %a>" (time-add nil (* 24 60 60))))
 
 (parenthesis-pair-maybe (if (use-region-p) '(l "(" r ")") "("))
+(bracket-pair-maybe (if (use-region-p) '(l "[" r "]") "["))
+(brace-pair-maybe (if (use-region-p) '(l "{" r "}") "{"))
+(abracket-pair-maybe (if (use-region-p) '(l "<" r ">") "<"))
+(qquote-pair-maybe (if (use-region-p) '(l "\"" r "\"") "\""))
+(quote-pair-maybe (if (use-region-p) '(l "\'" r "\'") "\'"))
+(tick-pair-maybe (if (use-region-p) '(l "`" r "`") "`"))
