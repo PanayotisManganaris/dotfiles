@@ -99,6 +99,10 @@
 	      ("C-z" . nil)
 	      ("C-x C-z" . nil)))
 					; tree-sitter
+(use-package combobulate
+  :load-path "~/src/combobulate"
+  :after treesit)
+
 (use-package treesit
   :init
   (setq treesit-language-source-alist
