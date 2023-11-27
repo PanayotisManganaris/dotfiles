@@ -98,6 +98,15 @@
               ("C-%" . replace-regexp)
 	      ("C-z" . nil)
 	      ("C-x C-z" . nil)))
+					; tree-sitter
+(use-package treesit
+  :init
+  (setq treesit-language-source-alist
+	'((python "https://github.com/tree-sitter/tree-sitter-python")
+	  (elisp "https://github.com/Wilfred/tree-sitter-elisp")))
+  :bind (:map global-map
+	      ("C-c t i" . treesit-inspect-mode)
+	      ("C-c t t" . treesit-explore-mode)))
 					; failure recovery
 (use-package recentf
   :init
