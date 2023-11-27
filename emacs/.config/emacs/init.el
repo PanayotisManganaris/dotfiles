@@ -34,6 +34,13 @@
 	       '("\\.\\(mermaid\\|mmd\\)$" . mermaid-mode))
   :ensure t)
 
+(use-package paredit
+  :ensure t)
+
+(use-package macrostep
+  :bind (:map emacs-lisp-mode-map
+	      ("C-c e" . macrostep-expand)))
+
 (use-package popper
   :ensure t
   :config
