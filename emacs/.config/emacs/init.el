@@ -35,6 +35,11 @@
   :ensure t)
 
 (use-package paredit
+  :config
+  ;; move to combobulate when appropriate
+  (keymap-set paredit-mode-map "M-R"
+	      (keymap-lookup paredit-mode-map "M-r"))
+  (keymap-set paredit-mode-map "M-r" nil)
   :ensure t)
 
 (use-package macrostep
@@ -316,19 +321,25 @@ tempel element."
         register-preview-function #'consult-register-format)
 
   (advice-add #'register-preview :override #'consult-register-window)
-
+  :config
+  (keymap-global-set "C-s"
+		     (keymap-lookup global-map "M-s"))
+  (keymap-global-set "M-s" nil)
+  :demand t ;; force remap of anonymous search map on startup
   :bind ((:map global-map
 	       ("C-x b" . consult-buffer)
+	       ;; includes bookmarks
 	       ("C-x C-d" . consult-dir)
                ("M-y" . consult-yank-pop)
 	       ("C-x R" . consult-register-store)
 	       ("C-x r l" . consult-register)
-	       ;; bookmarks listed in consult-buffer
-               ("M-s l" . consult-line)
-               ("M-s L" . consult-line-multi)
-               ("M-s G" . consult-git-grep)
-               ("M-s r" . consult-ripgrep)
-               ("M-s d" . consult-find)
+	       ("C-s s" . isearch-forward)
+	       ("C-s r" . isearch-backward)
+               ("C-s l" . consult-line)
+               ("C-s L" . consult-line-multi)
+               ("C-s G" . consult-git-grep)
+               ("C-s r" . consult-ripgrep)
+               ("C-s d" . consult-find)
                ("M-g i" . consult-imenu)
                ("M-g I" . consult-imenu-multi)
                ("M-g m" . consult-mark)
@@ -338,7 +349,6 @@ tempel element."
                ("C-c m" . consult-minor-mode-menu)
 	       ("C-x p b" . consult-project-buffer))
 	 (:map vertico-map
-	       ("C-x C-d" . consult-dir)
 	       ("M-s" . consult-history))))
 
 (use-package embark-consult
@@ -361,8 +371,8 @@ tempel element."
 (use-package phi-search
   :ensure t
   :bind (:map mc/keymap
-              ("C-s" . phi-search)
-              ("C-r" . phi-search-backward)))
+              ([remap isearch-forward] . phi-search)
+              ([remap isearch-backward] . phi-search-backward)))
 
 (use-package avy
   :ensure t
@@ -451,8 +461,7 @@ tempel element."
 					; source control
 (use-package magit
   :ensure t
-  :bind
-  ("C-x g" . magit-status))
+  :bind ("C-x g" . magit-status))
 					; contextual action framework
 (use-package embark
   :ensure t
