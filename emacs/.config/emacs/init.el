@@ -172,6 +172,13 @@ daemon can run at startup and it'll still work"
               ("C-s-p" . windmove-up)
               ("C-s-b" . windmove-left)
               ("C-s-n" . windmove-down)))
+					; shell interaction
+(use-package shell
+  :commands shell
+  :init
+  ;; precaution when redirecting zsh IO
+  (setq explicit-zsh-args '("--login" "--interactive")
+        explicit-shell-file-name shell-file-name))
 					; completion framework
 (use-package vertico
   :ensure t
