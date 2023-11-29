@@ -34,6 +34,7 @@
 	       '("\\.\\(mermaid\\|mmd\\)$" . mermaid-mode))
   :ensure t)
 
+(use-package python)
 (use-package paredit
   :hook ((emacs-lisp-mode . paredit-mode))
   :config
@@ -113,6 +114,7 @@
 	      ("C-x C-z" . nil)))
 					; tree-sitter
 (use-package combobulate
+  :hook ((python-ts-mode . combobulate-mode))
   :load-path "~/src/combobulate"
   :after treesit)
 
@@ -261,6 +263,7 @@ daemon can run at startup and it'll still work"
   (setq cape-dict-file "/usr/share/dict/usa"))
 
 (use-package eglot
+  :hook ((python-base-mode . eglot-ensure))
   :config
   ;; configure to increase performance OR reliability of completions
   (setq-default eglot-workspace-configuration
