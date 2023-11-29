@@ -24,6 +24,7 @@
 (use-package emacs
   :init
   (column-number-mode 1)
+  (setq-default indent-tabs-mode nil)
   :custom
   (visible-bell t)
   (inhibit-startup-screen t))
@@ -601,7 +602,6 @@ cookie."
   (require 'org-roam-protocol)
   :bind ((:map global-map
                ("C-c n f" . org-roam-node-find)
-	       ("C-c n g" . org-roam-ui-mode)
 	       ("C-c n r" . org-roam-node-random))
          (:map org-mode-map
 	       ("C-c n i" . org-roam-node-insert)
@@ -615,6 +615,7 @@ cookie."
   :after org-roam
   :custom
   (org-roam-ui-sync-theme t)
+  :bind ("C-c n g" . org-roam-ui-mode)
   :ensure t)
 
 (use-package ob
