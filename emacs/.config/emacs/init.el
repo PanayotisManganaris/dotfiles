@@ -35,6 +35,7 @@
   :ensure t)
 
 (use-package paredit
+  :hook ((emacs-lisp-mode . paredit-mode))
   :config
   ;; move to combobulate when appropriate
   (keymap-set paredit-mode-map "M-R"
