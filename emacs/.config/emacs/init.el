@@ -648,7 +648,7 @@ cookie."
   :init
   (dolist (scheme '((org-web-link "blue violet" "color web links")
 		    (org-file-link "lime green" "color file links")
-		    (org-info-link "dark turquoise" "color texinfo links")))
+		    (org-help-link "dark turquoise" "color manual links")))
     (let ((linkey (nth 0 scheme))
 	  (color (nth 1 scheme))
 	  (doc (nth 2 scheme)))
@@ -660,9 +660,12 @@ cookie."
   (org-link-set-parameters "https" :face 'org-web-link)
   (org-link-set-parameters "http" :face 'org-web-link)
   (org-link-set-parameters "file" :face 'org-file-link)
-  (org-link-set-parameters "info" :face 'org-info-link)
+  (org-link-set-parameters "info" :face 'org-help-link)
+  (org-link-set-parameters "man" :face 'org-help-link)
   :bind (:map global-map
 	      ("C-c l" . org-store-link)))
+
+(use-package ol-man)
 
 (use-package org-download
   :ensure t
@@ -698,6 +701,10 @@ cookie."
                   "\\PreviewEnvironment{prooftree}" t))
   :custom
   (org-preview-latex-default-process 'imagemagick))
+                                        ; documentation
+(use-package man
+  :custom
+  (Man-switches "-a"))
 					; TRAMP
 (use-package tramp
   :init
