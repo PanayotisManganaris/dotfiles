@@ -701,6 +701,15 @@ cookie."
                   "\\PreviewEnvironment{prooftree}" t))
   :custom
   (org-preview-latex-default-process 'imagemagick))
+                                        ; communication
+(use-package notmuch
+  :bind (:map global-map
+              ("C-x m" . notmuch)
+              ("C-x C-m" . notmuch-mua-new-mail))
+  :ensure t)
+
+(use-package ol-notmuch
+  :ensure t)
                                         ; documentation
 (use-package man
   :custom
