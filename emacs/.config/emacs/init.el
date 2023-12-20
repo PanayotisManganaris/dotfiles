@@ -29,6 +29,9 @@
   (visible-bell t)
   (inhibit-startup-screen t))
 					; user interface
+(use-package markdown-mode
+  :ensure t)
+
 (use-package mermaid-mode
   :config
   (add-to-list 'auto-mode-alist
