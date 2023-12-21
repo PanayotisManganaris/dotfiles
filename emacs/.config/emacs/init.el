@@ -26,6 +26,8 @@
   (column-number-mode 1)
   (setq-default indent-tabs-mode nil)
   :custom
+  (user-full-name "Panayotis Manganaris")
+  (user-mail-address "panos.manganaris@gmail.com")
   (visible-bell t)
   (inhibit-startup-screen t))
 					; user interface
