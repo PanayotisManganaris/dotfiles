@@ -733,10 +733,17 @@ cookie."
   :ensure t
   :custom
   (citar-bibliography org-cite-global-bibliography)
+  ;; citar-notes-paths not needed
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar)
   :after oc)
+
+(use-package citar-org-roam
+  :ensure t
+  :config
+  (citar-org-roam-mode 1)
+  :after (citar org-roam))
                                         ; communication
 (use-package notmuch
   :bind (:map global-map
