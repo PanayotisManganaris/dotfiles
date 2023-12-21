@@ -612,7 +612,7 @@ cookie."
   :custom
   (org-roam-directory (file-truename (concat org-directory "/zettles/")))
   :config
-  (org-roam-db-autosync-mode)
+  (org-roam-db-autosync-mode 1)
   (require 'org-roam-protocol)
   :bind ((:map global-map
                ("C-c n f" . org-roam-node-find)
@@ -722,6 +722,21 @@ cookie."
     "latexmk -f -pdf -%latex -bibtex -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
   (org-latex-src-block-backend 'engraved)
   (org-export-dispatch-use-expert-ui t))
+					; reference management
+(use-package oc
+  :custom
+  (org-cite-global-bibliography
+   (list (file-truename (concat org-directory "/lib.bib"))))
+  :after org)
+
+(use-package citar
+  :ensure t
+  :custom
+  (citar-bibliography org-cite-global-bibliography)
+  (org-cite-insert-processor 'citar)
+  (org-cite-follow-processor 'citar)
+  (org-cite-activate-processor 'citar)
+  :after oc)
                                         ; communication
 (use-package notmuch
   :bind (:map global-map
