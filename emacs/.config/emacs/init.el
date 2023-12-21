@@ -712,6 +712,10 @@ cookie."
   (org-preview-latex-default-process 'imagemagick))
 
 (use-package ox-latex
+  :config
+  (defun seed-random-generator (_)
+    (random (buffer-name)))
+  (add-hook 'org-export-before-processing-hook #'seed-random-generator)
   :custom
   (org-latex-pdf-process
    (list
