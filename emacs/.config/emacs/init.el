@@ -781,6 +781,8 @@ cookie."
 
   (citar-org-roam-mode 1)
   :after (citar org-roam))
+
+(use-package citar-latex)
                                         ; communication
 (use-package notmuch
   :bind (:map global-map
