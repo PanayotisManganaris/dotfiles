@@ -745,6 +745,37 @@ cookie."
   (citar-org-roam-note-title-template
    "${title}\n#+filetags: :article:${tags keywords}\n#+author: ${author}\n")
   :config
+  (defun citar-org-roam-has-notes ()
+    "Return function to check for notes. When given a citekey, return
+           non-nil if there's an associated note."
+    ;; Lookup performance for this function needs to be as fast as possible, so we
+    ;; use a hash-table.
+    (let* ((hasnotes (make-hash-table :test 'equal)))
+      (dolist (citekey (citar-org-roam-keys-with-notes))
+        (puthash citekey t hasnotes))
+      (lambda (citekey)
+        (gethash (concat "@" citekey) hasnotes))))
+
+  (defun citar-org-roam--create-capture-note (citekey entry)
+    "Open or create org-roam node for CITEKEY and ENTRY."
+    ;; adapted from https://jethrokuan.github.io/org-roam-guide/#orgc48eb0d
+    (let ((title (citar-format--entry
+                  citar-org-roam-note-title-template entry)))
+      (org-roam-capture-
+       :templates
+       '(("r" "reference" plain "%?" :if-new
+          (file+head
+           ;; REVIEW not sure the file name shoud be citekey alone.
+           "%(concat
+     (when citar-org-roam-subdir (concat citar-org-roam-subdir \"/\")) \"%<%Y%m%d%H%M%S>-${citekey}.org\")"
+           "#+title: ${title}\n")
+          :immediate-finish t
+          :unnarrowed t))
+       :info (list :citekey citekey)
+       :node (org-roam-node-create :title title)
+       :props '(:finalize find-file))
+      (org-roam-ref-add (concat "[cite:@" citekey "]"))))
+
   (citar-org-roam-mode 1)
   :after (citar org-roam))
                                         ; communication
