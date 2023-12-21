@@ -697,6 +697,8 @@ cookie."
         '("cd %o && pdflatex -interaction nonstopmode -output-directory %o --shell-escape %f"))
 
   (add-to-list 'org-latex-packages-alist
+               '("" "ptm" t ("pdflatex")))
+  (add-to-list 'org-latex-packages-alist
                '("" "tikz" t))
   (eval-after-load "preview"
     '(add-to-list 'preview-default-preamble
@@ -705,6 +707,8 @@ cookie."
     '(add-to-list 'preview-default-preamble
                   "\\PreviewEnvironment{prooftree}" t))
   :custom
+  (org-format-latex-options
+   (plist-put org-format-latex-options :scale 2.5))
   (org-preview-latex-default-process 'imagemagick))
 
 (use-package ox-latex
