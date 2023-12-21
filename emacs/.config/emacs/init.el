@@ -687,6 +687,8 @@ cookie."
 	 (:map global-map
                ("C-c a" . org-agenda))))
 					; org-mode and tex
+(use-package latex)
+
 (use-package org
   :config
   (setf (plist-get (alist-get
@@ -704,6 +706,14 @@ cookie."
                   "\\PreviewEnvironment{prooftree}" t))
   :custom
   (org-preview-latex-default-process 'imagemagick))
+
+(use-package ox-latex
+  :custom
+  (org-latex-pdf-process
+   (list
+    "latexmk -f -pdf -%latex -bibtex -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
+  (org-latex-src-block-backend 'engraved)
+  (org-export-dispatch-use-expert-ui t))
                                         ; communication
 (use-package notmuch
   :bind (:map global-map
