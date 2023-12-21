@@ -737,6 +737,9 @@ cookie."
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar)
+  :config
+  (add-to-list 'citar-file-open-functions
+               '("pdf" . citar-file-open-external))
   :after oc)
 
 (use-package citar-org-roam
