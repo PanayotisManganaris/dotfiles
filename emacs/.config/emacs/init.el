@@ -687,7 +687,21 @@ cookie."
 	 (:map global-map
                ("C-c a" . org-agenda))))
 					; org-mode and tex
-(use-package latex)
+(use-package latex
+  :config
+  (defun pm/p2l ()
+    "Format current paragraph into single lines."
+    (interactive "*")
+    (let ((i (current-indentation)))
+      (save-excursion
+        (forward-paragraph)
+        (let ((foo (point)))
+          (backward-paragraph)
+          (replace-regexp "\n *" " " nil (1+ (point)) foo))
+        (message (s-append ".\n" (spaces-string i)))
+        (let ((foo (point)))
+          (beginning-of-line)
+          (replace-regexp "\\. " (s-append (spaces-string i) ".\n") nil (point) foo))))))
 
 (use-package org
   :config
