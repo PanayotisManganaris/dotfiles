@@ -39,6 +39,10 @@
   :ensure t)
 
 (use-package python)
+
+(use-package sudo-edit
+  :ensure t)
+
 (use-package paredit
   :hook ((emacs-lisp-mode . paredit-mode))
   :config
