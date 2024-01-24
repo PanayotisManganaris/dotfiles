@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Exec=ec %F
+Name=dired
+Comment=designate emacs dired as system file manager
+MimeType=inode/directory
