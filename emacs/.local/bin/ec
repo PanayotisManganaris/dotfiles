@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+if [ $# -eq 0 ]; then
+    emacsclient -c -n -a ""
+else
+    emacsclient -c -n -a "" $@
+fi
