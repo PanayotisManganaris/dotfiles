@@ -1,3 +1,6 @@
 [Default Applications]
 inode/directory=ecfm.desktop
 application/pdf=sioyek.desktop
+text/html=nyxt.desktop
+x-scheme-handler/http=nyxt.desktop
+x-scheme-handler/https=nyxt.desktop
