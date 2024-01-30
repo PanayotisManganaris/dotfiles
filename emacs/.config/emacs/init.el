@@ -325,6 +325,8 @@ tempel element."
   :bind ((:map global-map
                ("C-c y" . tempel-insert))
          (:map tempel-map
+               ("<tab>" . tempel-next)
+               ("<backtab>" . tempel-previous)
                ("M-}" . tempel-next)
                ("M-{" . tempel-previous))))
 					; spell checking
