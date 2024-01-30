@@ -1,4 +1,4 @@
-latex-mode
+latex-mode org-mode
 
 (bmath & "\\[" n> r> n "\\]")
 (lmath "\\(" r "\\)")
