@@ -4,3 +4,5 @@ latex-mode org-mode
 (lmath "\\(" r "\\)")
 (tikz & "\\begin{tikzpicture}" n> r> n "\\end{tikzpicture}")
 (kv p "_{" p "^{" q "}}")
+(align & "\\begin{align}" n> r> n "\\end{align}")
+(alignn & "\\begin{align*}" n> r> n "\\end{align*}")
