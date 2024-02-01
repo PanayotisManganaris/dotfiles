@@ -1,5 +1,5 @@
 ;; -*- lexical-binding: t; -*-
-					; supplementary files
+                                        ; supplementary files
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (unless (load custom-file t)
   (write-region "" nil custom-file))
@@ -7,15 +7,15 @@
 (setq alias-file (concat user-emacs-directory "alias.el"))
 (unless (load alias-file t)
   (write-region "" nil alias-file))
-					; package repositories and use-package macro
+                                        ; package repositories and use-package macro
 (require 'package)
 (add-to-list 'package-archives
-	     '("melpa" . "https://melpa.org/packages/") t)
+             '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
 (when (not (package-installed-p 'use-package))
   (package-refresh-contents)
   (package-install 'use-package))
-					; user experience
+                                        ; user experience
 (use-package doom-themes
   :ensure t
   :config
@@ -28,14 +28,14 @@
   :custom
   (visible-bell t)
   (inhibit-startup-screen t))
-					; user interface
+                                        ; user interface
 (use-package markdown-mode
   :ensure t)
 
 (use-package mermaid-mode
   :config
   (add-to-list 'auto-mode-alist
-	       '("\\.\\(mermaid\\|mmd\\)$" . mermaid-mode))
+               '("\\.\\(mermaid\\|mmd\\)$" . mermaid-mode))
   :ensure t)
 
 (use-package python)
@@ -48,13 +48,13 @@
   :config
   ;; move to combobulate when appropriate
   (keymap-set paredit-mode-map "M-R"
-	      (keymap-lookup paredit-mode-map "M-r"))
+              (keymap-lookup paredit-mode-map "M-r"))
   (keymap-set paredit-mode-map "M-r" nil)
   :ensure t)
 
 (use-package macrostep
   :bind (:map emacs-lisp-mode-map
-	      ("C-c e" . macrostep-expand)))
+              ("C-c e" . macrostep-expand)))
 
 (use-package popper
   :ensure t
@@ -74,8 +74,8 @@
   (popper-mode 1)
   (popper-echo-mode 1)
   :bind  (("C-`" . popper-toggle-latest)
-	  ("M-`" . popper-cycle)
-	  ("M-~" . popper-toggle-type)))
+          ("M-`" . popper-cycle)
+          ("M-~" . popper-toggle-type)))
 
 (use-package calc
   :bind ("M-#" . calc-dispatch))
@@ -118,9 +118,9 @@
   :bind (:map global-map
               ("C-S-d" . backward-delete-char-untabify)
               ("C-%" . replace-regexp)
-	      ("C-z" . nil)
-	      ("C-x C-z" . nil)))
-					; tree-sitter
+              ("C-z" . nil)
+              ("C-x C-z" . nil)))
+                                        ; tree-sitter
 (use-package combobulate
   :hook ((python-ts-mode . combobulate-mode))
   :load-path "~/src/combobulate"
@@ -129,12 +129,12 @@
 (use-package treesit
   :init
   (setq treesit-language-source-alist
-	'((python "https://github.com/tree-sitter/tree-sitter-python")
-	  (elisp "https://github.com/Wilfred/tree-sitter-elisp")))
+        '((python "https://github.com/tree-sitter/tree-sitter-python")
+          (elisp "https://github.com/Wilfred/tree-sitter-elisp")))
   :bind (:map global-map
-	      ("C-c t i" . treesit-inspect-mode)
-	      ("C-c t t" . treesit-explore-mode)))
-					; failure recovery
+              ("C-c t i" . treesit-inspect-mode)
+              ("C-c t t" . treesit-explore-mode)))
+                                        ; failure recovery
 (use-package recentf
   :init
   (recentf-mode 1))
@@ -147,8 +147,8 @@
       "Restores desktop and cancels hook after first frame opens. So the
 daemon can run at startup and it'll still work"
       (with-selected-frame frame
-	(desktop-save-mode 1)
-	(let ((desktop-load-locked-desktop t))
+        (desktop-save-mode 1)
+        (let ((desktop-load-locked-desktop t))
           (desktop-read)
           (remove-hook 'after-make-frame-functions 'restore-desktop))))
     (add-hook 'after-make-frame-functions 'restore-desktop))
@@ -157,9 +157,9 @@ daemon can run at startup and it'll still work"
 
   (setq bookmark-save-flag 1)
   (setq backup-directory-alist
-	'(("." . "~/.local/share/emacs/saves/")))
+        '(("." . "~/.local/share/emacs/saves/")))
   (setq backup-by-copying t
-	;; symlinked files + metadata
+        ;; symlinked files + metadata
         version-control t
         delete-old-versions t
         kept-new-versions 6
@@ -179,7 +179,7 @@ daemon can run at startup and it'll still work"
               ("C-s-p" . windmove-up)
               ("C-s-b" . windmove-left)
               ("C-s-n" . windmove-down)))
-					; shell interaction
+                                        ; shell interaction
 (use-package shell
   :commands shell
   :config
@@ -190,7 +190,7 @@ daemon can run at startup and it'll still work"
   ;; precaution when redirecting zsh IO
   (setq explicit-zsh-args '("--login" "--interactive")
         explicit-shell-file-name shell-file-name))
-					; completion framework
+                                        ; completion framework
 (use-package vertico
   :ensure t
   :init
@@ -208,9 +208,9 @@ daemon can run at startup and it'll still work"
       (let* ((vertico--index (max 0 vertico--index))
              (current (minibuffer-contents))
              (candidate (vertico--candidate)))
-	(insert (car (s-slice-at
-		      (rx bow)
-		      (substring candidate
+        (insert (car (s-slice-at
+                      (rx bow)
+                      (substring candidate
                                  (+ (string-match current candidate)
                                     (seq-length current)))))))))
   :bind (:map vertico-map
@@ -251,11 +251,11 @@ daemon can run at startup and it'll still work"
   :config
   (add-hook 'minibuffer-setup-hook #'corfu-mode)
   :bind (:map corfu-map
-	      ("M-a" . corfu-reset)
-	      ([remap corfu-complete] . corfu-next)
-	      ("<backtab>" . corfu-previous)
-	      ([remap next-line] . nil)
-	      ([remap previous-line] . nil)
+              ("M-a" . corfu-reset)
+              ([remap corfu-complete] . corfu-next)
+              ("<backtab>" . corfu-previous)
+              ([remap next-line] . nil)
+              ([remap previous-line] . nil)
               ("RET" . nil))
   :hook (shell-mode . (lambda ()
                         (setq-local corfu-quit-at-boundary t
@@ -269,12 +269,12 @@ daemon can run at startup and it'll still work"
          ("C-c p f" . cape-file)
          ("C-c p w" . cape-dict)
          ("C-c p \\" . cape-tex)
-	 ("C-c p p" . completion-at-point))
+         ("C-c p p" . completion-at-point))
   :init
   (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-dict)
   (add-to-list 'completion-category-overrides
-	       '((cape-dict (styles . (basic)))))
+               '((cape-dict (styles . (basic)))))
   ;; doesn't work?
   (add-to-list 'completion-at-point-functions #'cape-abbrev)
   :config
@@ -286,25 +286,25 @@ daemon can run at startup and it'll still work"
   :config
   ;; configure to increase performance OR reliability of completions
   (setq-default eglot-workspace-configuration
-		'((haskell (maxCompletions . 200))))
+                '((haskell (maxCompletions . 200))))
   ;; NOTICE: this can and SHOULD be configured per project directory
   :init
   (add-to-list 'completion-category-overrides
-	       '(eglot (styles . (orderless)))))
-					; autotyping
+               '(eglot (styles . (orderless)))))
+                                        ; autotyping
 (use-package abbrev
   :custom
   (save-abbrevs 'silently)
   :bind (("C-x a r" . expand-region-abbrevs)
-	 ("C-x a a" . list-abbrevs)
-	 ("C-x a w" . edit-abbrevs)
-	 ("C-x a u" . unexpand-abbrev)))
+         ("C-x a a" . list-abbrevs)
+         ("C-x a w" . edit-abbrevs)
+         ("C-x a u" . unexpand-abbrev)))
 
 (use-package tempel
   :ensure t
   :init
   (setq tempel-path (file-name-concat user-emacs-directory
-				      "templates/*.eld"))
+                                      "templates/*.eld"))
   (defun tempel-setup-capf ()
     "Add `tempel-complete' to `completion-at-point-functions' to check
 while typing. Add it *before* the mode's main Capf, so it will be
@@ -329,7 +329,7 @@ tempel element."
                ("<backtab>" . tempel-previous)
                ("M-}" . tempel-next)
                ("M-{" . tempel-previous))))
-					; spell checking
+                                        ; spell checking
 (use-package jinx
   :ensure t
   :hook (emacs-startup . global-jinx-mode)
@@ -337,29 +337,29 @@ tempel element."
          ("C-,"   . jinx-previous)
          ("C-."   . jinx-next)
          ("C-M-$" . jinx-languages)))
-					; interactive command framework
+                                        ; interactive command framework
 (use-package consult
   :ensure t
   :init
   (setq consult-dir-shadow-filenames nil
-	register-preview-delay 0.5
+        register-preview-delay 0.5
         register-preview-function #'consult-register-format)
 
   (advice-add #'register-preview :override #'consult-register-window)
   :config
   (keymap-global-set "C-s"
-		     (keymap-lookup global-map "M-s"))
+                     (keymap-lookup global-map "M-s"))
   (keymap-global-set "M-s" nil)
   :demand t ;; force remap of anonymous search map on startup
   :bind ((:map global-map
-	       ("C-x b" . consult-buffer)
-	       ;; includes bookmarks
-	       ("C-x C-d" . consult-dir)
+               ("C-x b" . consult-buffer)
+               ;; includes bookmarks
+               ("C-x C-d" . consult-dir)
                ("M-y" . consult-yank-pop)
-	       ("C-x R" . consult-register-store)
-	       ("C-x r l" . consult-register)
-	       ("C-s s" . isearch-forward)
-	       ("C-s r" . isearch-backward)
+               ("C-x R" . consult-register-store)
+               ("C-x r l" . consult-register)
+               ("C-s s" . isearch-forward)
+               ("C-s r" . isearch-backward)
                ("C-s l" . consult-line)
                ("C-s L" . consult-line-multi)
                ("C-s G" . consult-git-grep)
@@ -372,9 +372,9 @@ tempel element."
                ("M-g e" . consult-compile-error)
                ("C-c k" . consult-kmacro)
                ("C-c m" . consult-minor-mode-menu)
-	       ("C-x p b" . consult-project-buffer))
-	 (:map vertico-map
-	       ("M-s" . consult-history))))
+               ("C-x p b" . consult-project-buffer))
+         (:map vertico-map
+               ("M-s" . consult-history))))
 
 (use-package embark-consult
   :ensure t
@@ -383,15 +383,15 @@ tempel element."
   ;; :hook
   ;; (embark-collect-mode . consult-preview-at-point-mode)
   :bind (:map embark-collect-mode-map
-	      ("C-j" . #'consult-preview-at-point)))
+              ("C-j" . #'consult-preview-at-point)))
 
 (use-package multiple-cursors
   :ensure t
   :bind (("C-S-c C-S-c" . mc/edit-lines)
-	 ("C->" . mc/mark-next-like-this)
-	 ("C-<" . mc/mark-previous-like-this)
-	 ("C-c C-<" . mc/mark-all-like-this)
-	 ("C-S-<mouse-1>" . mc/add-cursor-on-click)))
+         ("C->" . mc/mark-next-like-this)
+         ("C-<" . mc/mark-previous-like-this)
+         ("C-c C-<" . mc/mark-all-like-this)
+         ("C-S-<mouse-1>" . mc/add-cursor-on-click)))
 
 (use-package phi-search
   :ensure t
@@ -407,7 +407,7 @@ tempel element."
   :ensure t
   :config
   (setf bufler-groups
-	(bufler-defgroups
+        (bufler-defgroups
           ;; group all named workspaces.
           (group (auto-workspace))
           ;; group all `help-mode' and `info-mode' buffers.
@@ -483,22 +483,22 @@ tempel element."
               ("C-x b" . bufler-switch-buffer)))
 
 (use-package project)
-					; source control
+                                        ; source control
 (use-package magit
   :ensure t
   :bind ("C-x g" . magit-status))
-					; contextual action framework
+                                        ; contextual action framework
 (use-package embark
   :ensure t
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
   :bind (:map global-map
-	      ("C-;" . embark-act)
+              ("C-;" . embark-act)
               ("M-." . embark-dwim)
               ("C-h B" . embark-bindings)
               ("C-:" . embark-act-all)
               ("C-(" . embark-collect-snapshot)))
-					; directory edit
+                                        ; directory edit
 (use-package dired
   :init
   (setq dired-listing-switches "-ahl -v --group-directories-first")
@@ -520,12 +520,12 @@ does not use GNU ls, which is the only variant that supports
   (put 'dired-find-alternate-file 'disabled nil)
   :bind (:map dired-mode-map
               ("C-c C-e" . wdired-change-to-wdired-mode)))
-					; direnv
+                                        ; direnv
 (use-package direnv
   :ensure t
   :config
   (direnv-mode 1))
-					; org-mode notes
+                                        ; org-mode notes
 (use-package org
   :init
   (setq org-directory (concat (getenv "HOME") "/org"))
@@ -586,29 +586,29 @@ cookie."
     (interactive "p")
     (save-excursion
       (let* ((struct (ignore-errors (org-list-struct)))
-	     (cpos (cond ((not struct) (org-up-heading-safe) (point))
-			 ((org-in-item-p))))
-	     (parents (org-list-parents-alist struct))
-	     (cookie (cond ((eq arg 1) "[/] ")
-			   ((eq arg 4) "[%] "))))
-	(if struct
-	    (progn
-	      (if (member cpos (map-values parents))
-		  ;; there is children
-		  (beginning-of-line)
-		(if-let (ppos (map-elt parents cpos))
-		    ;; there is a parent
-		    (goto-char ppos)
-		  (error "Nothing to track in this task")))
-	      (looking-at org-list-full-item-re))
-	  (looking-at
-	   ;; create regexp from user's keywords
-	   "^\\(\\*+\\)\\(?: +\\(TODO\\|NEXT\\|WAIT\\|DONE\\) +\\)"))
-	(goto-char (match-end 0))
-	(insert cookie)))
+             (cpos (cond ((not struct) (org-up-heading-safe) (point))
+                         ((org-in-item-p))))
+             (parents (org-list-parents-alist struct))
+             (cookie (cond ((eq arg 1) "[/] ")
+                           ((eq arg 4) "[%] "))))
+        (if struct
+            (progn
+              (if (member cpos (map-values parents))
+                  ;; there is children
+                  (beginning-of-line)
+                (if-let (ppos (map-elt parents cpos))
+                    ;; there is a parent
+                    (goto-char ppos)
+                  (error "Nothing to track in this task")))
+              (looking-at org-list-full-item-re))
+          (looking-at
+           ;; create regexp from user's keywords
+           "^\\(\\*+\\)\\(?: +\\(TODO\\|NEXT\\|WAIT\\|DONE\\) +\\)"))
+        (goto-char (match-end 0))
+        (insert cookie)))
     (org-update-statistics-cookies 'nil))
   :bind (:map org-mode-map
-	      ("C-c C-x s" . pm/insert-stats-cookie))
+              ("C-c C-x s" . pm/insert-stats-cookie))
   :custom
   (org-cycle-include-plain-lists nil))
 
@@ -622,14 +622,14 @@ cookie."
   (require 'org-roam-protocol)
   :bind ((:map global-map
                ("C-c n f" . org-roam-node-find)
-	       ("C-c n r" . org-roam-node-random))
+               ("C-c n r" . org-roam-node-random))
          (:map org-mode-map
-	       ("C-c n i" . org-roam-node-insert)
-	       ("C-c n o" . org-id-get-create)
-	       ("C-c n t" . org-roam-tag-add)
-	       ("C-c n a" . org-roam-alias-add)
-	       ("C-c n l" . org-roam-buffer-toggle)
-	       ("C-c n c" . org-roam-extract-subtree))))
+               ("C-c n i" . org-roam-node-insert)
+               ("C-c n o" . org-id-get-create)
+               ("C-c n t" . org-roam-tag-add)
+               ("C-c n a" . org-roam-alias-add)
+               ("C-c n l" . org-roam-buffer-toggle)
+               ("C-c n c" . org-roam-extract-subtree))))
 
 (use-package org-roam-ui
   :after org-roam
@@ -657,15 +657,15 @@ cookie."
 (use-package ol
   :init
   (dolist (scheme '((org-web-link "blue violet" "color web links")
-		    (org-file-link "lime green" "color file links")
-		    (org-help-link "dark turquoise" "color manual links")))
+                    (org-file-link "lime green" "color file links")
+                    (org-help-link "dark turquoise" "color manual links")))
     (let ((linkey (nth 0 scheme))
-	  (color (nth 1 scheme))
-	  (doc (nth 2 scheme)))
+          (color (nth 1 scheme))
+          (doc (nth 2 scheme)))
       (eval `(defface ,linkey '((t :inherit 'org-link
-				   :foreground ,color))
-	       ,doc
-	       :group 'org-faces))))
+                                   :foreground ,color))
+               ,doc
+               :group 'org-faces))))
   :config
   (org-link-set-parameters "https" :face 'org-web-link)
   (org-link-set-parameters "http" :face 'org-web-link)
@@ -673,7 +673,7 @@ cookie."
   (org-link-set-parameters "info" :face 'org-help-link)
   (org-link-set-parameters "man" :face 'org-help-link)
   :bind (:map global-map
-	      ("C-c l" . org-store-link)))
+              ("C-c l" . org-store-link)))
 
 (use-package ol-man)
 
@@ -682,18 +682,18 @@ cookie."
   :config
   (setq org-image-actual-width '(800))
   (setq org-download-display-inline-images nil
-	org-download-screenshot-method "flameshot gui --raw > %s"))
+        org-download-screenshot-method "flameshot gui --raw > %s"))
 
 (use-package org-agenda
   :after (org-roam)
   :custom
   (org-agenda-files (list org-roam-directory))
   :bind ((:map org-mode-map
-	       ("C-'" . nil)
-	       ("C-," . nil))
-	 (:map global-map
+               ("C-'" . nil)
+               ("C-," . nil))
+         (:map global-map
                ("C-c a" . org-agenda))))
-					; org-mode and tex
+                                        ; org-mode and tex
 (use-package latex
   :config
   (defun pm/p2l ()
@@ -713,8 +713,8 @@ cookie."
 (use-package org
   :config
   (setf (plist-get (alist-get
-		    'imagemagick org-preview-latex-process-alist)
-		   :latex-compiler)
+                    'imagemagick org-preview-latex-process-alist)
+                   :latex-compiler)
         '("cd %o && pdflatex -interaction nonstopmode -output-directory %o --shell-escape %f"))
 
   (add-to-list 'org-latex-packages-alist
@@ -743,7 +743,7 @@ cookie."
     "latexmk -f -pdf -%latex -bibtex -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
   (org-latex-src-block-backend 'engraved)
   (org-export-dispatch-use-expert-ui t))
-					; reference management
+                                        ; reference management
 (use-package oc
   :custom
   (org-cite-global-bibliography
@@ -817,9 +817,9 @@ cookie."
 (use-package man
   :custom
   (Man-switches "-a"))
-					; TRAMP
+                                        ; TRAMP
 (use-package tramp
   :config
   (add-to-list 'completion-category-overrides
-	       '((file (styles . (basic partial-completion)))))
+               '((file (styles . (basic partial-completion)))))
   (add-to-list 'tramp-remote-path "~/.local/bin"))
