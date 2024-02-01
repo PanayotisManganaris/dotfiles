@@ -819,7 +819,7 @@ cookie."
   (Man-switches "-a"))
 					; TRAMP
 (use-package tramp
-  :init
+  :config
   (add-to-list 'completion-category-overrides
 	       '((file (styles . (basic partial-completion)))))
   (add-to-list 'tramp-remote-path "~/.local/bin"))
