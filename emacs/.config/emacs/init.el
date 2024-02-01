@@ -519,6 +519,7 @@ does not use GNU ls, which is the only variant that supports
 
   (put 'dired-find-alternate-file 'disabled nil)
   :bind (:map dired-mode-map
+              ("C-x M-o" . dired-omit-mode)
               ("C-c C-e" . wdired-change-to-wdired-mode)))
                                         ; direnv
 (use-package direnv
