@@ -394,6 +394,8 @@ if ! mountpoint -q "$root"; then
   die "$root is not a mountpoint"
 fi
 
+write_fstab() {
+    printf '#<filesystem>\t<dir>\t<type>\t<options>\t<dump>\t<pass>\n'
 # handle block devices
 findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     while read -r src target fstype opts fsroot; do
@@ -486,5 +488,13 @@ done
     printf '\t%-10s\t%-10s\t%-10s\t0 0\n\n' 'none' 'swap' "$options"
   done
 } </proc/swaps
+}
 
 # vim: et ts=2 sw=2 ft=sh:
+
+awk 'BEGIN{OFS=FS=" "}
+NR==FNR {
+ for (i=1;i<=NF;i++) w[i]=(length($i)+1>w[i] ? length($i)+1 : w[i]); next
+} {
+ for (i=1;i<=NF;i++) printf("%-*s%s", w[i], $i, i==NF ? ORS : OFS)
+}' <(write_fstab) <(write_fstab)
