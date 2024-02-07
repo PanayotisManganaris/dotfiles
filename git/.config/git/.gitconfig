@@ -1,0 +1,7 @@
+[user]
+	email = panos.manganaris@gmail.com
+	name = Panayotis Manganaris
+[credential]
+	helper = cache
+[init]
+	defaultBranch = master
