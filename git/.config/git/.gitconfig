@@ -5,3 +5,7 @@
 	helper = cache
 [init]
 	defaultBranch = master
+[core]
+	autocrlf = input
+[merge]
+	conflictStyle = diff3
