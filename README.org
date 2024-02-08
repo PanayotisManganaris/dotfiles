@@ -6,3 +6,8 @@ files. Each package is named after the tool it corresponds to.
 The namesake tools are not included.
 
 These packages are to be managed using [[https://www.gnu.org/software/stow/][GNU stow]], installed separately.
+
+A few sub-stow repositories may be configured using these dotfiles
+- src/.stowrc :: stow user local software from source (not included)
+- etc/.stowrc :: stow portable system configuration
+- sys/.stowrc :: stow system software from source (not included)
