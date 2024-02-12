@@ -1,0 +1,1 @@
+/mnt/nas /etc/autofs/auto.nas --timeout 120 --browse
