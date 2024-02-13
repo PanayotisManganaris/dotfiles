@@ -529,7 +529,9 @@ does not use GNU ls, which is the only variant that supports
                                         ; org-mode notes
 (use-package org
   :init
-  (setq org-directory (concat (getenv "HOME") "/org"))
+  (setq org-directory
+        (file-truename
+         (file-name-concat (getenv "HOME") "org")))
   (setq org-startup-indented t)
   (setq org-ellipsis " [+]")
   (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))
@@ -745,10 +747,28 @@ cookie."
   (org-latex-src-block-backend 'engraved)
   (org-export-dispatch-use-expert-ui t))
                                         ; reference management
+(use-package org-roam-bibtex
+  ;; :custom
+  ;; (orb-insert-link-description 'title)
+  ;; (orb-preformat-templates t)
+  ;; (orb-note-actions-interface 'default)
+  ;; (orb-insert-interface 'generic)
+  :config
+  ;; (defun my-note-action (citekey)
+  ;;   (let ((key (car citekey)))
+  ;;     ...))
+  ;; an embark based interface with optional persistence would be real nice
+  ;; (with-eval-after-load 'orb-note-actions
+  ;;   (add-to-list 'orb-note-actions-user (cons "My note action" #'my-note-action)))
+
+  (org-roam-bibtex-mode 1)
+  :after org-roam
+  :ensure t)
+
 (use-package oc
   :custom
   (org-cite-global-bibliography
-   (list (file-truename (concat org-directory "/lib.bib"))))
+   (list (file-truename (file-name-concat org-directory "lib.bib"))))
   :after org)
 
 (use-package citar
