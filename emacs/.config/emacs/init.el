@@ -792,25 +792,22 @@ cookie."
   :after org)
 
 (use-package citar
-  :ensure t
   :custom
   (citar-bibliography org-cite-global-bibliography)
   ;; citar-notes-paths not needed
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar)
-  :config
-  (add-to-list 'citar-file-open-functions
-               '("pdf" . citar-file-open-external))
+  :ensure t
   :after oc)
 
 (use-package citar-org-roam
-  :ensure t
   :custom
   (citar-org-roam-note-title-template
    "${title}\n#+filetags: :article:${tags keywords}\n#+author: ${author}\n")
   :config
   (citar-org-roam-mode 1)
+  :ensure t
   :after (citar org-roam))
 
 (use-package citar-latex)
