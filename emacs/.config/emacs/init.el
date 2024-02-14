@@ -30,6 +30,8 @@
   (inhibit-startup-screen t))
                                         ; user interface
 (use-package mhtml-mode
+  :bind (:map sgml-mode-map
+         ("C-c h" . html-html5-template))
   :config
   ;; a dirty hack
   (define-derived-mode html-auto-mode prog-mode "HTMLA"
