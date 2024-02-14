@@ -29,6 +29,18 @@
   (visible-bell t)
   (inhibit-startup-screen t))
                                         ; user interface
+(use-package js
+  :config
+  ;; a dirty hack
+  (define-derived-mode js-auto-mode prog-mode "JSA"
+    "automatically decide which mode to use"
+    (if (treesit-ready-p 'javascript t)
+        (js-ts-mode) (js-mode)))
+  (add-to-list 'major-mode-remap-alist
+               '(js-mode . js-auto-mode))
+  ;; js-base-mode is mutual base mode
+  :after treesit)
+
 (use-package mhtml-mode
   :bind (:map sgml-mode-map
          ("C-c h" . html-html5-template))
@@ -44,7 +56,8 @@
 
   (tempel-key "C-c C-c y" style-tag)
   (tempel-key "C-c C-c k" link-tag)
-  (tempel-key "C-c C-c s" script-tag))
+  (tempel-key "C-c C-c s" script-tag)
+  :after treesit)
 
 (use-package markdown-mode
   :ensure t)
