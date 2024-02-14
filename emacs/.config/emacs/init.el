@@ -137,7 +137,8 @@
               ("C-x C-z" . nil)))
                                         ; tree-sitter
 (use-package combobulate
-  :hook ((python-ts-mode . combobulate-mode))
+  :hook ((python-ts-mode . combobulate-mode)
+         (html-ts-mode . combobulate-mode))
   :load-path "~/src/combobulate"
   :after treesit)
 
