@@ -177,6 +177,8 @@
   (recentf-mode 1))
 
 (use-package emacs
+  :custom
+  (desktop-restore-forces-onscreen nil)
   :config
   (if (not (daemonp))
       (desktop-save-mode 1)
