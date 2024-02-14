@@ -130,6 +130,10 @@
   :init
   (setq treesit-language-source-alist
         '((python "https://github.com/tree-sitter/tree-sitter-python")
+          (html "https://github.com/tree-sitter/tree-sitter-html")
+          (css "https://github.com/tree-sitter/tree-sitter-css")
+          (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+          (json "https://github.com/tree-sitter/tree-sitter-json")
           (elisp "https://github.com/Wilfred/tree-sitter-elisp")))
   :bind (:map global-map
               ("C-c t i" . treesit-inspect-mode)
@@ -650,6 +654,7 @@ cookie."
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
+     (js . t)
      (makefile . t)
      (ditaa . t)
      (mermaid . t)
