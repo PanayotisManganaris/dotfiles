@@ -29,6 +29,21 @@
   (visible-bell t)
   (inhibit-startup-screen t))
                                         ; user interface
+(use-package mhtml-mode
+  :config
+  ;; a dirty hack
+  (define-derived-mode html-auto-mode prog-mode "HTMLA"
+    "automatically decide which mode to use"
+    (if (treesit-ready-p 'html t)
+        (html-ts-mode) (mhtml-mode)))
+  (add-to-list 'major-mode-remap-alist
+               '(mhtml-mode . html-auto-mode))
+  ;; html-mode is mutual base mode
+
+  (tempel-key "C-c C-c y" style-tag)
+  (tempel-key "C-c C-c k" link-tag)
+  (tempel-key "C-c C-c s" script-tag))
+
 (use-package markdown-mode
   :ensure t)
 
