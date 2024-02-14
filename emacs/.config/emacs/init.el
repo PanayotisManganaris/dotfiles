@@ -135,6 +135,7 @@
   :bind (:map global-map
               ("C-S-d" . backward-delete-char-untabify)
               ("C-%" . replace-regexp)
+              ("C-x C-c" . nil)
               ("C-z" . nil)
               ("C-x C-z" . nil)))
                                         ; tree-sitter
