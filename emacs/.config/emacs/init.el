@@ -154,6 +154,7 @@
                                         ; tree-sitter
 (use-package combobulate
   :hook ((python-ts-mode . combobulate-mode)
+         (js-ts-mode . combobulate-mode)
          (html-ts-mode . combobulate-mode))
   :load-path "~/src/combobulate"
   :after treesit)
