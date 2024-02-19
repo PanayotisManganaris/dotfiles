@@ -714,6 +714,7 @@ cookie."
   (org-link-set-parameters "file" :face 'org-file-link)
   (org-link-set-parameters "info" :face 'org-help-link)
   (org-link-set-parameters "man" :face 'org-help-link)
+  (org-link-set-parameters "help" :face 'org-help-link)
   :bind (:map global-map
               ("C-c l" . org-store-link)))
 
