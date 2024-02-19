@@ -656,7 +656,8 @@ cookie."
   :ensure t
   :init (setq org-roam-v2-ack t)
   :custom
-  (org-roam-directory (file-truename (concat org-directory "/zettles/")))
+  (org-roam-directory (file-truename (file-name-concat
+                                      org-directory "roam")))
   :config
   (org-roam-db-autosync-mode 1)
   (require 'org-roam-protocol)
