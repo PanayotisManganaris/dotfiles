@@ -669,6 +669,7 @@ cookie."
                ("C-c n o" . org-id-get-create)
                ("C-c n t" . org-roam-tag-add)
                ("C-c n a" . org-roam-alias-add)
+               ("C-c n b" . org-roam-ref-add)
                ("C-c n l" . org-roam-buffer-toggle)
                ("C-c n c" . org-roam-extract-subtree))))
 
