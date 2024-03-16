@@ -677,6 +677,7 @@ cookie."
   :after org-roam
   :custom
   (org-roam-ui-sync-theme t)
+  (org-roam-ui-browser-function #'browse-url-chromium)
   :bind ("C-c n g" . org-roam-ui-mode)
   :ensure t)
 
