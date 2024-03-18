@@ -658,6 +658,15 @@ cookie."
   :custom
   (org-roam-directory (file-truename (file-name-concat
                                       org-directory "roam")))
+  (org-roam-capture-templates
+   (quote (("f" "dispatch")
+           ;; (fkey description type template
+           ;;  :target (type etc)
+           ;;  :etc)
+           ("ff" "default" plain "%?"
+            :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                               "#+title: ${title}")
+            :unnarrowed t))))
   :config
   (org-roam-db-autosync-mode 1)
   (require 'org-roam-protocol)
