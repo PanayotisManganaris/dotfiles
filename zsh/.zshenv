@@ -11,3 +11,6 @@ export XDG_CACHE_HOME=${XDG_CACHE_HOME:="$HOME/.cache"}
 export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:="$HOME/.config"}
 export XDG_DATA_DIRS=${XGD_DATA_DIRS:="/usr/local/share:/usr/share"}
 export XDG_CONFIG_DIRS=${XGD_CONFIG_DIRS:="/etc/xdg"}
+
+# user variables
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
