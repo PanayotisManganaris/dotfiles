@@ -1,0 +1,8 @@
+# Define the recursion root
+R /home/panos/
+# Exclude all nas links in any directory
+- **/nas
+# Explicitly include
++ org/**
++ dat/**
++ doc/**

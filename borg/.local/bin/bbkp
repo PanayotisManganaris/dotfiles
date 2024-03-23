@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+USER=$(id -un)
+REPONAME=$(uname -n)
+
+borg create \
+     --list \
+     --progress \
+     --stat \
+     --compression none \
+     # no need with repo on lzma,4 compressed ZFS
+     --patterns-from patterns.lst
+     ssh://borg@nas.home.lan:$USER/$REPONAME::{borgpatch}-{now:%Y%m%d%H%M%S}
