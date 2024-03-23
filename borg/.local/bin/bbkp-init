@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+USER=$(id -un)
+REPONAME=$(uname -n)
+
+# repos located on home NAS under user /home/borg/
+borg init --encryption keyfile ssh://borg@nas.home.lan:$USER/$REPONAME
