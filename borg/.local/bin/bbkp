@@ -1,13 +1,21 @@
 #!/usr/bin/env sh
 
-USER=$(id -un)
-REPONAME=$(uname -n)
+REPOADDR=ssh://borg@nas.home.lan:
+PORT=8022
+REPOPATH=/~/backups
+REPONAME={user}@{hostname}
+ARCHIVENAME={borgpatch}-{now:%Y%m%d%H%M%S}
+COMP=none
+# auto,lzma,4 is optimal
+# but redundant for repos on compressed ZFS
+PATTERNFILE=patterns.lst
 
 borg create \
+     --dry-run \
      --list \
+     --filter=AMUCEdbchsfi-? \
      --progress \
      --stat \
-     --compression none \
-     # no need with repo on lzma,4 compressed ZFS
-     --patterns-from patterns.lst
-     ssh://borg@nas.home.lan:$USER/$REPONAME::{borgpatch}-{now:%Y%m%d%H%M%S}
+     --compression $COMP \
+     --patterns-from $PATTERNFILE \
+     $REPOADDR$PORT$REPOPATH/$REPONAME::$ARCHIVENAME
