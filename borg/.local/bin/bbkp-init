@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 
+REPOADDR=ssh://borg@nas.home.lan:
 PORT=8022
+REPOPATH=/~/backups
 REPONAME={user}@{hostname}
 
 # repos located on home NAS under user /home/borg/
@@ -8,4 +10,4 @@ REPONAME={user}@{hostname}
 borg init \
      --encryption keyfile \
      --make-parent-dirs \
-     ssh://borg@nas.home.lan:$PORT/~/backups/$REPONAME
+     $REPOADDR$PORT$REPOPATH/$REPONAME
