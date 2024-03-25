@@ -1,7 +1,11 @@
 #!/usr/bin/env sh
 
-USER=$(id -un)
-REPONAME=$(uname -n)
+PORT=8022
+REPONAME={user}@{hostname}
 
 # repos located on home NAS under user /home/borg/
-borg init --encryption keyfile ssh://borg@nas.home.lan:$USER/$REPONAME
+# keys located on local machine under XDG_CONFIG_DIR/borg
+borg init \
+     --encryption keyfile \
+     --make-parent-dirs \
+     ssh://borg@nas.home.lan:$PORT/~/backups/$REPONAME
