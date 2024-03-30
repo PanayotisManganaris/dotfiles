@@ -539,6 +539,9 @@ tempel element."
               ("C-(" . embark-collect-snapshot)))
                                         ; directory edit
 (use-package dired
+  :custom
+  (dired-guess-shell-alist-user
+   '(("\\.pdf\\'" "xdg-open &")))
   :init
   (setq dired-listing-switches "-ahl -v --group-directories-first")
   (setq dired-omit-files "\\`[.]?#\\|\\`[.][.]?\\|^[.].+\\'")
