@@ -20,3 +20,10 @@ emacs-lisp-mode
      ;; (i legal) n
      (i commentary) n n q n n
      (i tail))
+
+(autoload & ";;;###autoload")
+(fun "(defun " (p "name") " (" (p "arg") ")" n>
+     "\"" p "\"" (i interactive-maybe) r> ")")
+(lam "(lambda (" p ") " (i interactive-maybe) r ")")
+(interactive-maybe (if (yes-or-no-p "interactive?") '(i interactive) ""))
+(interactive & > "(interactive" (p " p") ")" o >)
