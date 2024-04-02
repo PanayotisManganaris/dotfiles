@@ -361,6 +361,15 @@ tried first."
 tempel element."
     (eval form))
   (add-to-list 'tempel-user-elements #'tempel--eval)
+
+  (defun tempel-include (elt)
+    "include templates by name in another template."
+    (when (eq (car-safe elt) 'i)
+      (if-let (template (alist-get (cadr elt) (tempel--templates)))
+          (cons 'l template)
+        (message "Template %s not found" (cadr elt))
+        nil)))
+  (add-to-list 'tempel-user-elements #'tempel-include)
   :bind ((:map global-map
                ("C-c y" . tempel-insert))
          (:map tempel-map
