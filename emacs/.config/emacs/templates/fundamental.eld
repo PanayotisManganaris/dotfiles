@@ -13,10 +13,11 @@ fundamental-mode ;; Available everywhere
 (quote-pair-maybe (if (use-region-p) '(l "\'" r "\'") "\'"))
 (tick-pair-maybe (if (use-region-p) '(l "`" r "`") "`"))
 
+(fname (file-name-nondirectory (or (buffer-file-name) (buffer-name))))
+(fbase (file-name-base (or (buffer-file-name) (buffer-name))))
 (copyright (push-mark) "Copyright (C) " copyright-current-year "  "
            user-full-name " <" user-mail-address ">"
            :post (comment-region (mark) (point)))
-
 (gplshort (push-mark) "
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
