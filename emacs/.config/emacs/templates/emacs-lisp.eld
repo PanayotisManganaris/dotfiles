@@ -2,13 +2,21 @@ emacs-lisp-mode
 
 (head ";;; " (file-name-nondirectory (or (buffer-file-name) (buffer-name)))
       " --- " (p "description" nil) " -*- lexical-binding: t -*-")
+(metadata "
+;; Author: " (user-full-name) "
+;; URL: " nil "
+;; Keywords: " p "
+;; Version: " (p "0.0.0" nil) "
+;; Package-Requires: " (p "packages-alist" nil) "
+")
 (legal ";; This file is NOT part of GNU Emacs." n (i gplshort))
-(comm ";;; Commentary:" n ";; " p n ";;; Code:")
+(commentary ";;; Commentary:" n ";; " p n ";;; Code:")
 (tail "(provide '" (file-name-base (or (buffer-file-name) (buffer-name))) ")" n
       ";;; " (file-name-nondirectory (or (buffer-file-name) (buffer-name))) " ends here")
 
 (pkg (i head) n n
-     ;; (i copyright) n n
+     ;; (i copyright) n
+     (i metadata) n
      ;; (i legal) n
-     (i comm) n q n
+     (i commentary) n n q n n
      (i tail))
