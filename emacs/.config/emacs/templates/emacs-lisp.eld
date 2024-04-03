@@ -17,8 +17,21 @@ emacs-lisp-mode
      ;; (i copyright) n
      (i metadata) n
      ;; (i legal) n
-     (i commentary) n n q n n
+     (i commentary) n n r n n
      (i tail))
+
+(group "(defgroup " (i fbase) " (" p ")"
+       n> "\"" p "\""
+       n> ":group " p
+       n> ":prefix \"" (i fbase) "-\""
+       % > r ")")
+(custom "(defcustom " (p "name") (p "default-value")
+        n> "\"" p "\""
+        n> ":type '" (p "widget")
+        % > r ")")
+(face "(defface " (p "name") "'(t :inherit " (p "default") ")"
+      n> "\"" p "\""
+      % > r ")")
 
 (autoload & ";;;###autoload")
 (fun "(defun " (p "name") " (" (p "arg") ")" n>
