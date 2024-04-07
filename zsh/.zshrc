@@ -8,3 +8,6 @@ SAVEHIST=10000
 bindkey -e
 autoload -U select-word-style
 select-word-style bash
+
+# session-specific variables
+export GPG_TTY=$(tty)
