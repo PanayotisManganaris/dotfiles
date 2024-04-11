@@ -57,9 +57,14 @@
                        (write-region "" nil alias-file))))
                                         ; elpaca + use-package macro
 (elpaca elpaca-use-package (elpaca-use-package-mode))
+(use-package use-package
+  :custom
+  (use-package-always-defer t)
+  :ensure nil)
 (elpaca-wait)
                                         ; user experience
 (use-package doom-themes
+  :demand t
   :config
   (load-theme 'doom-dark+ t)
   :ensure t)
