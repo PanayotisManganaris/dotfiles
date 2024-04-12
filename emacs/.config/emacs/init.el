@@ -924,7 +924,11 @@ cookie."
   :bind (:map global-map
               ("C-x m" . notmuch)
               ("C-x C-m" . notmuch-mua-new-mail))
-  :ensure t)
+  :ensure (:pre-build
+           (("make" "IS_GIT=no" "emacs/notmuch-version.el"))
+           :version
+           (lambda (_) (require 'notmuch-version)
+             notmuch-emacs-version)))
 
 (use-package ol-notmuch
   :ensure t)
