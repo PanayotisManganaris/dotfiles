@@ -871,9 +871,10 @@ cookie."
   (eval-after-load "preview"
     '(add-to-list 'preview-default-preamble
                   "\\PreviewEnvironment{prooftree}" t))
+
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :scale 2.5))
   :custom
-  (org-format-latex-options
-   (plist-put org-format-latex-options :scale 2.5))
   (org-preview-latex-default-process 'imagemagick)
   :ensure nil)
                                         ; org-mode export
