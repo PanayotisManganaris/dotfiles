@@ -1,12 +1,3 @@
 R /home/panos/org
 + **/.git
 - **/.?*
-R /home/panos/doc
-- **/.?*
-R /home/panos/dsk
-R /home/panos/pic
-- **/nas
-R /home/panos/vid
-- **/nas
-R /home/panos/mus
-- **/nas

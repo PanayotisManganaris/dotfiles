@@ -8,10 +8,9 @@ ARCHIVENAME={borgpatch}-{now:%Y%m%d%H%M%S}
 COMP=none
 # auto,lzma,4 is optimal
 # but redundant for repos on compressed ZFS
-PATTERNFILE=patterns.lst
+PATTERNFILE="$( dirname $0 )/patterns.lst"
 
 borg create \
-     --dry-run \
      --list \
      --filter=AMUCEdbchsfi-? \
      --progress \
