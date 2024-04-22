@@ -1,0 +1,8 @@
+[Unit]
+Description=run borg backup
+
+[Service]
+ExecStart=bbkp
+
+[Install]
+WantedBy=default.target

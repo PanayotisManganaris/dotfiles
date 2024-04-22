@@ -1,0 +1,8 @@
+[Unit]
+Description=backup user files every 4 hours of user uptime
+
+[Timer]
+OnUnitActiveSec=4h
+
+[Install]
+WantedBy=timers.target
