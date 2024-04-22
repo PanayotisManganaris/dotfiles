@@ -12,7 +12,7 @@ PATTERNFILE="$( dirname $0 )/patterns.lst"
 
 borg create \
      --list \
-     --filter=AMUCEdbchsfi-? \
+     --filter=AMCEdbchsfi-? \
      --progress \
      --stat \
      --compression $COMP \
