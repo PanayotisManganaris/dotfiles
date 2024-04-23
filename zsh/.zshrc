@@ -11,3 +11,7 @@ select-word-style bash
 
 # session-specific variables
 export GPG_TTY=$(tty)
+export EDITOR=ec
+
+# options
+unsetopt beep
