@@ -57,10 +57,6 @@
                        (write-region "" nil alias-file))))
                                         ; elpaca + use-package macro
 (elpaca elpaca-use-package (elpaca-use-package-mode))
-(use-package use-package
-  :custom
-  (use-package-always-defer t)
-  :ensure nil)
 (elpaca-wait)
                                         ; user experience
 (use-package doom-themes
@@ -817,6 +813,7 @@ cookie."
   :ensure nil)
 
 (use-package ol-man
+  :autoload (org-man-store-link org-man-open)
   :ensure nil)
 
 (use-package org-download
