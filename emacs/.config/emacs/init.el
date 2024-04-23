@@ -511,6 +511,16 @@ tempel element."
   :ensure t)
 
 (use-package bufler
+  :custom
+  (bufler-filter-buffer-modes '(bufler-list-mode
+                                calendar-mode
+                                helm-major-mode
+                                magit-diff-mode
+                                magit-process-mode
+                                magit-revision-mode
+                                magit-section-mode
+                                special-mode
+                                timer-list-mode))
   :config
   (setf bufler-groups
         (bufler-defgroups
