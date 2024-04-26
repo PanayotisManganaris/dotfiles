@@ -59,6 +59,31 @@
 (elpaca elpaca-use-package (elpaca-use-package-mode))
 (elpaca-wait)
                                         ; user experience
+(use-package popper
+  :demand t
+  :custom
+  (popper-reference-buffers
+   '("\\*Messages\\*"
+     help-mode
+     compilation-mode))
+  :config
+  (popper-mode 1)
+  (popper-echo-mode 1)
+  :bind (("C-`" . popper-toggle-latest)
+         ("M-`" . popper-cycle)
+         ("M-~" . popper-toggle-type))
+  :ensure t)
+
+(use-package unkillable-scratch
+  :config
+  (unkillable-scratch t)
+  :ensure t)
+
+(use-package ws-butler
+  :config
+  (ws-butler-global-mode 1)
+  :ensure t)
+
 (use-package doom-themes
   :config
   (load-theme 'doom-dark+ t)
@@ -138,21 +163,6 @@
               ("C-c e" . macrostep-expand))
   :ensure t)
 
-(use-package popper
-  :demand t
-  :custom
-  (popper-reference-buffers
-   '("\\*Messages\\*"
-     help-mode
-     compilation-mode))
-  :config
-  (popper-mode 1)
-  (popper-echo-mode 1)
-  :bind  (("C-`" . popper-toggle-latest)
-          ("M-`" . popper-cycle)
-          ("M-~" . popper-toggle-type))
-  :ensure t)
-
 (use-package calc
   :bind ("M-#" . calc-dispatch)
   :ensure nil)
@@ -166,16 +176,6 @@
   :ensure nil)
 
 (use-package wgrep
-  :ensure t)
-
-(use-package unkillable-scratch
-  :config
-  (unkillable-scratch t)
-  :ensure t)
-
-(use-package ws-butler
-  :config
-  (ws-butler-global-mode 1)
   :ensure t)
 
 (use-package emacs
