@@ -76,13 +76,18 @@
 
 (use-package unkillable-scratch
   :config
-  (unkillable-scratch t)
+  (unkillable-scratch 1)
   :ensure t)
 
 (use-package ws-butler
   :config
   (ws-butler-global-mode 1)
   :ensure t)
+
+(use-package recentf
+  :config
+  (recentf-mode 1)
+  :ensure nil)
 
 (use-package doom-themes
   :config
@@ -93,9 +98,33 @@
   :init
   (column-number-mode 1)
   (setq-default indent-tabs-mode nil)
+  (winner-mode 1)
+  (if (not (daemonp))
+      (desktop-save-mode 1)
+    (defun restore-desktop (frame)
+      "Restores desktop and cancels hook after first frame opens. So the
+daemon can run at startup and it'll still work"
+      (with-selected-frame frame
+        (desktop-save-mode 1)
+        (let ((desktop-load-locked-desktop t))
+          (desktop-read)
+          (remove-hook 'after-make-frame-functions 'restore-desktop))))
+    (add-hook 'after-make-frame-functions 'restore-desktop))
   :custom
   (visible-bell t)
   (inhibit-startup-screen t)
+  (desktop-restore-forces-onscreen nil)
+  (bookmark-save-flag 1)
+  (backup-directory-alist
+   '(("." . (expand-file-name "emacs/saves" (xdg-data-home)))))
+  (backup-by-copying t)
+  (version-control t)
+  (delete-old-versions t)
+  (kept-new-versions 6)
+  (kept-old-versions 2)
+  (auto-save-default t)
+  (auto-save-timeout 60)
+  (auto-save-interval 200)
   :ensure nil)
                                         ; user interface
 (use-package js
@@ -206,43 +235,7 @@
               ("C-c t i" . treesit-inspect-mode)
               ("C-c t t" . treesit-explore-mode))
   :ensure nil)
-                                        ; failure recovery
-(use-package recentf
-  :init
-  (recentf-mode 1)
-  :ensure nil)
 
-(use-package emacs
-  :custom
-  (desktop-restore-forces-onscreen nil)
-  :config
-  (if (not (daemonp))
-      (desktop-save-mode 1)
-    (defun restore-desktop (frame)
-      "Restores desktop and cancels hook after first frame opens. So the
-daemon can run at startup and it'll still work"
-      (with-selected-frame frame
-        (desktop-save-mode 1)
-        (let ((desktop-load-locked-desktop t))
-          (desktop-read)
-          (remove-hook 'after-make-frame-functions 'restore-desktop))))
-    (add-hook 'after-make-frame-functions 'restore-desktop))
-
-  (winner-mode 1)
-
-  (setq bookmark-save-flag 1)
-  (setq backup-directory-alist
-        '(("." . "~/.local/share/emacs/saves/")))
-  (setq backup-by-copying t
-        ;; symlinked files + metadata
-        version-control t
-        delete-old-versions t
-        kept-new-versions 6
-        kept-old-versions 2)
-  (setq auto-save-default t
-        auto-save-timeout 60
-        auto-save-interval 200)
-  :ensure nil)
                                         ; server
 (use-package windmove
   ;; replace this with the tm/functions and new vm
