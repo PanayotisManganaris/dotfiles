@@ -108,18 +108,20 @@
   :ensure nil)
 
 (use-package markdown-mode
+  :mode "\\.md"
   :ensure t)
 
 (use-package mermaid-mode
-  :config
-  (add-to-list 'auto-mode-alist
-               '("\\.\\(mermaid\\|mmd\\)$" . mermaid-mode))
+  :mode ("\\.mmd" "\\.mermaid")
   :ensure t)
 
 (use-package python
+  :mode ("\\.py\\'" . python-mode)
+  :interpreter ("python" . python-mode)
   :ensure nil)
 
 (use-package sudo-edit
+  :commands sudo-edit
   :ensure t)
 
 (use-package paredit
