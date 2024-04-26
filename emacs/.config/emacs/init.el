@@ -191,8 +191,7 @@
   :hook ((python-ts-mode . combobulate-mode)
          (js-ts-mode . combobulate-mode)
          (html-ts-mode . combobulate-mode))
-  :after treesit
-  :ensure (:host github :repo "PanayotisManganaris/combobulate" :depth 1))
+  :ensure (:host github :repo "pmiam/combobulate" :depth 1))
 
 (use-package treesit
   :init
