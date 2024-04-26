@@ -59,6 +59,11 @@
 (elpaca elpaca-use-package (elpaca-use-package-mode))
 (elpaca-wait)
                                         ; user experience
+(use-package direnv
+  :config
+  (direnv-mode 1)
+  :ensure t)
+
 (use-package popper
   :demand t
   :custom
@@ -204,6 +209,37 @@ daemon can run at startup and it'll still work"
               ("C-c e" . macrostep-expand))
   :ensure t)
 
+(use-package wdired
+  :after dired
+  :bind (:map dired-mode-map
+              ("C-c C-e" . wdired-change-to-wdired-mode))
+  :ensure nil)
+
+(use-package dired
+  :custom
+  (dired-guess-shell-alist-user
+   '(("\\.pdf\\'" "xdg-open &")))
+  (dired-listing-switches "-ahl -v --group-directories-first")
+  (dired-omit-files "\\`[.]?#\\|\\`[.][.]?\\|^[.].+\\'")
+  (dired-auto-revert-buffer t)
+  (dired-dwim-target t)
+  (dired-recursive-copies 'always)
+  (dired-recursive-deletes 'top)
+  :config
+  (add-hook 'dired-mode-hook 'dired-hide-details-mode)
+
+  (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers ()
+    "For when dired in tramp displays blank screen when remote system
+does not use GNU ls, which is the only variant that supports
+--group-directories-first."
+    (when (file-remote-p default-directory)
+      (setq-local dired-actual-switches (car args))))
+
+  (put 'dired-find-alternate-file 'disabled nil)
+  :bind (:map dired-mode-map
+              ("C-x M-o" . dired-omit-mode))
+  :ensure nil)
+
 (use-package calc
   :bind ("M-#" . calc-dispatch)
   :ensure nil)
@@ -215,6 +251,10 @@ daemon can run at startup and it'll still work"
   (ediff-split-window-function 'split-window-horizontally)
   (ediff-window-setup-function 'ediff-setup-windows-plain)
   :ensure nil)
+
+(use-package magit
+  :bind ("C-x g" . magit-status)
+  :ensure t)
 
 (use-package windmove
   :bind (:map global-map
@@ -597,49 +637,6 @@ tempel element."
   :bind (:map global-map
               ("C-x C-b" . bufler)
               ("C-x b" . bufler-switch-buffer))
-  :ensure t)
-
-(use-package project
-  :ensure nil)
-                                        ; source control
-(use-package magit
-  :bind ("C-x g" . magit-status)
-  :ensure t)
-                                        ; directory edit
-(use-package dired
-  :custom
-  (dired-guess-shell-alist-user
-   '(("\\.pdf\\'" "xdg-open &")))
-  :init
-  (setq dired-listing-switches "-ahl -v --group-directories-first")
-  (setq dired-omit-files "\\`[.]?#\\|\\`[.][.]?\\|^[.].+\\'")
-  (setq dired-auto-revert-buffer t
-        dired-dwim-target t
-        dired-recursive-copies 'always
-        dired-recursive-deletes 'top)
-  :config
-  (add-hook 'dired-mode-hook 'dired-hide-details-mode)
-
-  (defun pm/dired-disable-gnu-ls-flags-in-tramp-buffers ()
-    "For when dired in tramp displays blank screen when remote system
-does not use GNU ls, which is the only variant that supports
---group-directories-first."
-    (when (file-remote-p default-directory)
-      (setq-local dired-actual-switches (car args))))
-
-  (put 'dired-find-alternate-file 'disabled nil)
-  :bind (:map dired-mode-map
-              ("C-x M-o" . dired-omit-mode))
-  :ensure nil)
-
-(use-package wdired
-  :bind (:map dired-mode-map
-              ("C-c C-e" . wdired-change-to-wdired-mode))
-  :ensure nil)
-                                        ; direnv
-(use-package direnv
-  :config
-  (direnv-mode 1)
   :ensure t)
                                         ; org-mode notes
 (use-package org
