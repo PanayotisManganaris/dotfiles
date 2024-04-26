@@ -216,9 +216,6 @@ daemon can run at startup and it'll still work"
   (ediff-window-setup-function 'ediff-setup-windows-plain)
   :ensure nil)
 
-(use-package wgrep
-  :ensure t)
-
 (use-package windmove
   :bind (:map global-map
               ("C-M-s-f" . windmove-swap-states-right)
@@ -425,7 +422,7 @@ tempel element."
                ("M-}" . tempel-next)
                ("M-{" . tempel-previous)))
   :ensure t)
-                                        ; spell checking
+
 (use-package jinx
   :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
@@ -470,6 +467,20 @@ tempel element."
                ("C-x p b" . consult-project-buffer))
          (:map vertico-map
                ("M-s" . consult-history)))
+  :ensure t)
+
+(use-package embark
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command)
+  :bind (:map global-map
+              ("C-;" . embark-act)
+              ("M-." . embark-dwim)
+              ("C-h B" . embark-bindings)
+              ("C-:" . embark-act-all)
+              ("C-(" . embark-collect-snapshot))
+  :ensure t)
+
+(use-package wgrep
   :ensure t)
 
 (use-package embark-consult
@@ -593,17 +604,6 @@ tempel element."
                                         ; source control
 (use-package magit
   :bind ("C-x g" . magit-status)
-  :ensure t)
-                                        ; contextual action framework
-(use-package embark
-  :init
-  (setq prefix-help-command #'embark-prefix-help-command)
-  :bind (:map global-map
-              ("C-;" . embark-act)
-              ("M-." . embark-dwim)
-              ("C-h B" . embark-bindings)
-              ("C-:" . embark-act-all)
-              ("C-(" . embark-collect-snapshot))
   :ensure t)
                                         ; directory edit
 (use-package dired
