@@ -127,6 +127,18 @@ daemon can run at startup and it'll still work"
   (auto-save-interval 200)
   :ensure nil)
                                         ; user interface
+(use-package shell
+  :commands shell
+  :config
+  (defun zsh-shell-mode-setup ()
+    (setq-local comint-process-echoes t))
+  (add-hook 'shell-mode-hook #'zsh-shell-mode-setup)
+  :init
+  ;; precaution when redirecting zsh IO
+  (setq explicit-zsh-args '("--login" "--interactive")
+        explicit-shell-file-name shell-file-name)
+  :ensure nil)
+
 (use-package js
   :init
   ;; a dirty hack
@@ -207,6 +219,18 @@ daemon can run at startup and it'll still work"
 (use-package wgrep
   :ensure t)
 
+(use-package windmove
+  :bind (:map global-map
+              ("C-M-s-f" . windmove-swap-states-right)
+              ("C-M-s-p" . windmove-swap-states-up)
+              ("C-M-s-b" . windmove-swap-states-left)
+              ("C-M-s-n" . windmove-swap-states-down)
+              ("C-s-f" . windmove-right)
+              ("C-s-p" . windmove-up)
+              ("C-s-b" . windmove-left)
+              ("C-s-n" . windmove-down))
+  :ensure nil)
+
 (use-package emacs
   :bind (:map global-map
               ("C-S-d" . backward-delete-char-untabify)
@@ -234,32 +258,6 @@ daemon can run at startup and it'll still work"
   :bind (:map global-map
               ("C-c t i" . treesit-inspect-mode)
               ("C-c t t" . treesit-explore-mode))
-  :ensure nil)
-
-                                        ; server
-(use-package windmove
-  ;; replace this with the tm/functions and new vm
-  :bind (:map global-map
-              ("C-M-s-f" . windmove-swap-states-right)
-              ("C-M-s-p" . windmove-swap-states-up)
-              ("C-M-s-b" . windmove-swap-states-left)
-              ("C-M-s-n" . windmove-swap-states-down)
-              ("C-s-f" . windmove-right)
-              ("C-s-p" . windmove-up)
-              ("C-s-b" . windmove-left)
-              ("C-s-n" . windmove-down))
-  :ensure nil)
-                                        ; shell interaction
-(use-package shell
-  :commands shell
-  :config
-  (defun zsh-shell-mode-setup ()
-    (setq-local comint-process-echoes t))
-  (add-hook 'shell-mode-hook #'zsh-shell-mode-setup)
-  :init
-  ;; precaution when redirecting zsh IO
-  (setq explicit-zsh-args '("--login" "--interactive")
-        explicit-shell-file-name shell-file-name)
   :ensure nil)
                                         ; completion framework
 (use-package vertico
