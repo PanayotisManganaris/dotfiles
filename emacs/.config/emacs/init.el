@@ -158,10 +158,11 @@
   :ensure nil)
 
 (use-package ediff
-  :config
-  (setq ediff-make-buffers-readonly-at-startup nil)
-  (setq ediff-split-window-function 'split-window-horizontally)
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  :defer t
+  :custom
+  (ediff-make-buffers-readonly-at-startup nil)
+  (ediff-split-window-function 'split-window-horizontally)
+  (ediff-window-setup-function 'ediff-setup-windows-plain)
   :ensure nil)
 
 (use-package wgrep
