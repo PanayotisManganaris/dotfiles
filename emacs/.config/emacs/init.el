@@ -60,7 +60,6 @@
 (elpaca-wait)
                                         ; user experience
 (use-package doom-themes
-  :demand t
   :config
   (load-theme 'doom-dark+ t)
   :ensure t)
@@ -75,7 +74,7 @@
   :ensure nil)
                                         ; user interface
 (use-package js
-  :config
+  :init
   ;; a dirty hack
   (define-derived-mode js-auto-mode prog-mode "JSA"
     "automatically decide which mode to use"
@@ -85,12 +84,11 @@
                '(js-mode . js-auto-mode))
   ;; js-base-mode is mutual base mode
   :after treesit
+  :mode ("\\.js" . js-mode)
   :ensure nil)
 
 (use-package mhtml-mode
-  :bind (:map sgml-mode-map
-         ("C-c h" . html-html5-template))
-  :config
+  :init
   ;; a dirty hack
   (define-derived-mode html-auto-mode prog-mode "HTMLA"
     "automatically decide which mode to use"
@@ -99,11 +97,14 @@
   (add-to-list 'major-mode-remap-alist
                '(mhtml-mode . html-auto-mode))
   ;; html-mode is mutual base mode
-
+  :after treesit
+  :mode ("\\.html" . mhtml-mode)
+  :config
   (tempel-key "C-c C-c y" style-tag)
   (tempel-key "C-c C-c k" link-tag)
   (tempel-key "C-c C-c s" script-tag)
-  :after treesit
+  :bind (:map sgml-mode-map
+              ("C-c h" . html-html5-template))
   :ensure nil)
 
 (use-package markdown-mode
