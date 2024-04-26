@@ -139,19 +139,13 @@
   :ensure t)
 
 (use-package popper
+  :demand t
+  :custom
+  (popper-reference-buffers
+   '("\\*Messages\\*"
+     help-mode
+     compilation-mode))
   :config
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
-          "Output\\*$"
-          "\\*Org Select\\*"
-          "\\*Backtrace\\*"
-          "\\*ob-ipython-out\\*"
-          "\\*ob-ipython-traceback\\*"
-          "\\*Async Shell Command\\*"
-          "\\*Python\\*"
-          "shell\\*$"
-          help-mode
-          compilation-mode))
   (popper-mode 1)
   (popper-echo-mode 1)
   :bind  (("C-`" . popper-toggle-latest)
