@@ -179,21 +179,6 @@
   :ensure t)
 
 (use-package emacs
-  :after (tempel)
-  :config
-  (defun tempel--region ()
-    "Return region bounds."
-    (when (use-region-p)
-      (when (< (mark) (point)) (exchange-point-and-mark))
-      ;; (deactivate-mark)
-      (cons (point-marker) (mark-marker))))
-
-  (tempel-key "(" parenthesis-pair-maybe)
-  (tempel-key "[" bracket-pair-maybe)
-  (tempel-key "{" brace-pair-maybe)
-  (tempel-key "<" abracket-pair-maybe)
-  (tempel-key "\"" qquote-pair-maybe)
-  (tempel-key "'" quote-pair-maybe)
   :bind (:map global-map
               ("C-S-d" . backward-delete-char-untabify)
               ("C-%" . replace-regexp)
@@ -397,9 +382,18 @@ daemon can run at startup and it'll still work"
   :ensure nil)
 
 (use-package tempel
+  :demand t
+  :custom
+  (tempel-path
+   (expand-file-name "templates/*.eld" user-emacs-directory))
   :init
-  (setq tempel-path (file-name-concat user-emacs-directory
-                                      "templates/*.eld"))
+  (defun tempel--region ()
+    "Return region bounds."
+    (when (use-region-p)
+      (when (< (mark) (point)) (exchange-point-and-mark))
+      ;; (deactivate-mark)
+      (cons (point-marker) (mark-marker))))
+
   (defun tempel-setup-capf ()
     "Add `tempel-complete' to `completion-at-point-functions' to check
 while typing. Add it *before* the mode's main Capf, so it will be
@@ -426,6 +420,13 @@ tempel element."
         (message "Template %s not found" (cadr elt))
         nil)))
   (add-to-list 'tempel-user-elements #'tempel-include)
+
+  (tempel-key "(" parenthesis-pair-maybe)
+  (tempel-key "[" bracket-pair-maybe)
+  (tempel-key "{" brace-pair-maybe)
+  (tempel-key "<" abracket-pair-maybe)
+  (tempel-key "\"" qquote-pair-maybe)
+  (tempel-key "'" quote-pair-maybe)
   :bind ((:map global-map
                ("C-c y" . tempel-insert))
          (:map tempel-map
