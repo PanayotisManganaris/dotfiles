@@ -738,17 +738,17 @@ cookie."
 (use-package org-roam
   :init (setq org-roam-v2-ack t)
   :custom
-  (org-roam-directory (file-truename (file-name-concat
-                                      org-directory "roam")))
+  (org-roam-directory (expand-file-name "roam" org-directory))
   (org-roam-capture-templates
-   (quote (("d" "dispatch")
-           ;; (fkey description type template
-           ;;  :target (type etc)
-           ;;  :etc)
-           ("f" "default" plain "%?"
-            :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                               "#+title: ${title}")
-            :unnarrowed t))))
+   '(("d" "dispatch")
+     ("db" "bundled" plain "%?"
+      :target (file+head "${path}/%<%Y%m%d%H%M%S>-${slug}.org"
+                         "$+title: ${title}")
+      :unnarrowed t)
+     ("f" "default" plain "%?"
+      :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                         "#+title: ${title}")
+      :unnarrowed t)))
   :config
   (org-roam-db-autosync-mode 1)
   (require 'org-roam-protocol)
