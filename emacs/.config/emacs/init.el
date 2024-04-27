@@ -185,6 +185,7 @@ daemon can run at startup and it'll still work"
   :ensure t)
 
 (use-package mermaid-mode
+  :after ob
   :mode ("\\.mmd" "\\.mermaid")
   :ensure t)
 
@@ -800,13 +801,13 @@ cookie."
   (org-confirm-babel-evaluate nil)
   (org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
   :config
+  ;; only for built-in babel support
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
      (js . t)
      (makefile . t)
      (ditaa . t)
-     (mermaid . t)
      (shell . t)))
 
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
