@@ -68,13 +68,15 @@
   :demand t
   :custom
   (popper-reference-buffers
-   '("\\*Messages\\*"
+   '(messages-buffer-mode
+     "*direnv*"
+     emacs-lisp-compilation-mode
      help-mode
      compilation-mode))
   :config
   (popper-mode 1)
   (popper-echo-mode 1)
-  :bind (("C-`" . popper-toggle-latest)
+  :bind (("C-`" . popper-toggle)
          ("M-`" . popper-cycle)
          ("M-~" . popper-toggle-type))
   :ensure t)
