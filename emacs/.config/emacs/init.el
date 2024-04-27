@@ -721,6 +721,20 @@ cookie."
               ("M-}" . org-forward-element))
   :ensure nil)
 
+(use-package org-agenda
+  :after org-roam
+  :custom
+  (org-agenda-files org-roam-directory)
+  (org-stuck-projects
+   '("/!+TODO|+NEXT|+WAIT" ("NEXT" "WAIT") nil nil))
+  (org-agenda-dim-blocked-tasks t)
+  :bind ((:map org-mode-map
+               ("C-'" . nil)
+               ("C-," . nil))
+         (:map global-map
+               ("C-c a" . org-agenda)))
+  :ensure nil)
+
 (use-package org-roam
   :init (setq org-roam-v2-ack t)
   :custom
@@ -810,17 +824,6 @@ cookie."
   (setq org-download-display-inline-images nil
         org-download-screenshot-method "flameshot gui --raw > %s")
   :ensure t)
-
-(use-package org-agenda
-  :after (org-roam)
-  :custom
-  (org-agenda-files (list org-roam-directory))
-  :bind ((:map org-mode-map
-               ("C-'" . nil)
-               ("C-," . nil))
-         (:map global-map
-               ("C-c a" . org-agenda)))
-  :ensure nil)
                                         ; tex and tex integration
 (use-package tex-mode
   :config
