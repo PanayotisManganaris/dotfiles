@@ -647,6 +647,7 @@ tempel element."
   (org-ellipsis " [+]")
   (org-cycle-include-plain-lists nil)
   (org-preview-latex-default-process 'imagemagick)
+  (org-image-actual-width '(800))
   ;; GTD implementation
   (org-todo-keywords
    '((sequence
@@ -819,10 +820,11 @@ cookie."
   :ensure nil)
 
 (use-package org-download
-  :config
-  (setq org-image-actual-width '(800))
-  (setq org-download-display-inline-images nil
-        org-download-screenshot-method "flameshot gui --raw > %s")
+  :commands (org-download-screenshot
+             org-download-clipboard)
+  :custom
+  (org-download-display-inline-images nil)
+  (org-download-screenshot-method "flameshot gui --raw > %s")
   :ensure t)
                                         ; tex and tex integration
 (use-package tex-mode
