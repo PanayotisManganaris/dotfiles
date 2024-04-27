@@ -186,6 +186,24 @@ daemon can run at startup and it'll still work"
   :mode ("\\.mmd" "\\.mermaid")
   :ensure t)
 
+(use-package tex-mode
+  :mode ("\\.tex" . latex-mode)
+  :config
+  (defun pm/p2l ()
+    "Format current paragraph into single lines."
+    (interactive "*")
+    (let ((i (current-indentation)))
+      (save-excursion
+        (forward-paragraph)
+        (let ((foo (point)))
+          (backward-paragraph)
+          (replace-regexp "\n *" " " nil (1+ (point)) foo))
+        (message (s-append ".\n" (spaces-string i)))
+        (let ((foo (point)))
+          (beginning-of-line)
+          (replace-regexp "\\. " (s-append (spaces-string i) ".\n") nil (point) foo)))))
+  :ensure nil)
+
 (use-package python
   :mode ("\\.py\\'" . python-mode)
   :interpreter ("python" . python-mode)
@@ -816,7 +834,7 @@ cookie."
   :ensure nil)
 
 (use-package ol-man
-  :autoload (org-man-store-link org-man-open)
+  :after (ol man)
   :ensure nil)
 
 (use-package org-download
@@ -826,24 +844,7 @@ cookie."
   (org-download-display-inline-images nil)
   (org-download-screenshot-method "flameshot gui --raw > %s")
   :ensure t)
-                                        ; tex and tex integration
-(use-package tex-mode
-  :config
-  (defun pm/p2l ()
-    "Format current paragraph into single lines."
-    (interactive "*")
-    (let ((i (current-indentation)))
-      (save-excursion
-        (forward-paragraph)
-        (let ((foo (point)))
-          (backward-paragraph)
-          (replace-regexp "\n *" " " nil (1+ (point)) foo))
-        (message (s-append ".\n" (spaces-string i)))
-        (let ((foo (point)))
-          (beginning-of-line)
-          (replace-regexp "\\. " (s-append (spaces-string i) ".\n") nil (point) foo)))))
-  :ensure nil)
-                                        ; org-mode export
+
 (use-package ox
   :custom
   (org-export-dispatch-use-expert-ui t)
