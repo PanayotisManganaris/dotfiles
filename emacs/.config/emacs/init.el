@@ -638,62 +638,43 @@ tempel element."
               ("C-x C-b" . bufler)
               ("C-x b" . bufler-switch-buffer))
   :ensure t)
-                                        ; org-mode notes
+                                        ; org-mode
 (use-package org
-  :init
-  (setq org-directory
-        (file-truename
-         (file-name-concat (getenv "HOME") "org")))
-  (setq org-startup-indented t)
-  (setq org-ellipsis " [+]")
-  (custom-set-faces '(org-ellipsis ((t (:foreground "gray40" :underline nil)))))
-  :config
+  :mode ("\\.org" . org-mode)
+  :custom
+  (org-directory (expand-file-name "org" (getenv "HOME")))
+  (org-startup-indented t)
+  (org-ellipsis " [+]")
+  (org-cycle-include-plain-lists nil)
+  (org-preview-latex-default-process 'imagemagick)
   ;; GTD implementation
-  (setq org-use-fast-todo-selection 'auto)
-  (setq org-treat-S-cursor-todo-selection-as-state-change nil)
-  (setq org-todo-keywords
-        '((sequence "TODO(t)"
-                    "NEXT(n!)"
-                    "WAIT(w@/!)"
-                    "|"
-                    "DONE(d!)"
-                    "INACTIVE(i@)"
-                    "CANCELED(q@/@)")))
-  (setq org-todo-keyword-faces
-        (quote (("TODO" :foreground "blue" :weight bold)
-                ("NEXT" :foreground "red" :weight bold)
-                ("WAIT" :foreground "orange" :weight bold)
-                ("DONE" :foreground "forest green" :weight bold)
-                ("INACTIVE" :foreground "magenta" :weight bold)
-                ("CANCELED" :foreground "forest green" :weight bold))))
-
-  (defun pm/modify-org-done-face ()
-    (setq org-fontify-done-headline t)
-    (set-face-attribute 'org-done nil :strike-through t)
-    (set-face-attribute 'org-headline-done nil
-                        :strike-through t
-                        :foreground "light gray"))
-  (eval-after-load "org"
-    (add-hook 'org-add-hook 'pm/modify-org-done-face))
-
-  (setq org-stuck-projects
-        '("+LEVEL=1+TODO/-DONE-CANCELED-INACTIVE-NEXT" ("NEXT")))
-  (setq org-enforce-todo-dependencies t)
-  (setq org-agenda-dim-blocked-tasks t)
-  (setq org-log-into-drawer t)
-  (setq org-priority-default 3)
-  (setq org-priority-highest 1)
-  (setq org-priority-lowest 5)
-  ;; tree-sitter org mode navigation?
-  :bind (:map org-mode-map
-              ("M-[" . org-backward-paragraph)
-              ("M-]" . org-forward-paragraph)
-              ("M-{" . org-backward-element)
-              ("M-}" . org-forward-element))
-  :ensure nil)
-
-(use-package org
-  ;; customize checklists
+  (org-todo-keywords
+   '((sequence
+      "TODO(t)"
+      "NEXT(n!)"
+      "WAIT(w@/!)"
+      "|"
+      "DONE(d!)"
+      "INACTIVE(i@)"
+      "CANCELED(q@/@)")))
+  (org-todo-keyword-faces
+   '(("TODO" :foreground "blue" :weight bold)
+     ("NEXT" :foreground "red" :weight bold)
+     ("WAIT" :foreground "orange" :weight bold)
+     ("DONE" :foreground "forest green" :weight bold)
+     ("INACTIVE" :foreground "magenta" :weight bold)
+     ("CANCELED" :foreground "forest green" :weight bold)))
+  (org-use-fast-todo-selection 'auto)
+  (org-treat-S-cursor-todo-selection-as-state-change nil)
+  (org-fontify-done-headline t)
+  (org-enforce-todo-dependencies t)
+  (org-log-into-drawer t)
+  (org-priority-default 3)
+  (org-priority-highest 1)
+  (org-priority-lowest 5)
+  :custom-face
+  (org-ellipsis ((t (:foreground "gray40" :underline nil))))
+  (org-headline-done ((t (:foreground "light gray" :strike-through t))))
   :config
   (defun pm/insert-stats-cookie (&optional arg)
     "insert statistics cookie in list item/heading at point.
@@ -723,10 +704,21 @@ cookie."
         (goto-char (match-end 0))
         (insert cookie)))
     (org-update-statistics-cookies 'nil))
+
+  (setf (plist-get (alist-get 'imagemagick org-preview-latex-process-alist) :latex-compiler)
+        '("cd %o && pdflatex -interaction nonstopmode -output-directory %o --shell-escape %f"))
+
+  (add-to-list 'org-latex-packages-alist '("" "ptm" t ("pdflatex")))
+  (add-to-list 'org-latex-packages-alist '("" "tikz" t))
+
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :scale 2.5))
   :bind (:map org-mode-map
-              ("C-c C-x s" . pm/insert-stats-cookie))
-  :custom
-  (org-cycle-include-plain-lists nil)
+              ("C-c C-x s" . pm/insert-stats-cookie)
+              ("M-[" . org-backward-paragraph)
+              ("M-]" . org-forward-paragraph)
+              ("M-{" . org-backward-element)
+              ("M-}" . org-forward-element))
   :ensure nil)
 
 (use-package org-roam
@@ -845,30 +837,6 @@ cookie."
         (let ((foo (point)))
           (beginning-of-line)
           (replace-regexp "\\. " (s-append (spaces-string i) ".\n") nil (point) foo)))))
-  :ensure nil)
-
-(use-package org
-  :config
-  (setf (plist-get (alist-get
-                    'imagemagick org-preview-latex-process-alist)
-                   :latex-compiler)
-        '("cd %o && pdflatex -interaction nonstopmode -output-directory %o --shell-escape %f"))
-
-  (add-to-list 'org-latex-packages-alist
-               '("" "ptm" t ("pdflatex")))
-  (add-to-list 'org-latex-packages-alist
-               '("" "tikz" t))
-  (eval-after-load "preview"
-    '(add-to-list 'preview-default-preamble
-                  "\\PreviewEnvironment{tikzpicture}" t))
-  (eval-after-load "preview"
-    '(add-to-list 'preview-default-preamble
-                  "\\PreviewEnvironment{prooftree}" t))
-
-  (setq org-format-latex-options
-        (plist-put org-format-latex-options :scale 2.5))
-  :custom
-  (org-preview-latex-default-process 'imagemagick)
   :ensure nil)
                                         ; org-mode export
 (use-package ox
