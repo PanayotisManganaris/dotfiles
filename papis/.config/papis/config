@@ -1,0 +1,7 @@
+[settings]
+default-library = lit
+use-git = False
+bibtex-unicode = True
+
+[lit]
+dir = ~/doc/lit
