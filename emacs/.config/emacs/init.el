@@ -123,7 +123,7 @@ daemon can run at startup and it'll still work"
   (desktop-restore-forces-onscreen nil)
   (bookmark-save-flag 1)
   (backup-directory-alist
-   '(("." . (expand-file-name "emacs/saves" (xdg-data-home)))))
+   (list (cons "." (expand-file-name "emacs/saves" (xdg-data-home)))))
   (backup-by-copying t)
   (version-control t)
   (delete-old-versions t)
@@ -868,7 +868,7 @@ cookie."
 (use-package oc
   :custom
   (org-cite-global-bibliography
-   (list (file-truename (file-name-concat org-directory "lib.bib"))))
+   (list (expand-file-name "lib.bib" org-directory)))
   :after org
   :ensure nil)
 
