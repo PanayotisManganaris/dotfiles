@@ -15,3 +15,7 @@ export EDITOR=ec
 
 # options
 unsetopt beep
+
+if [[ -x $commands[direnv] ]]; then
+    eval "$(direnv hook zsh)"
+fi
