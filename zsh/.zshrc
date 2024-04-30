@@ -16,6 +16,10 @@ export EDITOR=ec
 # options
 unsetopt beep
 
+# extensions
+autoload -Uz compinit
+compinit
+
 if [[ -x $commands[direnv] ]]; then
     eval "$(direnv hook zsh)"
 fi
