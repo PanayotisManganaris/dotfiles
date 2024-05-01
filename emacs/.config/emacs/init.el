@@ -208,6 +208,15 @@ daemon can run at startup and it'll still work"
   :ensure nil)
 
 (use-package python
+  :init
+  ;; a dirty hack
+  (define-derived-mode python-auto-mode prog-mode "PythonA"
+    "automatically decide which mode to use"
+    (if (treesit-ready-p 'python t)
+        (python-ts-mode) (python-mode)))
+  (add-to-list 'major-mode-remap-alist
+               '(python-mode . python-auto-mode))
+  :after treesit
   :mode ("\\.py\\'" . python-mode)
   :interpreter ("python" . python-mode)
   :ensure nil)
