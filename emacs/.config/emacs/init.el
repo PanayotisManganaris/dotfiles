@@ -128,7 +128,7 @@ daemon can run at startup and it'll still work"
   (desktop-restore-forces-onscreen nil)
   (bookmark-save-flag 1)
   (backup-directory-alist
-   (list (cons "." (expand-file-name "emacs/saves" (xdg-data-home)))))
+   (list (cons "." (expand-file-name "emacs/saves" (getenv "XDG_DATA_HOME")))))
   (backup-by-copying t)
   (version-control t)
   (delete-old-versions t)
