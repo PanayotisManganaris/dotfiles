@@ -69,9 +69,14 @@
   :custom
   (popper-reference-buffers
    '(messages-buffer-mode
+     "Output*"
      "*direnv*"
-     emacs-lisp-compilation-mode
+     "*vc*"
+     "*EGLOT"
+     special-mode
      help-mode
+     shell-mode
+     emacs-lisp-compilation-mode
      compilation-mode))
   :config
   (popper-mode 1)
