@@ -457,13 +457,6 @@ does not use GNU ls, which is the only variant that supports
   (tempel-path
    (expand-file-name "templates/*.eld" user-emacs-directory))
   :init
-  (defun tempel--region ()
-    "Return region bounds."
-    (when (use-region-p)
-      (when (< (mark) (point)) (exchange-point-and-mark))
-      ;; (deactivate-mark)
-      (cons (point-marker) (mark-marker))))
-
   (defun tempel-setup-capf ()
     "Add `tempel-complete' to `completion-at-point-functions' to check
 while typing. Add it *before* the mode's main Capf, so it will be
@@ -476,6 +469,13 @@ tried first."
   (add-hook 'prog-mode-hook 'tempel-setup-capf)
   (add-hook 'text-mode-hook 'tempel-setup-capf)
   :config
+  (defun tempel--region ()
+    "Return region bounds."
+    (when (use-region-p)
+      (when (< (mark) (point)) (exchange-point-and-mark))
+      ;; (deactivate-mark)
+      (cons (point-marker) (mark-marker))))
+
   (defun tempel--eval (form)
     "Eval arbitrary forms in templates. The form should return a valid
 tempel element."
