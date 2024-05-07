@@ -139,6 +139,11 @@ daemon can run at startup and it'll still work"
   (auto-save-interval 200)
   :ensure nil)
                                         ; user interface
+(use-package go-ts-mode
+  :after treesit
+  :mode "\\.go"
+  :ensure nil)
+
 (use-package shell
   :commands shell
   :config
@@ -314,6 +319,7 @@ does not use GNU ls, which is the only variant that supports
                                         ; tree-sitter
 (use-package combobulate
   :hook ((python-ts-mode . combobulate-mode)
+         (go-ts-mode . combobulate-mode)
          (js-ts-mode . combobulate-mode)
          (html-ts-mode . combobulate-mode))
   :ensure (:host github :repo "pmiam/combobulate" :depth 1))
@@ -322,6 +328,8 @@ does not use GNU ls, which is the only variant that supports
   :init
   (setq treesit-language-source-alist
         '((python "https://github.com/tree-sitter/tree-sitter-python")
+          (go "https://github.com/tree-sitter/tree-sitter-go")
+          (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
           (html "https://github.com/tree-sitter/tree-sitter-html")
           (css "https://github.com/tree-sitter/tree-sitter-css")
           (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
