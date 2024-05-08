@@ -937,3 +937,7 @@ cookie."
                '((file (styles . (basic partial-completion)))))
   (add-to-list 'tramp-remote-path "~/.local/bin")
   :ensure nil)
+
+;; Local Variables:
+;; fill-column: 110
+;; End:
