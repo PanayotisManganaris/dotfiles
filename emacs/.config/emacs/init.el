@@ -431,7 +431,10 @@ does not use GNU ls, which is the only variant that supports
   :ensure t)
 
 (use-package eglot
-  :hook ((python-base-mode . eglot-ensure))
+  :after (:any python go-ts-mode elisp-mode)
+  :hook ((python-base-mode . eglot-ensure)
+         (go-ts-mode . eglot-ensure)
+         (emacs-lisp-mode . eglot-ensure))
   :config
   ;; configure to increase performance OR reliability of completions
   (setq-default eglot-workspace-configuration
