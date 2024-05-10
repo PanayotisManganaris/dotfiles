@@ -1,5 +1,9 @@
 go-mode go-ts-mode
 
+(pkg "package " (p "main") n n
+     (i import) n n)
+(import "import " (p "\"log\""))
+
 (fun "func " p "(" p ") {" n> r n "}")
 (main "func main() {" n> r n "}")
 (test "func Test" p " (t *testing.T) { " n> r n "}")
