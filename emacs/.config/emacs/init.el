@@ -826,6 +826,7 @@ cookie."
   :custom
   (org-confirm-babel-evaluate nil)
   (org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
+  (org-edit-src-content-indentation 0)
   :config
   ;; only for built-in babel support
   (org-babel-do-load-languages
