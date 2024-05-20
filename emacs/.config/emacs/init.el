@@ -831,6 +831,7 @@ cookie."
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
+     (python . t)
      (js . t)
      (makefile . t)
      (ditaa . t)
