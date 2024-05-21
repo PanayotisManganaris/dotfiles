@@ -559,12 +559,11 @@ tempel element."
 (use-package embark
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
-  :bind (:map global-map
-              ("C-;" . embark-act)
-              ("M-." . embark-dwim)
-              ("C-h B" . embark-bindings)
-              ("C-:" . embark-act-all)
-              ("C-(" . embark-collect-snapshot))
+  :bind (("C-;" . embark-act)
+         ("M-." . embark-dwim)
+         ("C-h b" . embark-bindings)
+         :map vertico-map
+         ("M-;" . embark-select))
   :ensure t)
 
 (use-package wgrep
