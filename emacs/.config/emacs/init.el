@@ -681,9 +681,10 @@ tempel element."
   ;; if fast autogrouping can be done, do it...
   ;; (magit-section-toggle (magit-get-section (magit-section-ident)))
 
-  :bind (:map global-map
-              ("C-x C-b" . bufler)
-              ("C-x b" . bufler-switch-buffer))
+  :bind (("C-x C-b" . bufler)
+         ("C-x b" . bufler-switch-buffer)
+         :map embark-become-file+buffer-map
+         ("b" . bufler-switch-buffer))
   :ensure t)
                                         ; org-mode
 (use-package org
