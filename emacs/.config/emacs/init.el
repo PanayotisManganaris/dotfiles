@@ -559,6 +559,10 @@ tempel element."
 (use-package embark
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
+  :custom
+  (embark-indicators '(embark-minimal-indicator
+                       embark-highlight-indicator
+                       embark-isearch-highlight-indicator))
   :bind (("C-;" . embark-act)
          ("M-." . embark-dwim)
          ("C-h b" . embark-bindings)
@@ -571,9 +575,6 @@ tempel element."
 
 (use-package embark-consult
   :after (embark consult)
-  ;; :demand t
-  ;; :hook
-  ;; (embark-collect-mode . consult-preview-at-point-mode)
   :bind (:map embark-collect-mode-map
               ("C-j" . #'consult-preview-at-point))
   :ensure t)
