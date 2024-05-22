@@ -390,15 +390,18 @@ does not use GNU ls, which is the only variant that supports
   (global-corfu-mode 1)
   :custom
   (corfu-cycle t)
+  (corfu-preselect 'first)
   :config
   (add-hook 'minibuffer-setup-hook #'corfu-mode)
-  :bind (:map corfu-map
-              ("M-a" . corfu-reset)
-              ("<tab>" . corfu-next)
-              ("<backtab>" . corfu-previous)
-              ([remap next-line] . nil)
-              ([remap previous-line] . nil)
-              ("RET" . nil))
+  :bind (("M-<tab>" . completion-at-point)
+         :map corfu-map
+         ("M-<tab>" . corfu-complete)
+         ("M-a" . corfu-reset)
+         ("<tab>" . corfu-next)
+         ("<backtab>" . corfu-previous)
+         ([remap next-line] . nil)
+         ([remap previous-line] . nil)
+         ("RET" . nil))
   :ensure t)
 
 (use-package cape
