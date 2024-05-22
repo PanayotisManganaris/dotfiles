@@ -559,6 +559,8 @@ tempel element."
   :bind (("C-;" . embark-act)
          ("M-." . embark-dwim)
          ("C-h b" . embark-bindings)
+         :map embark-become-file+buffer-map
+         ("b" . bufler-switch-buffer)
          :map vertico-map
          ("M-;" . embark-select))
   :ensure t)
@@ -675,9 +677,7 @@ tempel element."
   ;; (magit-section-toggle (magit-get-section (magit-section-ident)))
 
   :bind (("C-x C-b" . bufler)
-         ("C-x b" . bufler-switch-buffer)
-         :map embark-become-file+buffer-map
-         ("b" . bufler-switch-buffer))
+         ("C-x b" . bufler-switch-buffer))
   :ensure t)
                                         ; org-mode
 (use-package org
